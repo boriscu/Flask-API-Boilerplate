@@ -4,6 +4,8 @@ from flask import Flask
 from flask_cors import CORS
 import redis
 
+from app.commands import register_commands
+
 from .services.celery_service import CeleryService
 from config.app_config import AppConfig
 
@@ -32,5 +34,7 @@ def create_app():
         db=AppConfig.REDIS_DB,
         password=AppConfig.REDIS_PASSWORD,
     )
+
+    register_commands(app)
 
     return app

@@ -7,7 +7,7 @@ from config.app_config import AppConfig
 _ = load_dotenv(find_dotenv())
 
 db = PostgresqlDatabase(
-    database=AppConfig.DB_NAME,
+    AppConfig.DB_NAME,
     user=AppConfig.DB_USER,
     password=AppConfig.DB_PASSWORD,
     host=AppConfig.DB_HOST,

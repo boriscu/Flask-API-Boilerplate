@@ -58,7 +58,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - "${DB_PORT}:5432"
-
+    networks:
+      - app-network
 volumes:
   postgresdata:
     external: false
