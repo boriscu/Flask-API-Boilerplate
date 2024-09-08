@@ -1,0 +1,20 @@
+# Database configurations
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=flask-db  
+DB_HOST=localhost  
+DB_PORT=5433  
+
+# Redis configurations
+REDIS_HOST=flask-redis  
+REDIS_PORT=6380  
+REDIS_PASSWORD=flask-redis-password
+
+# JWT and cookie configurations
+JWT_SECRET_KEY=secret-key
+COOKIE_SECURE=False
+CSRF_PROTECT=False
+HTTP_ONLY=False
+COOKIE_DOMAIN=127.0.0.1
+COOKIE_PATH=/
+DEBUG_MODE=True

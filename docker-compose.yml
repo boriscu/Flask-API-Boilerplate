@@ -1,0 +1,64 @@
+version: "3.8"
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    command: flask run --host=0.0.0.0
+    volumes:
+      - .:/app
+    env_file: .env
+    restart: always
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+
+  celery_worker:
+    build:
+      context: .
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    command: bash -c "celery -A app.make_celery worker --loglevel=debug --concurrency=4 >> /app/logs/celery.log 2>&1"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    container_name: ${REDIS_HOST}
+    env_file: .env
+    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD --port ${REDIS_PORT}"
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - app-network
+
+  db:
+    image: postgres:13
+    restart: always
+    container_name: ${DB_NAME}
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+
+volumes:
+  postgresdata:
+    external: false
