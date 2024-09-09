@@ -18,3 +18,7 @@ HTTP_ONLY=False
 COOKIE_DOMAIN=127.0.0.1
 COOKIE_PATH=/
 DEBUG_MODE=True
+
+# Seeding
+ADMIN_EMAIL=admin@mail.com
+ADMIN_PASSWORD=admin

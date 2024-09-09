@@ -48,6 +48,10 @@ class AppConfig(BaseConfig):
     COOKIE_PATH = None
     DEBUG_MODE = None
 
+    # Admin seeding
+    ADMIN_EMAIL = None
+    ADMIN_PASSWORD = None
+
     @classmethod
     def load_config(cls):
         """
@@ -75,6 +79,9 @@ class AppConfig(BaseConfig):
 
             cls.CELERY_BROKER_URL = cls.REDIS_URL
             cls.CELERY_RESULT_BACKEND = cls.REDIS_URL
+
+            cls.ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+            cls.ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
         super().check_none_values()
 

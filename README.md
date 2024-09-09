@@ -14,9 +14,16 @@ To start the app for the first time, run the following command in the root folde
 docker-compose up --build
 ```
 
+### Initial Values and Seeding
+
+Adding initial values to your database can be done from the commands/seeding section. By executing these commands you can insert pre defined values to your tables when needed.
+
+If you need to to execute multiple seeding steps when running your application for the first time, the `run-init-seeders.sh` script can be utilized. Follow as started by adding new seeding steps.
+
 ## Documentation
 
 OpenAPI docs are available when the server is started, they can be viewed my going to `http://localhost:5000/` in your browser.
+
 The docs should be updated by following the current setup in the schemas folder.
 
 ## Database Setup and Migrations
