@@ -10,7 +10,7 @@ from app.validators.user_validator import (
 )
 from flask_restx import Namespace, Resource
 
-user_namespace = Namespace("users", description="User operations")
+user_namespace = Namespace("Users", description="User operations")
 user_schema_retriever = UserSchemaRetriever(user_namespace)
 
 
@@ -22,9 +22,9 @@ class Register(Resource):
     @user_namespace.expect(
         user_schema_retriever.retrieve("registration"), validate=True
     )
-    @user_namespace.response(201, "User Registered")
-    @user_namespace.response(400, "Validation Error")
-    @user_namespace.response(500, "Server Error")
+    @user_namespace.response(HttpStatus.CREATED.value, "User Registered")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Validation Error")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     def post(self):
         data = request.get_json()
 
@@ -32,17 +32,16 @@ class Register(Resource):
         if not is_valid:
             return jsonify({"message": message}), HttpStatus.BAD_REQUEST.value
 
-        message, status_code = UserAuthService.register(data)
-        return jsonify(message), status_code
+        return UserAuthService.register(data)
 
 
 @user_namespace.route("/login/", methods=["POST"])
 class Login(Resource):
     @user_namespace.doc(description="Log in a user using their email and password.")
     @user_namespace.expect(user_schema_retriever.retrieve("login"), validate=True)
-    @user_namespace.response(200, "Login Successful")
-    @user_namespace.response(401, "Unauthorized")
-    def login():
+    @user_namespace.response(HttpStatus.OK.value, "Login Successful")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    def post(self):
         data = request.get_json()
 
         is_valid, message = UserValidator.validate_user_login_data(data)
@@ -58,8 +57,8 @@ class Logout(Resource):
     @user_namespace.doc(
         description="Log out the current user. Requires a valid JWT token."
     )
-    @user_namespace.response(200, "Successfully logged out")
-    @user_namespace.response(401, "Unauthorized")
+    @user_namespace.response(HttpStatus.OK.value, "Successfully logged out")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     def post(self):
         return UserAuthService.logout()
 
@@ -71,24 +70,30 @@ class GetMyself(Resource):
     )
     @jwt_required()
     @user_namespace.response(
-        200, "Profile retrieved", user_schema_retriever.retrieve("profile")
+        HttpStatus.OK.value,
+        "Profile retrieved",
+        user_schema_retriever.retrieve("profile"),
     )
-    @user_namespace.response(404, "User Not Found")
-    @user_namespace.response(500, "Server Error")
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     def get(self):
         try:
             current_user_id = get_jwt_identity()
             user_profile = UserCRUDService.get_user(current_user_id)
             if user_profile:
-                return jsonify(user_profile), HttpStatus.OK.value
+                return user_profile, HttpStatus.OK.value
             else:
                 return (
-                    jsonify({"message": "User not found"}),
+                    {"message": "User not found"},
                     HttpStatus.NOT_FOUND.value,
                 )
         except Exception as e:
             LoggerSetup.get_logger("general").error(
                 f"Internal server error while getting the user with ID:{current_user_id}, err : {e}"
+            )
+            return (
+                {"message": f"Internal server error: {str(e)}"},
+                HttpStatus.UNAUTHORIZED.value,
             )
 
 
@@ -98,14 +103,11 @@ class CheckAuth(Resource):
         description="Check the validity of the current user's JWT token."
     )
     @jwt_required()
-    @user_namespace.response(200, "Token is valid")
-    @user_namespace.response(401, "Unauthorized")
+    @user_namespace.response(HttpStatus.OK.value, "Token is valid")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     def get(self):
         try:
             get_jwt_identity()
-            return jsonify({"message": "Token is valid"}), HttpStatus.OK.value
-        except Exception as e:
-            return (
-                jsonify({"message": "Invalid token", "error": str(e)}),
-                HttpStatus.UNAUTHORIZED.value,
-            )
+            return {"message": "Token is valid"}, HttpStatus.OK.value
+        except Exception:
+            return {"message": "Unauthorized"}, HttpStatus.UNAUTHORIZED.value
