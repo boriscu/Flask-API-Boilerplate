@@ -5,7 +5,7 @@ from peewee import DoesNotExist, PeeweeException
 
 class UserCRUDService:
     @staticmethod
-    def get_user(user_id: int) -> Optional[Dict[str, str]]:
+    def get_user(user_id: int) -> Optional[UserProfile]:
         """
         Retrieves a user by their ID, excluding the password from the output.
 
@@ -13,19 +13,13 @@ class UserCRUDService:
             user_id (int): The ID of the user to retrieve.
 
         Returns:
-            Optional[Dict[str, str]]: A dictionary containing user data without the password if the user exists, None otherwise.
+            Optional[UserProfile]: A UserProfile class instance containing current user data if the user exists, None otherwise.
 
         Raises:
             Exception: An exception indicating an internal server error if a database or unexpected error occurs.
         """
         try:
-            user = UserProfile.get_by_id(user_id)
-            return {
-                "name": user.name,
-                "surname": user.surname,
-                "email": user.email,
-                "is_admin": user.is_admin,
-            }
+            return UserProfile.get_by_id(user_id)
         except DoesNotExist:
             return None
         except PeeweeException as e:

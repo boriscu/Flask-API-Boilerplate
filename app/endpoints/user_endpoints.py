@@ -79,9 +79,16 @@ class GetMyself(Resource):
     def get(self):
         try:
             current_user_id = get_jwt_identity()
-            user_profile = UserCRUDService.get_user(current_user_id)
-            if user_profile:
-                return user_profile, HttpStatus.OK.value
+            current_user_profile = UserCRUDService.get_user(current_user_id)
+
+            if current_user_profile:
+                user_data = {
+                    "name": current_user_profile.name,
+                    "surname": current_user_profile.surname,
+                    "email": current_user_profile.email,
+                    "is_admin": current_user_profile.is_admin,
+                }
+                return user_data, HttpStatus.OK.value
             else:
                 return (
                     {"message": "User not found"},
