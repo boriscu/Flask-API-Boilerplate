@@ -18,7 +18,7 @@ docker-compose up --build
 
 Adding initial values to your database can be done from the commands/seeding section. By executing these commands you can insert pre defined values to your tables when needed.
 
-If you need to to execute multiple seeding steps when running your application for the first time, the `run-init-seeders.sh` script can be utilized. Follow as started by adding new seeding steps.
+If you need to to execute multiple seeding steps when running your application for the first time, the `run-init-seeders.sh` script can be utilized. Follow as started by adding new seeding steps. To execute teh script itself just run `bash ./scripts/run-init-seeders.sh` command from the project root. If you are using windows you will need to do this from the wsl/bash terminal instead from cmd/powershell.
 
 ## Documentation
 
