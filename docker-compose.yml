@@ -11,7 +11,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    command: flask run --host=0.0.0.0
+    command: flask run --host=0.0.0.0 --debugger --reload
     volumes:
       - .:/app
     env_file: .env
