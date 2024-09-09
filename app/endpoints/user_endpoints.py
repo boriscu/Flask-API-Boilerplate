@@ -75,3 +75,19 @@ def get_myself():
             f"Internal server error while getting the user with ID:{current_user_id}, err : {e}"
         )
         return jsonify({"message": str(e)}), HttpStatus.INTERNAL_SERVER_ERROR.value
+
+
+@user_blueprint.route("/check_auth/", methods=["GET"])
+@jwt_required()
+def check_auth():
+    """
+    Checks if the provided JWT token is valid.
+    """
+    try:
+        get_jwt_identity()
+        return jsonify({"message": "Token is valid"}), HttpStatus.OK.value
+    except Exception as e:
+        return (
+            jsonify({"message": "Invalid token", "error": str(e)}),
+            HttpStatus.UNAUTHORIZED.value,
+        )
