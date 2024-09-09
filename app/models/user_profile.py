@@ -8,3 +8,4 @@ class UserProfile(BaseModel):
     surname = TextField(null=False)
     email = TextField(unique=True)
     password = TextField(null=False)
+    is_admin = TextField(default=False)

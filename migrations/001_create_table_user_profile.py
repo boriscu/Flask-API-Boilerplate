@@ -44,6 +44,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         surname = pw.TextField(null=False)
         email = pw.TextField(unique=True)
         password = pw.TextField(null=False)
+        is_admin = pw.BooleanField(default=False)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):

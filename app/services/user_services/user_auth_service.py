@@ -34,7 +34,11 @@ class UserAuthService:
 
         try:
             user = UserProfile.create(
-                name=name, surname=surname, email=email, password=hashed_password
+                name=name,
+                surname=surname,
+                email=email,
+                password=hashed_password,
+                is_admin=False,
             )
             user.save()
 

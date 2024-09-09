@@ -20,7 +20,12 @@ class UserCRUDService:
         """
         try:
             user = UserProfile.get_by_id(user_id)
-            return {"name": user.name, "surname": user.surname, "email": user.email}
+            return {
+                "name": user.name,
+                "surname": user.surname,
+                "email": user.email,
+                "is_admin": user.is_admin,
+            }
         except DoesNotExist:
             return None
         except PeeweeException as e:
