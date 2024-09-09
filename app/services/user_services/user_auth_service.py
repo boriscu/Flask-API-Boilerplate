@@ -111,3 +111,13 @@ class UserAuthService:
         )
         response.set_cookie("access_token_cookie", "", expires=0, httponly=True)
         return response
+
+    @staticmethod
+    def check_if_admin(user: UserProfile) -> bool:
+        """
+        Checks if the UserProfile instance is an admin
+
+        Returns:
+            bool: True if the user is admin, false in other case
+        """
+        return user.is_admin

@@ -9,6 +9,7 @@ from app.validators.user_validator import (
     UserValidator,
 )
 from flask_restx import Namespace, Resource
+from peewee import DoesNotExist
 
 user_namespace = Namespace("Users", description="User operations")
 user_schema_retriever = UserSchemaRetriever(user_namespace)
@@ -81,26 +82,26 @@ class GetMyself(Resource):
             current_user_id = get_jwt_identity()
             current_user_profile = UserCRUDService.get_user(current_user_id)
 
-            if current_user_profile:
-                user_data = {
-                    "name": current_user_profile.name,
-                    "surname": current_user_profile.surname,
-                    "email": current_user_profile.email,
-                    "is_admin": current_user_profile.is_admin,
-                }
-                return user_data, HttpStatus.OK.value
-            else:
-                return (
-                    {"message": "User not found"},
-                    HttpStatus.NOT_FOUND.value,
-                )
+            user_data = {
+                "name": current_user_profile.name,
+                "surname": current_user_profile.surname,
+                "email": current_user_profile.email,
+                "is_admin": current_user_profile.is_admin,
+            }
+            return user_data, HttpStatus.OK.value
+
+        except DoesNotExist:
+            return (
+                {"message": "User not found"},
+                HttpStatus.NOT_FOUND.value,
+            )
         except Exception as e:
             LoggerSetup.get_logger("general").error(
                 f"Internal server error while getting the user with ID:{current_user_id}, err : {e}"
             )
             return (
                 {"message": f"Internal server error: {str(e)}"},
-                HttpStatus.UNAUTHORIZED.value,
+                HttpStatus.INTERNAL_SERVER_ERROR.value,
             )
 
 
@@ -118,3 +119,26 @@ class CheckAuth(Resource):
             return {"message": "Token is valid"}, HttpStatus.OK.value
         except Exception:
             return {"message": "Unauthorized"}, HttpStatus.UNAUTHORIZED.value
+
+
+@user_namespace.route("/check_admin/")
+class CheckIfAdmin(Resource):
+    @user_namespace.doc(description="Check if the current user is an Admin")
+    @jwt_required()
+    @user_namespace.response(
+        HttpStatus.OK.value,
+        "Checked if admin",
+        user_schema_retriever.retrieve("is_admin"),
+    )
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
+    def get(self):
+        try:
+            current_user_id = get_jwt_identity()
+            current_user_profile = UserCRUDService.get_user(current_user_id)
+            return UserAuthService.check_if_admin(current_user_profile)
+        except DoesNotExist:
+            return (
+                {"message": "User not found"},
+                HttpStatus.NOT_FOUND.value,
+            )

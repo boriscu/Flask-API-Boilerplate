@@ -21,6 +21,6 @@ class UserCRUDService:
         try:
             return UserProfile.get_by_id(user_id)
         except DoesNotExist:
-            return None
+            raise
         except PeeweeException as e:
             raise Exception("Internal server error occurred.") from e
