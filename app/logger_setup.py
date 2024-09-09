@@ -50,6 +50,6 @@ class LoggerSetup:
         loggers = {
             "cli": cls("cli_output", "cli_output", "cli_output.log"),
             "migrations": cls("migrations", "migrations", "migrations.log"),
-            "setup": cls("setup", "setup", "setup.log"),
+            "general": cls("general", "general", "general.log"),
         }
         return loggers[entity].setup_logger()

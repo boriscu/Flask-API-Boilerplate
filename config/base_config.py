@@ -23,7 +23,7 @@ class BaseConfig(ABC):
         """
         from app.logger_setup import LoggerSetup
 
-        logger = LoggerSetup.get_logger("setup")
+        logger = LoggerSetup.get_logger("general")
         for key, value in cls.__dict__.items():
             if not key.startswith("__") and not callable(value) and value is None:
                 logger.warning(f"Warning: {key} is not set in the configuration.")

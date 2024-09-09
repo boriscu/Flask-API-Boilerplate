@@ -5,12 +5,13 @@ from peewee import IntegrityError
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import timedelta
 from app.enums.http_status import HttpStatus
+from app.logger_setup import LoggerSetup
 from app.models.user_profile import UserProfile
 
 
 class UserAuthService:
     """
-    A simple service class for user authentication, including registration,
+    A service class for user authentication, including registration,
     login, and logout.
     """
 
@@ -43,6 +44,13 @@ class UserAuthService:
             return {
                 "message": "This email is already used"
             }, HttpStatus.BAD_REQUEST.value
+        except Exception as e:
+            LoggerSetup.get_logger("general").error(
+                f"Internal server error while registering a user with email:{data['email']}, err: {e}"
+            )
+            return {
+                "message": "Internal server error"
+            }, HttpStatus.INTERNAL_SERVER_ERROR.value
 
     @staticmethod
     def login(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
@@ -77,6 +85,13 @@ class UserAuthService:
 
         except UserProfile.DoesNotExist:
             return {"message": "User not found"}, HttpStatus.NOT_FOUND.value
+        except Exception as e:
+            LoggerSetup.get_logger("general").error(
+                f"Internal server error while attempting login for email:{data['email']}, err: {e}"
+            )
+            return {
+                "message": "Internal server error"
+            }, HttpStatus.INTERNAL_SERVER_ERROR.value
 
     @staticmethod
     @jwt_required()

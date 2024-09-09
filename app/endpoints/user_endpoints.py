@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.enums.http_status import HttpStatus
+from app.logger_setup import LoggerSetup
 from app.services.user_services.user_auth_service import UserAuthService
+from app.services.user_services.user_crud_service import UserCRUDService
 from app.validators.user_validator import (
     UserValidator,
 )
@@ -52,3 +54,24 @@ def logout():
     Requires valid JWT token.
     """
     return UserAuthService.logout()
+
+
+@user_blueprint.route("/get_myself/", methods=["GET"])
+@jwt_required()
+def get_myself():
+    """
+    Endpoint to retrieve the logged-in user's profile.
+    Requires a valid JWT token and returns the user's profile excluding the password.
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user_profile = UserCRUDService.get_user(current_user_id)
+        if user_profile:
+            return jsonify(user_profile), HttpStatus.OK.value
+        else:
+            return jsonify({"message": "User not found"}), HttpStatus.NOT_FOUND.value
+    except Exception as e:
+        LoggerSetup.get_logger("general").error(
+            f"Internal server error while getting the user with ID:{current_user_id}, err : {e}"
+        )
+        return jsonify({"message": str(e)}), HttpStatus.INTERNAL_SERVER_ERROR.value
