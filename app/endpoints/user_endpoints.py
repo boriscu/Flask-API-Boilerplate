@@ -8,7 +8,7 @@ from app.services.user_services.user_crud_service import UserCRUDService
 from app.validators.user_validator import (
     UserValidator,
 )
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, marshal_with
 from peewee import DoesNotExist
 
 user_namespace = Namespace("Users", description="User operations")
@@ -77,19 +77,13 @@ class GetMyself(Resource):
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
+    @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self):
         try:
             current_user_id = get_jwt_identity()
             current_user_profile = UserCRUDService.get_user(current_user_id)
 
-            user_data = {
-                "name": current_user_profile.name,
-                "surname": current_user_profile.surname,
-                "email": current_user_profile.email,
-                "is_admin": current_user_profile.is_admin,
-                "is_active": current_user_profile.is_active,
-            }
-            return user_data, HttpStatus.OK.value
+            return current_user_profile
 
         except DoesNotExist:
             return (
@@ -133,11 +127,36 @@ class CheckIfAdmin(Resource):
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
+    @marshal_with(user_schema_retriever.retrieve("is_admin"))
     def get(self):
         try:
             current_user_id = get_jwt_identity()
             current_user_profile = UserCRUDService.get_user(current_user_id)
-            return UserAuthService.check_if_admin(current_user_profile)
+            return current_user_profile
+        except DoesNotExist:
+            return (
+                {"message": "User not found"},
+                HttpStatus.NOT_FOUND.value,
+            )
+
+
+@user_namespace.route("/check_active/")
+class CheckIfActive(Resource):
+    @user_namespace.doc(description="Check if the current user is an Active")
+    @jwt_required()
+    @user_namespace.response(
+        HttpStatus.OK.value,
+        "Checked if active",
+        user_schema_retriever.retrieve("is_active"),
+    )
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
+    @marshal_with(user_schema_retriever.retrieve("is_active"))
+    def get(self):
+        try:
+            current_user_id = get_jwt_identity()
+            current_user_profile = UserCRUDService.get_user(current_user_id)
+            return current_user_profile
         except DoesNotExist:
             return (
                 {"message": "User not found"},

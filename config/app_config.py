@@ -70,7 +70,7 @@ class AppConfig(BaseConfig):
             cls.HTTP_ONLY = os.getenv("HTTP_ONLY", "False") == "True"
             cls.COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN")
             cls.COOKIE_PATH = os.getenv("COOKIE_PATH")
-            cls.DEBUG_MODE = os.getenv("DEBUG_MODE")
+            cls.DEBUG_MODE = os.getenv("DEBUG_MODE") == "True"
 
             cls.REDIS_HOST = os.getenv("REDIS_HOST")
             cls.REDIS_PORT = os.getenv("REDIS_PORT")
