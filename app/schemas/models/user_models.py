@@ -55,6 +55,9 @@ def create_user_models(namespace):
                     description="Flag noting if the user has the admin role",
                     example=False,
                 ),
+                "is_active": fields.Boolean(
+                    description="Flag noting if the user is active or not", example=True
+                ),
             },
         ),
     )

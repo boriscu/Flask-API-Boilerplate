@@ -21,6 +21,7 @@ def seed_admin_command():
             name="Admin",
             surname="Admin",
             is_admin=True,
+            is_active=True,
         )
 
         logger.info(f"Admin account seeded successfully.")

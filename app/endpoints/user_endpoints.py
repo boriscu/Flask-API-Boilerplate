@@ -87,6 +87,7 @@ class GetMyself(Resource):
                 "surname": current_user_profile.surname,
                 "email": current_user_profile.email,
                 "is_admin": current_user_profile.is_admin,
+                "is_active": current_user_profile.is_active,
             }
             return user_data, HttpStatus.OK.value
 

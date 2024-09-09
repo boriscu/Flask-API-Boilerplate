@@ -1,4 +1,4 @@
-from peewee import TextField
+from peewee import TextField, BooleanField
 
 from .base import BaseModel
 
@@ -8,4 +8,5 @@ class UserProfile(BaseModel):
     surname = TextField(null=False)
     email = TextField(unique=True)
     password = TextField(null=False)
-    is_admin = TextField(default=False)
+    is_admin = BooleanField(default=False)
+    is_active = BooleanField(default=True)
