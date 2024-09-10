@@ -8,6 +8,9 @@ class AppConfig(BaseConfig):
     Inherits from BaseConfig and loads configurations directly from environment variables.
     """
 
+    # General app configuration
+    PROPAGATE_EXCEPTIONS = True
+
     # Celery Jobs
     CELERY_BROKER_URL = None
     CELERY_RESULT_BACKEND = None
