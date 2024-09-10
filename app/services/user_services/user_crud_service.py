@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 from app.models.user_profile import UserProfile
 from peewee import DoesNotExist, PeeweeException
 
@@ -24,3 +24,28 @@ class UserCRUDService:
             raise
         except PeeweeException as e:
             raise Exception("Internal server error occurred.") from e
+
+    @staticmethod
+    def toggle_active_status(user: UserProfile) -> Tuple[bool, str]:
+        """
+        Toggles the active status of a user. If the user is currently active, they will be set to inactive,
+        and if inactive, they will be set to active.
+
+        Args:
+            user (UserProfile): The user profile whose status is to be toggled.
+
+        Returns:
+            Tuple[bool, str]: A tuple containing a boolean indicating the new active status and a message about the update.
+        """
+        try:
+            if user.is_active:
+                user.is_active = False
+                message = "User status changed to inactive."
+            else:
+                user.is_active = True
+                message = "User status changed to active."
+
+            user.save()
+            return user.is_active, message
+        except Exception as e:
+            raise Exception(f"Error while toggling user status: {str(e)}")

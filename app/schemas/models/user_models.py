@@ -85,10 +85,27 @@ def create_user_models(namespace):
         },
     )
 
+    toggle_user_status_response_model = namespace.model(
+        "ToggleUserStatusResponse",
+        {
+            "message": fields.String(
+                required=True,
+                description="A message indicating the result of the status toggle operation.",
+                example="User status changed to active.",
+            ),
+            "new_status": fields.Boolean(
+                required=True,
+                description="The new active status of the user after the toggle operation.",
+                example=True,
+            ),
+        },
+    )
+
     return {
         "registration": user_registration_model,
         "login": user_login_model,
         "profile": user_profile_model,
         "is_admin": user_is_admin_model,
         "is_active": user_is_active_model,
+        "toggle_status": toggle_user_status_response_model,
     }

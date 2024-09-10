@@ -220,3 +220,54 @@ class GetUserById(Resource):
                 {"message": f"Internal server error: {str(e)}"},
                 HttpStatus.INTERNAL_SERVER_ERROR.value,
             )
+
+
+@user_namespace.route("/<int:user_id>/status/")
+class ToggleUserStatus(Resource):
+    @user_namespace.doc(
+        description="Toggle user's active status by user ID. Requires admin privileges."
+    )
+    @jwt_required()
+    @user_namespace.response(
+        HttpStatus.OK.value,
+        "User status updated successfully.",
+        user_schema_retriever.retrieve("toggle_status"),
+    )
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
+    def put(self, user_id):
+        try:
+            current_user_id = get_jwt_identity()
+            current_user_profile = UserCRUDService.get_user(current_user_id)
+
+            if not UserAuthService.check_if_admin(current_user_profile):
+                return (
+                    {"message": "Unauthorized."},
+                    HttpStatus.UNAUTHORIZED.value,
+                )
+
+            user_profile = UserCRUDService.get_user(user_id)
+
+            new_status, message = UserCRUDService.toggle_active_status(user_profile)
+
+            return {"message": message, "is_active": new_status}, HttpStatus.OK.value
+
+        except DoesNotExist:
+            return (
+                {"message": "User not found"},
+                HttpStatus.NOT_FOUND.value,
+            )
+        except Unauthorized as e:
+            return (
+                {"message": "Unauthorized."},
+                HttpStatus.UNAUTHORIZED.value,
+            )
+        except Exception as e:
+            LoggerSetup.get_logger("general").error(
+                f"Internal server error while toggling user status with ID:{user_id}, err : {e}"
+            )
+            return (
+                {"message": f"Internal server error: {str(e)}"},
+                HttpStatus.INTERNAL_SERVER_ERROR.value,
+            )
