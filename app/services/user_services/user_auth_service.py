@@ -7,24 +7,26 @@ from datetime import timedelta
 from app.enums.http_status import HttpStatus
 from app.logger_setup import LoggerSetup
 from app.models.user_profile import UserProfile
+from config.app_config import AppConfig
 
 
 class UserAuthService:
     """
     A service class for user authentication, including registration,
-    login, and logout.
+    login, and logout and util methods.
     """
 
     @staticmethod
-    def register(data: Dict[str, str]) -> Dict[str, Union[str, int]]:
+    def register(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
         """
-        Registers a new user with just the required fields (name, surname, email, password).
+        Registers a new user with just the required fields (name, surname, email, password)
+        and returns a JWT token.
 
         Args:
             data (dict): A dictionary containing the user's name, surname, email, and password.
 
         Returns:
-            dict: A response message with the status code.
+            Union[Dict[str, str], make_response]: A response message with the status code and a token.
         """
         name = data.get("name")
         surname = data.get("surname")
@@ -42,7 +44,17 @@ class UserAuthService:
             )
             user.save()
 
-            return {"message": "User created successfully"}, HttpStatus.OK.value
+            access_token = create_access_token(
+                identity=user.id,
+                expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+            )
+
+            response = make_response(
+                {"message": "User created successfully", "access_token": access_token},
+                HttpStatus.OK.value,
+            )
+            response.set_cookie("access_token_cookie", access_token, httponly=True)
+            return response
 
         except IntegrityError:
             return {
@@ -74,7 +86,10 @@ class UserAuthService:
             user = UserProfile.get(UserProfile.email == email)
             if check_password_hash(user.password, password):
                 access_token = create_access_token(
-                    identity=user.id, expires_delta=timedelta(minutes=2880)
+                    identity=user.id,
+                    expires_delta=timedelta(
+                        minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)
+                    ),
                 )
 
                 response = make_response(

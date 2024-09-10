@@ -46,6 +46,7 @@ class AppConfig(BaseConfig):
     HTTP_ONLY = None
     COOKIE_DOMAIN = None
     COOKIE_PATH = None
+    TOKEN_EXPIRATION_TIME = None
     DEBUG_MODE = None
 
     # Admin seeding
@@ -70,6 +71,7 @@ class AppConfig(BaseConfig):
             cls.HTTP_ONLY = os.getenv("HTTP_ONLY", "False") == "True"
             cls.COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN")
             cls.COOKIE_PATH = os.getenv("COOKIE_PATH")
+            cls.TOKEN_EXPIRATION_TIME = os.getenv("TOKEN_EXPIRATION_TIME")
             cls.DEBUG_MODE = os.getenv("DEBUG_MODE") == "True"
 
             cls.REDIS_HOST = os.getenv("REDIS_HOST")
