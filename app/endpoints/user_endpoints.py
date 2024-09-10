@@ -271,3 +271,76 @@ class ToggleUserStatus(Resource):
                 {"message": f"Internal server error: {str(e)}"},
                 HttpStatus.INTERNAL_SERVER_ERROR.value,
             )
+
+
+@user_namespace.route("/change-password")
+class ChangePassword(Resource):
+    @user_namespace.doc(
+        description="Allows the current user to change their password. Requires authentication."
+    )
+    @jwt_required()
+    @user_namespace.expect(
+        user_schema_retriever.retrieve("change_password"), validate=True
+    )
+    @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Old password is incorrect.")
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
+    def put(self):
+        data = request.json
+        user_id = get_jwt_identity()
+
+        try:
+            user = UserCRUDService.get_user(user_id)
+            result = UserCRUDService.update_user_password(
+                user, data.get("old_password"), data.get("new_password")
+            )
+
+            if result:
+                return result, HttpStatus.BAD_REQUEST.value
+
+            return {"message": "Password changed successfully"}, HttpStatus.OK.value
+
+        except DoesNotExist:
+            return {"message": "User not found"}, HttpStatus.NOT_FOUND.value
+
+        except Exception as e:
+            return {
+                "message": f"Internal server error: {str(e)}"
+            }, HttpStatus.INTERNAL_SERVER_ERROR.value
+
+
+@user_namespace.route("/change-password/<int:user_id>")
+class AdminChangePassword(Resource):
+    @user_namespace.doc(
+        description="Allows admin to change the password for a specified user by user ID. Requires admin privileges."
+    )
+    @user_namespace.expect(
+        user_schema_retriever.retrieve("admin_change_password"), validate=True
+    )
+    @jwt_required()
+    @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized.")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
+    def put(self, user_id):
+        current_user_id = get_jwt_identity()
+
+        try:
+            current_user = UserCRUDService.get_user(current_user_id)
+            if not UserAuthService.check_if_admin(current_user):
+                return {"message": "Unauthorized"}, HttpStatus.UNAUTHORIZED.value
+
+            user = UserCRUDService.get_user(user_id)
+            data = request.json
+            UserAuthService.change_password(user, data.get("new_password"))
+
+            return {"message": "Password changed successfully"}, HttpStatus.OK.value
+
+        except DoesNotExist:
+            return {"message": "User not found"}, HttpStatus.NOT_FOUND.value
+
+        except Exception as e:
+            return {
+                "message": f"Internal server error: {str(e)}"
+            }, HttpStatus.INTERNAL_SERVER_ERROR.value

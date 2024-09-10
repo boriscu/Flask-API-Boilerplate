@@ -136,3 +136,33 @@ class UserAuthService:
             bool: True if the user is admin, false in other case
         """
         return user.is_admin
+
+    @staticmethod
+    def check_password(user: UserProfile, password: str) -> bool:
+        """
+        Checks if the provided password matches the current password of the user.
+
+        Args:
+            user (UserProfile): The user whose password is being checked.
+            password (str): The password to verify.
+
+        Returns:
+            bool: True if the password matches, False otherwise.
+        """
+        return check_password_hash(user.password, password)
+
+    @staticmethod
+    def change_password(user: UserProfile, new_password: str) -> None:
+        """
+        Changes the password for a user to a new one.
+
+        Args:
+            user (UserProfile): The user whose password is to be changed.
+            new_password (str): The new password to set.
+
+        Returns:
+            None
+        """
+        hashed_password = generate_password_hash(new_password)
+        user.password = hashed_password
+        user.save()

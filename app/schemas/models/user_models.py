@@ -101,6 +101,33 @@ def create_user_models(namespace):
         },
     )
 
+    change_password_model = namespace.model(
+        "ChangePassword",
+        {
+            "old_password": fields.String(
+                required=True,
+                description="Current password of the user",
+                example="OldPassword123!",
+            ),
+            "new_password": fields.String(
+                required=True,
+                description="New password for the user",
+                example="NewPassword456!",
+            ),
+        },
+    )
+
+    admin_change_password_model = namespace.model(
+        "AdminChangePassword",
+        {
+            "new_password": fields.String(
+                required=True,
+                description="New password for the user",
+                example="AdminSetPassword789!",
+            ),
+        },
+    )
+
     return {
         "registration": user_registration_model,
         "login": user_login_model,
@@ -108,4 +135,6 @@ def create_user_models(namespace):
         "is_admin": user_is_admin_model,
         "is_active": user_is_active_model,
         "toggle_status": toggle_user_status_response_model,
+        "change_password": change_password_model,
+        "admin_change_password": admin_change_password_model,
     }

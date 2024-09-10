@@ -1,6 +1,8 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 from app.models.user_profile import UserProfile
 from peewee import DoesNotExist, PeeweeException
+
+from app.services.user_services.user_auth_service import UserAuthService
 
 
 class UserCRUDService:
@@ -49,3 +51,24 @@ class UserCRUDService:
             return user.is_active, message
         except Exception as e:
             raise Exception(f"Error while toggling user status: {str(e)}")
+
+    @staticmethod
+    def update_user_password(
+        user: UserProfile, old_password: str, new_password: str
+    ) -> Union[Dict[str, str], None]:
+        """
+        Changes the password for a user after validating the old password.
+
+        Args:
+            user (UserProfile): The user whose password is to be changed.
+            old_password (str): The current password to verify.
+            new_password (str): The new password to set.
+
+        Returns:
+            Union[Dict[str, str], None]: A message dictionary in case of an error, None if the password was updated.
+        """
+        if not UserAuthService.check_password(user, old_password):
+            return {"message": "Old password is incorrect"}
+
+        UserAuthService.change_password(user, new_password)
+        return None
