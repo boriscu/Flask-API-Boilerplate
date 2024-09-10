@@ -1,5 +1,11 @@
 from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_restx import Namespace, Resource, marshal_with
+
+from peewee import DoesNotExist
+
+from werkzeug.exceptions import Unauthorized
+
 from app.enums.http_status import HttpStatus
 from app.logger_setup import LoggerSetup
 from app.schemas.retrievers.user_schema_retriever import UserSchemaRetriever
@@ -8,8 +14,6 @@ from app.services.user_services.user_crud_service import UserCRUDService
 from app.validators.user_validator import (
     UserValidator,
 )
-from flask_restx import Namespace, Resource, marshal_with
-from peewee import DoesNotExist
 
 user_namespace = Namespace("Users", description="User operations")
 user_schema_retriever = UserSchemaRetriever(user_namespace)
@@ -161,4 +165,58 @@ class CheckIfActive(Resource):
             return (
                 {"message": "User not found"},
                 HttpStatus.NOT_FOUND.value,
+            )
+
+
+@user_namespace.route("/<int:user_id>")
+class GetUserById(Resource):
+    @user_namespace.doc(
+        description="Retrieve any user's profile by user ID. Requires admin privileges."
+    )
+    @jwt_required()
+    @user_namespace.response(
+        HttpStatus.OK.value,
+        "User profile retrieved successfully.",
+        user_schema_retriever.retrieve("profile"),
+    )
+    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
+    @marshal_with(user_schema_retriever.retrieve("profile"))
+    def get(self, user_id):
+        try:
+            current_user_id = get_jwt_identity()
+            current_user_profile = UserCRUDService.get_user(current_user_id)
+
+            if not UserAuthService.check_if_admin(current_user_profile):
+                return (
+                    {"message": "Unauthorized. Only admins can access this endpoint."},
+                    HttpStatus.UNAUTHORIZED.value,
+                )
+
+            user_profile = UserCRUDService.get_user(user_id)
+            if user_profile is None:
+                return (
+                    {"message": "User not found"},
+                    HttpStatus.NOT_FOUND.value,
+                )
+            return user_profile
+
+        except DoesNotExist:
+            return (
+                {"message": "User not found"},
+                HttpStatus.NOT_FOUND.value,
+            )
+        except Unauthorized as e:
+            return (
+                {"message": str(e)},
+                HttpStatus.UNAUTHORIZED.value,
+            )
+        except Exception as e:
+            LoggerSetup.get_logger("general").error(
+                f"Internal server error while getting the user with ID:{user_id}, err : {e}"
+            )
+            return (
+                {"message": f"Internal server error: {str(e)}"},
+                HttpStatus.INTERNAL_SERVER_ERROR.value,
             )
