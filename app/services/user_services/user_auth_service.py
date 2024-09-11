@@ -50,7 +50,7 @@ class UserAuthService:
             )
 
             response = make_response(
-                {"message": "User created successfully", "access_token": access_token},
+                {"message": "User created successfully"},
                 HttpStatus.OK.value,
             )
             response.set_cookie("access_token_cookie", access_token, httponly=True)

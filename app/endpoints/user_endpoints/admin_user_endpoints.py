@@ -133,6 +133,7 @@ class AdminChangePassword(Resource):
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized.")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def put(self, user_id):
         current_user_id = get_jwt_identity()
 

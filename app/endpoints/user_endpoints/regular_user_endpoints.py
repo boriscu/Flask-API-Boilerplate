@@ -8,9 +8,7 @@ from app.enums.http_status import HttpStatus
 from app.logger_setup import LoggerSetup
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_crud_service import UserCRUDService
-from app.validators.user_validator import (
-    UserValidator,
-)
+
 from . import user_namespace, user_schema_retriever
 
 
@@ -27,11 +25,6 @@ class Register(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     def post(self):
         data = request.get_json()
-
-        is_valid, message = UserValidator.validate_user_register_data(data)
-        if not is_valid:
-            return jsonify({"message": message}), HttpStatus.BAD_REQUEST.value
-
         return UserAuthService.register(data)
 
 
@@ -41,13 +34,9 @@ class Login(Resource):
     @user_namespace.expect(user_schema_retriever.retrieve("login"), validate=True)
     @user_namespace.response(HttpStatus.OK.value, "Login Successful")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
         data = request.get_json()
-
-        is_valid, message = UserValidator.validate_user_login_data(data)
-        if not is_valid:
-            return jsonify({"message": message}), HttpStatus.BAD_REQUEST.value
-
         return UserAuthService.login(data)
 
 
@@ -59,6 +48,7 @@ class Logout(Resource):
     )
     @user_namespace.response(HttpStatus.OK.value, "Successfully logged out")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
         return UserAuthService.logout()
 
