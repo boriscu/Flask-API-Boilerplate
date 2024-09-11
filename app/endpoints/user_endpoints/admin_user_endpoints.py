@@ -24,12 +24,12 @@ class GetUserById(Resource):
     @user_namespace.response(
         HttpStatus.OK.value,
         "User profile retrieved successfully.",
-        user_schema_retriever.retrieve("profile"),
+        user_schema_retriever.retrieve("user_profile"),
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
-    @marshal_with(user_schema_retriever.retrieve("profile"))
+    @marshal_with(user_schema_retriever.retrieve("user_profile"))
     def get(self, user_id):
         try:
             current_user_id = get_jwt_identity()
@@ -168,11 +168,12 @@ class GetUsers(Resource):
     @user_namespace.response(
         HttpStatus.OK.value,
         "Users fetched successfully.",
-        model=user_schema_retriever.retrieve("users_response"),
+        model=user_schema_retriever.retrieve("user_profiles"),
     )
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized.")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
-    @marshal_with(user_schema_retriever.retrieve("users_response"))
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request.")
+    @marshal_with(user_schema_retriever.retrieve("user_profiles"))
     @jwt_required()
     def get(self):
         args = user_schema_retriever.retrieve("pagination_parser").parse_args()
@@ -202,7 +203,7 @@ class GetUsers(Resource):
 
         except ValueError as e:
             return {"message": str(e)}, HttpStatus.BAD_REQUEST.value
-        except AttributeError as e:
-            return {"message": f"Field error: {str(e)}"}, HttpStatus.BAD_REQUEST.value
         except Exception as e:
-            return {"message": str(e)}, HttpStatus.INTERNAL_SERVER_ERROR.value
+            return {
+                "message": f"Unexpected error: {str(e)}"
+            }, HttpStatus.INTERNAL_SERVER_ERROR.value

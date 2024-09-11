@@ -46,12 +46,12 @@ class BasePaginationService(ABC):
             models_list = cls.paginate_query(query, page, per_page)
             total_pages = (total_entries + per_page - 1) // per_page
             return (models_list, total_entries, total_pages)
-        except AttributeError as e:
-            raise ValueError(f"Invalid field name: {e}")
+        except ValueError as e:
+            raise
         except OperationalError as e:
-            raise ValueError(f"Database operational error: {e}")
+            raise ValueError(f"Database operational error: {str(e)}")
         except Exception as e:
-            raise Exception(f"An unexpected error occurred: {e}")
+            raise Exception(f"An unexpected error occurred: {str(e)}")
 
     @staticmethod
     def paginate_query(query: ModelSelect, page: int, per_page: int) -> List[Model]:
@@ -149,6 +149,8 @@ class BasePaginationService(ABC):
             return query
         except AttributeError as e:
             raise ValueError("Search field does not exist in the model.")
+        except Exception as e:
+            raise Exception(f"Error during searching: {e}")
 
     @staticmethod
     def filter_query(
@@ -182,4 +184,8 @@ class BasePaginationService(ABC):
                 query = query.where(field == value)
             return query
         except AttributeError as e:
-            raise ValueError(str(e))
+            raise ValueError(
+                f"Filter key '{key}' is not a valid field in model '{model.__name__}'."
+            )
+        except Exception as e:
+            raise Exception(f"Error during filtering: {e}")

@@ -17,9 +17,7 @@ class Register(Resource):
     @user_namespace.doc(
         description="Register a new user. The request body must include name, surname, email, and password."
     )
-    @user_namespace.expect(
-        user_schema_retriever.retrieve("registration"), validate=True
-    )
+    @user_namespace.expect(user_schema_retriever.retrieve("register"), validate=True)
     @user_namespace.response(HttpStatus.CREATED.value, "User Registered")
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Validation Error")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
@@ -62,11 +60,11 @@ class GetMyself(Resource):
     @user_namespace.response(
         HttpStatus.OK.value,
         "Profile retrieved",
-        user_schema_retriever.retrieve("profile"),
+        user_schema_retriever.retrieve("user_profile"),
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
-    @marshal_with(user_schema_retriever.retrieve("profile"))
+    @marshal_with(user_schema_retriever.retrieve("user_profile"))
     def get(self):
         try:
             current_user_id = get_jwt_identity()
