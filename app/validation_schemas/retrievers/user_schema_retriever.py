@@ -1,5 +1,8 @@
-from app.schemas.models.user_models import create_pagination_parser, create_user_models
-from app.schemas.retrievers.base_schema_retriever import BaseSchemaRetriever
+from app.validation_schemas.models.user_models import (
+    create_pagination_parser,
+    create_user_models,
+)
+from app.validation_schemas.retrievers.base_schema_retriever import BaseSchemaRetriever
 
 
 class UserSchemaRetriever(BaseSchemaRetriever):

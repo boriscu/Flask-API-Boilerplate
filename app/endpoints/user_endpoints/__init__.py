@@ -1,6 +1,6 @@
 from flask_restx import Namespace
 
-from app.schemas.retrievers.user_schema_retriever import UserSchemaRetriever
+from app.validation_schemas.retrievers.user_schema_retriever import UserSchemaRetriever
 
 
 user_namespace = Namespace("Users", description="User operations")
