@@ -72,7 +72,7 @@ class AppConfig(BaseConfig):
             cls.APP_ENVIRONMENT = os.getenv("APP_ENVIRONMENT", "DEV")
 
             cls.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-            cls.JWT_TOKEN_LOCATION = ["cookies"]
+            cls.JWT_TOKEN_LOCATION = ["headers"]
 
             cls.COOKIE_SECURE = os.getenv("COOKIE_SECURE", "False") == "True"
             cls.CSRF_PROTECT = os.getenv("CSRF_PROTECT", "False") == "True"
