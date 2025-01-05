@@ -12,6 +12,8 @@ from app.commands import register_commands
 
 from app.init.sentry_init import SentryInitializer
 
+from app.init.error_handler import register_error_handlers
+
 from app.services.celery_service import CeleryService
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -45,5 +47,6 @@ def create_app():
     )
 
     register_commands(app)
+    register_error_handlers(app)
 
     return app
