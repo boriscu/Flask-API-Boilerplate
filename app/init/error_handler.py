@@ -116,6 +116,6 @@ def register_error_handlers(app: Flask):
             verify_jwt_in_request()
             jwt_data = get_jwt()
             if jwt_data:
-                sentry_sdk.set_user({"id": str(get_jwt_identity())})
+                sentry_sdk.set_user({"id": get_jwt_identity()})
         except:
             pass

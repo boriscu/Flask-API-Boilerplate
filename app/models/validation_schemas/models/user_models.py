@@ -25,8 +25,8 @@ def create_user_models(namespace):
         },
     )
 
-    user_login_model = namespace.model(
-        "UserLogin",
+    user_login_request_model = namespace.model(
+        "UserLoginRequest",
         {
             "email": fields.String(
                 required=True,
@@ -35,6 +35,22 @@ def create_user_models(namespace):
             ),
             "password": fields.String(
                 required=True, description="User password", example="Strong password"
+            ),
+        },
+    )
+
+    user_login_response_model = namespace.model(
+        "UserLoginResponse",
+        {
+            "message": fields.String(
+                required=True,
+                description="Response message",
+                example="Login successful",
+            ),
+            "access_token": fields.String(
+                required=True,
+                description="JWT Token for the user that needs to be used for authentication",
+                example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
             ),
         },
     )
@@ -126,7 +142,8 @@ def create_user_models(namespace):
 
     return {
         "registration": user_registration_model,
-        "login": user_login_model,
+        "login_request": user_login_request_model,
+        "login_response": user_login_response_model,
         "profile": user_profile_model,
         "toggle_status": toggle_user_status_response_model,
         "change_password": change_password_model,

@@ -1,13 +1,10 @@
 from typing import Dict, Union
-from flask import make_response
+from flask import jsonify, make_response
 from flask_jwt_extended import create_access_token, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from peewee import IntegrityError
 from datetime import timedelta
 
 from config.app_config import AppConfig
-
-from app.init.logger_setup import LoggerSetup
 
 from app.models.enums.http_status import HttpStatus
 
@@ -17,7 +14,7 @@ from app.models.pg.user_profile import UserProfile
 class UserAuthService:
     """
     A service class for user authentication, including registration,
-    login, and logout and util methods.
+    login, util methods.
     """
 
     @staticmethod
@@ -44,6 +41,7 @@ class UserAuthService:
             email=email,
             password=hashed_password,
             is_admin=False,
+            is_active=True,
         )
         user.save()
 
@@ -74,6 +72,7 @@ class UserAuthService:
         password = data.get("password")
 
         user = UserProfile.get(UserProfile.email == email)
+
         if check_password_hash(user.password, password):
             access_token = create_access_token(
                 identity=str(user.id),
@@ -81,27 +80,15 @@ class UserAuthService:
             )
 
             response = make_response(
-                {"message": "Login successful"}, HttpStatus.OK.value
+                {
+                    "message": "Login successful",
+                    "access_token": access_token,
+                },
+                HttpStatus.OK.value,
             )
-            response.set_cookie("access_token_cookie", access_token, httponly=True)
             return response
         else:
             return {"message": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
-
-    @staticmethod
-    @jwt_required()
-    def logout() -> make_response:
-        """
-        Logs out the current user by removing the access token cookie.
-
-        Returns:
-            make_response: A success message confirming the logout.
-        """
-        response = make_response(
-            {"message": "User logged out successfully"}, HttpStatus.OK.value
-        )
-        response.set_cookie("access_token_cookie", "", expires=0, httponly=True)
-        return response
 
     @staticmethod
     def check_if_admin(user: UserProfile) -> bool:

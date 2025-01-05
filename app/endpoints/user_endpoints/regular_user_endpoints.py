@@ -31,32 +31,24 @@ class Register(Resource):
 @user_namespace.route("/login/", methods=["POST"])
 class Login(Resource):
     @user_namespace.doc(description="Log in a user using their email and password.")
-    @user_namespace.expect(user_schema_retriever.retrieve("login"), validate=True)
-    @user_namespace.response(HttpStatus.OK.value, "Login Successful")
-    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
-    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
-    def post(self):
-        data = request.get_json()
-        return UserAuthService.login(data)
-
-
-@user_namespace.route("/logout/")
-class Logout(Resource):
-    @jwt_required()
-    @user_namespace.doc(
-        description="Log out the current user. Requires a valid JWT token."
+    @user_namespace.expect(
+        user_schema_retriever.retrieve("login_request"), validate=True
     )
-    @user_namespace.response(HttpStatus.OK.value, "Successfully logged out")
+    @user_namespace.response(
+        HttpStatus.OK.value,
+        "Login Successful",
+        user_schema_retriever.retrieve("login_response"),
+    )
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
-        return UserAuthService.logout()
+        return UserAuthService.login(request.get_json())
 
 
 @user_namespace.route("/get_myself/")
 class GetMyself(Resource):
     @user_namespace.doc(
-        description="Retrieve the logged-in user's profile. Requires a valid JWT token."
+        description="Retrieve the logged-in user's profile. Requires a valid JWT token.",
     )
     @jwt_required()
     @user_namespace.response(
