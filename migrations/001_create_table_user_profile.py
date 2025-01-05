@@ -29,7 +29,7 @@ from contextlib import suppress
 import peewee as pw
 from peewee_migrate import Migrator
 
-from app.models.base import BaseModel
+from app.models.pg.base import BaseModel
 
 
 with suppress(ImportError):

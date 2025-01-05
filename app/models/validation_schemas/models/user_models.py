@@ -1,6 +1,5 @@
 from datetime import datetime
 from flask_restx import fields
-from flask_restx import reqparse
 
 
 def create_user_models(namespace):
@@ -69,24 +68,6 @@ def create_user_models(namespace):
         },
     )
 
-    user_is_admin_model = namespace.model(
-        "UserIsAdmin",
-        {
-            "is_admin": fields.Boolean(
-                description="Determines if the user is an admin", example=True
-            )
-        },
-    )
-
-    user_is_active_model = namespace.model(
-        "UserIsActive",
-        {
-            "is_active": fields.Boolean(
-                description="Determines if the user is active", example=True
-            )
-        },
-    )
-
     toggle_user_status_response_model = namespace.model(
         "ToggleUserStatusResponse",
         {
@@ -147,41 +128,8 @@ def create_user_models(namespace):
         "registration": user_registration_model,
         "login": user_login_model,
         "profile": user_profile_model,
-        "is_admin": user_is_admin_model,
-        "is_active": user_is_active_model,
         "toggle_status": toggle_user_status_response_model,
         "change_password": change_password_model,
         "admin_change_password": admin_change_password_model,
         "users_response": user_response_model,
     }
-
-
-def create_pagination_parser():
-    pagination_parser = reqparse.RequestParser(bundle_errors=True)
-    pagination_parser.add_argument(
-        "page", type=int, default=1, required=False, help="Page number"
-    )
-    pagination_parser.add_argument(
-        "per_page", type=int, default=10, required=False, help="Items per page"
-    )
-    pagination_parser.add_argument(
-        "sort_field", type=str, default="name", required=False, help="Field to sort by"
-    )
-    pagination_parser.add_argument(
-        "sort_order",
-        type=str,
-        default="asc",
-        required=False,
-        help="Sort order: asc or desc",
-    )
-    pagination_parser.add_argument(
-        "search", type=str, required=False, help="Search query"
-    )
-    pagination_parser.add_argument(
-        "filters",
-        type=str,
-        required=False,
-        help="Filtering criteria as a JSON string",
-        default='{"is_active":true}',
-    )
-    return pagination_parser

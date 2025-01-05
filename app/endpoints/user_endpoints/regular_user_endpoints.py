@@ -2,8 +2,6 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
-from peewee import DoesNotExist
-
 from app.models.enums.http_status import HttpStatus
 
 from app.helpers.http_response_generator import HttpResponseGenerator
@@ -84,38 +82,6 @@ class CheckAuth(Resource):
     def get(self):
         get_jwt_identity()
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
-
-
-@user_namespace.route("/check_admin/")
-class CheckIfAdmin(Resource):
-    @user_namespace.doc(description="Check if the current user is an Admin")
-    @jwt_required()
-    @user_namespace.response(
-        HttpStatus.OK.value,
-        "Checked if admin",
-        user_schema_retriever.retrieve("is_admin"),
-    )
-    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
-    @marshal_with(user_schema_retriever.retrieve("is_admin"))
-    def get(self):
-        return UserCRUDService.get_user(get_jwt_identity())
-
-
-@user_namespace.route("/check_active/")
-class CheckIfActive(Resource):
-    @user_namespace.doc(description="Check if the current user is an Active")
-    @jwt_required()
-    @user_namespace.response(
-        HttpStatus.OK.value,
-        "Checked if active",
-        user_schema_retriever.retrieve("is_active"),
-    )
-    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
-    @marshal_with(user_schema_retriever.retrieve("is_active"))
-    def get(self):
-        return UserCRUDService.get_user(get_jwt_identity)
 
 
 @user_namespace.route("/change-password")

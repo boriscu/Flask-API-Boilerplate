@@ -38,39 +38,26 @@ class UserAuthService:
         password = data.get("password")
         hashed_password = generate_password_hash(password)
 
-        try:
-            user = UserProfile.create(
-                name=name,
-                surname=surname,
-                email=email,
-                password=hashed_password,
-                is_admin=False,
-            )
-            user.save()
+        user = UserProfile.create(
+            name=name,
+            surname=surname,
+            email=email,
+            password=hashed_password,
+            is_admin=False,
+        )
+        user.save()
 
-            access_token = create_access_token(
-                identity=user.id,
-                expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
-            )
+        access_token = create_access_token(
+            identity=str(user.id),
+            expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+        )
 
-            response = make_response(
-                {"message": "User created successfully"},
-                HttpStatus.OK.value,
-            )
-            response.set_cookie("access_token_cookie", access_token, httponly=True)
-            return response
-
-        except IntegrityError:
-            return {
-                "message": "This email is already used"
-            }, HttpStatus.BAD_REQUEST.value
-        except Exception as e:
-            LoggerSetup.get_logger("general").error(
-                f"Internal server error while registering a user with email:{data['email']}, err: {e}"
-            )
-            return {
-                "message": "Internal server error"
-            }, HttpStatus.INTERNAL_SERVER_ERROR.value
+        response = make_response(
+            {"message": "User created successfully"},
+            HttpStatus.OK.value,
+        )
+        response.set_cookie("access_token_cookie", access_token, httponly=True)
+        return response
 
     @staticmethod
     def login(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
@@ -86,35 +73,20 @@ class UserAuthService:
         email = data.get("email")
         password = data.get("password")
 
-        try:
-            user = UserProfile.get(UserProfile.email == email)
-            if check_password_hash(user.password, password):
-                access_token = create_access_token(
-                    identity=user.id,
-                    expires_delta=timedelta(
-                        minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)
-                    ),
-                )
-
-                response = make_response(
-                    {"message": "Login successful"}, HttpStatus.OK.value
-                )
-                response.set_cookie("access_token_cookie", access_token, httponly=True)
-                return response
-            else:
-                return {
-                    "message": "Password is incorrect"
-                }, HttpStatus.UNAUTHORIZED.value
-
-        except UserProfile.DoesNotExist:
-            return {"message": "User not found"}, HttpStatus.NOT_FOUND.value
-        except Exception as e:
-            LoggerSetup.get_logger("general").error(
-                f"Internal server error while attempting login for email:{data['email']}, err: {e}"
+        user = UserProfile.get(UserProfile.email == email)
+        if check_password_hash(user.password, password):
+            access_token = create_access_token(
+                identity=str(user.id),
+                expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
             )
-            return {
-                "message": "Internal server error"
-            }, HttpStatus.INTERNAL_SERVER_ERROR.value
+
+            response = make_response(
+                {"message": "Login successful"}, HttpStatus.OK.value
+            )
+            response.set_cookie("access_token_cookie", access_token, httponly=True)
+            return response
+        else:
+            return {"message": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
 
     @staticmethod
     @jwt_required()

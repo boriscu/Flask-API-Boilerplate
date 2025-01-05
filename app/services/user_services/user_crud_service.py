@@ -1,5 +1,4 @@
 from typing import Dict, Optional, Tuple, Union
-from peewee import DoesNotExist, PeeweeException
 
 from app.models.pg.user_profile import UserProfile
 
@@ -18,15 +17,8 @@ class UserCRUDService:
         Returns:
             Optional[UserProfile]: A UserProfile class instance containing current user data if the user exists, None otherwise.
 
-        Raises:
-            Exception: An exception indicating an internal server error if a database or unexpected error occurs.
         """
-        try:
-            return UserProfile.get_by_id(user_id)
-        except DoesNotExist:
-            raise
-        except PeeweeException as e:
-            raise Exception("Internal server error occurred.") from e
+        return UserProfile.get_by_id(user_id)
 
     @staticmethod
     def toggle_active_status(user: UserProfile) -> Tuple[bool, str]:
@@ -40,18 +32,15 @@ class UserCRUDService:
         Returns:
             Tuple[bool, str]: A tuple containing a boolean indicating the new active status and a message about the update.
         """
-        try:
-            if user.is_active:
-                user.is_active = False
-                message = "User status changed to inactive."
-            else:
-                user.is_active = True
-                message = "User status changed to active."
+        if user.is_active:
+            user.is_active = False
+            message = "User status changed to inactive."
+        else:
+            user.is_active = True
+            message = "User status changed to active."
 
-            user.save()
-            return user.is_active, message
-        except Exception as e:
-            raise Exception(f"Error while toggling user status: {str(e)}")
+        user.save()
+        return user.is_active, message
 
     @staticmethod
     def update_user_password(

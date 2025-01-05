@@ -53,9 +53,21 @@ def register_error_handlers(app: Flask):
         sentry_sdk.capture_message(e)
         return HttpResponseGenerator.generate_response(HttpStatus.NOT_FOUND)
 
-    @app.errorhandler(IntegrityError, ValueError, PeeweeException, KeyError, TypeError)
+    @app.errorhandler(IntegrityError)
     def handle_integrity_error(e):
-        """Handle Peewee, IntegrityError, ValueError, KeyError, TypeError exceptions."""
+        """Handle Peewee IntegrityError exceptions."""
+        sentry_sdk.capture_message(e)
+        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+
+    @app.errorhandler(ValueError)
+    def handle_value_error(e):
+        """Handle Peewee ValueError exceptions."""
+        sentry_sdk.capture_message(e)
+        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+
+    @app.errorhandler(PeeweeException)
+    def handle_peewee_exception(e):
+        """Handle general Peewee exceptions."""
         sentry_sdk.capture_message(e)
         return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
 
@@ -65,10 +77,37 @@ def register_error_handlers(app: Flask):
         sentry_sdk.capture_message(e)
         return HttpResponseGenerator.generate_response(HttpStatus.FORBIDDEN)
 
-    @app.errorhandler(RuntimeError, IndexError, Exception)
+    @app.errorhandler(RuntimeError)
     def handle_runtime_exception(e):
-        """Handle RuntimeError and IndexError exceptions."""
+        """Handle RuntimeError exceptions."""
         sentry_sdk.capture_message(e)
+        return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
+
+    @app.errorhandler(KeyError)
+    def handle_key_exception(e):
+        """Handle KeyError exceptions."""
+        sentry_sdk.capture_message(e)
+        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+
+    @app.errorhandler(TypeError)
+    def handle_key_exception(e):
+        """Handle TypeError exceptions."""
+        sentry_sdk.capture_message(e)
+        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+
+    @app.errorhandler(IndexError)
+    def handle_index_exception(e):
+        """Handle IndexError exceptions."""
+        sentry_sdk.capture_exception(e)
+        return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
+
+    @app.errorhandler(Exception)
+    def handle_general_exception(e):
+        """
+        Handle general exceptions not specifically mapped to an HTTP status.
+        Defaults to INTERNAL_SERVER_ERROR.
+        """
+        sentry_sdk.capture_exception(e)
         return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
 
     @app.before_request
@@ -77,8 +116,6 @@ def register_error_handlers(app: Flask):
             verify_jwt_in_request()
             jwt_data = get_jwt()
             if jwt_data:
-                user_id = get_jwt_identity()
-
-                sentry_sdk.set_user({"id": user_id})
+                sentry_sdk.set_user({"id": str(get_jwt_identity())})
         except:
             pass
