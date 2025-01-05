@@ -10,6 +10,8 @@ from config.app_config import AppConfig
 
 from app.commands import register_commands
 
+from app.init.sentry_init import SentryInitializer
+
 from app.services.celery_service import CeleryService
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -20,6 +22,8 @@ def create_app():
     app = Flask(__name__)
 
     AppConfig.load_config()
+
+    SentryInitializer.initialize()
 
     app.config.from_object(AppConfig)
 

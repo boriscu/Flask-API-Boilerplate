@@ -1,14 +1,10 @@
-from flask import json, request
+from flask import abort, json, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
-from peewee import DoesNotExist
-
-from werkzeug.exceptions import Unauthorized
-
-from app.init.logger_setup import LoggerSetup
-
 from app.models.enums.http_status import HttpStatus
+
+from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_crud_service import UserCRUDService
@@ -33,42 +29,14 @@ class GetUserById(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self, user_id):
-        try:
-            current_user_id = get_jwt_identity()
-            current_user_profile = UserCRUDService.get_user(current_user_id)
+        current_user_profile = UserCRUDService.get_user(get_jwt_identity())
 
-            if not UserAuthService.check_if_admin(current_user_profile):
-                return (
-                    {"message": "Unauthorized. Only admins can access this endpoint."},
-                    HttpStatus.UNAUTHORIZED.value,
-                )
+        if not UserAuthService.check_if_admin(current_user_profile):
+            abort(HttpStatus.UNAUTHORIZED.value)
 
-            user_profile = UserCRUDService.get_user(user_id)
-            if user_profile is None:
-                return (
-                    {"message": "User not found"},
-                    HttpStatus.NOT_FOUND.value,
-                )
-            return user_profile
+        user_profile = UserCRUDService.get_user(user_id)
 
-        except DoesNotExist:
-            return (
-                {"message": "User not found"},
-                HttpStatus.NOT_FOUND.value,
-            )
-        except Unauthorized as e:
-            return (
-                {"message": str(e)},
-                HttpStatus.UNAUTHORIZED.value,
-            )
-        except Exception as e:
-            LoggerSetup.get_logger("general").error(
-                f"Internal server error while getting the user with ID:{user_id}, err : {e}"
-            )
-            return (
-                {"message": f"Internal server error: {str(e)}"},
-                HttpStatus.INTERNAL_SERVER_ERROR.value,
-            )
+        return user_profile
 
 
 @user_namespace.route("/<int:user_id>/status/")
@@ -86,40 +54,17 @@ class ToggleUserStatus(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     def put(self, user_id):
-        try:
-            current_user_id = get_jwt_identity()
-            current_user_profile = UserCRUDService.get_user(current_user_id)
+        current_user_id = get_jwt_identity()
+        current_user_profile = UserCRUDService.get_user(current_user_id)
 
-            if not UserAuthService.check_if_admin(current_user_profile):
-                return (
-                    {"message": "Unauthorized."},
-                    HttpStatus.UNAUTHORIZED.value,
-                )
+        if not UserAuthService.check_if_admin(current_user_profile):
+            abort(HttpStatus.UNAUTHORIZED.value)
 
-            user_profile = UserCRUDService.get_user(user_id)
+        user_profile = UserCRUDService.get_user(user_id)
 
-            new_status, message = UserCRUDService.toggle_active_status(user_profile)
+        new_status, message = UserCRUDService.toggle_active_status(user_profile)
 
-            return {"message": message, "is_active": new_status}, HttpStatus.OK.value
-
-        except DoesNotExist:
-            return (
-                {"message": "User not found"},
-                HttpStatus.NOT_FOUND.value,
-            )
-        except Unauthorized as e:
-            return (
-                {"message": "Unauthorized."},
-                HttpStatus.UNAUTHORIZED.value,
-            )
-        except Exception as e:
-            LoggerSetup.get_logger("general").error(
-                f"Internal server error while toggling user status with ID:{user_id}, err : {e}"
-            )
-            return (
-                {"message": f"Internal server error: {str(e)}"},
-                HttpStatus.INTERNAL_SERVER_ERROR.value,
-            )
+        return {"message": message, "is_active": new_status}, HttpStatus.OK.value
 
 
 @user_namespace.route("/change-password/<int:user_id>")
@@ -139,24 +84,15 @@ class AdminChangePassword(Resource):
     def put(self, user_id):
         current_user_id = get_jwt_identity()
 
-        try:
-            current_user = UserCRUDService.get_user(current_user_id)
-            if not UserAuthService.check_if_admin(current_user):
-                return {"message": "Unauthorized"}, HttpStatus.UNAUTHORIZED.value
+        current_user = UserCRUDService.get_user(current_user_id)
+        if not UserAuthService.check_if_admin(current_user):
+            abort(HttpStatus.UNAUTHORIZED.value)
 
-            user = UserCRUDService.get_user(user_id)
-            data = request.json
-            UserAuthService.change_password(user, data.get("new_password"))
+        user = UserCRUDService.get_user(user_id)
+        data = request.json
+        UserAuthService.change_password(user, data.get("new_password"))
 
-            return {"message": "Password changed successfully"}, HttpStatus.OK.value
-
-        except DoesNotExist:
-            return {"message": "User not found"}, HttpStatus.NOT_FOUND.value
-
-        except Exception as e:
-            return {
-                "message": f"Internal server error: {str(e)}"
-            }, HttpStatus.INTERNAL_SERVER_ERROR.value
+        return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
 
 
 @user_namespace.route("/")
@@ -180,31 +116,23 @@ class GetUsers(Resource):
         args = user_schema_retriever.retrieve("pagination_parser").parse_args()
         current_user_id = get_jwt_identity()
 
-        try:
-            current_user = UserCRUDService.get_user(current_user_id)
-            if not UserAuthService.check_if_admin(current_user):
-                return {"message": "Unauthorized"}, HttpStatus.UNAUTHORIZED.value
+        current_user = UserCRUDService.get_user(current_user_id)
+        if not UserAuthService.check_if_admin(current_user):
+            abort(HttpStatus.UNAUTHORIZED.value)
 
-            filters = json.loads(args["filters"]) if args["filters"] else {}
+        filters = json.loads(args["filters"]) if args["filters"] else {}
 
-            users, total_entries, total_pages = UserPaginationService.get_rows(
-                page=args["page"],
-                per_page=args["per_page"],
-                sort_field=args["sort_field"],
-                sort_order=args["sort_order"],
-                search=args["search"],
-                filters=filters,
-            )
+        users, total_entries, total_pages = UserPaginationService.get_rows(
+            page=args["page"],
+            per_page=args["per_page"],
+            sort_field=args["sort_field"],
+            sort_order=args["sort_order"],
+            search=args["search"],
+            filters=filters,
+        )
 
-            return {
-                "users": users,
-                "total_entries": total_entries,
-                "total_pages": total_pages,
-            }, HttpStatus.OK.value
-
-        except ValueError as e:
-            return {"message": str(e)}, HttpStatus.BAD_REQUEST.value
-        except AttributeError as e:
-            return {"message": f"Field error: {str(e)}"}, HttpStatus.BAD_REQUEST.value
-        except Exception as e:
-            return {"message": str(e)}, HttpStatus.INTERNAL_SERVER_ERROR.value
+        return {
+            "users": users,
+            "total_entries": total_entries,
+            "total_pages": total_pages,
+        }, HttpStatus.OK.value

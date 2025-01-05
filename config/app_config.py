@@ -8,6 +8,9 @@ class AppConfig(BaseConfig):
     Inherits from BaseConfig and loads configurations directly from environment variables.
     """
 
+    # Application environment
+    APP_ENVIRONMENT = None
+
     # General app configuration
     PROPAGATE_EXCEPTIONS = True
 
@@ -63,6 +66,7 @@ class AppConfig(BaseConfig):
         Populates the class attributes with the configuration data.
         """
         if cls._are_attributes_none():
+            cls.APP_ENVIRONMENT = os.getenv("APP_ENVIRONMENT", "DEV")
 
             cls.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
             cls.JWT_TOKEN_LOCATION = ["cookies"]

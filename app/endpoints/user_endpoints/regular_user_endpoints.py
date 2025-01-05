@@ -6,7 +6,7 @@ from peewee import DoesNotExist
 
 from app.models.enums.http_status import HttpStatus
 
-from app.init.logger_setup import LoggerSetup
+from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_crud_service import UserCRUDService
@@ -70,25 +70,7 @@ class GetMyself(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self):
-        try:
-            current_user_id = get_jwt_identity()
-            current_user_profile = UserCRUDService.get_user(current_user_id)
-
-            return current_user_profile
-
-        except DoesNotExist:
-            return (
-                {"message": "User not found"},
-                HttpStatus.NOT_FOUND.value,
-            )
-        except Exception as e:
-            LoggerSetup.get_logger("general").error(
-                f"Internal server error while getting the user with ID:{current_user_id}, err : {e}"
-            )
-            return (
-                {"message": f"Internal server error: {str(e)}"},
-                HttpStatus.INTERNAL_SERVER_ERROR.value,
-            )
+        return UserCRUDService.get_user(get_jwt_identity())
 
 
 @user_namespace.route("/check_auth/")
@@ -100,11 +82,8 @@ class CheckAuth(Resource):
     @user_namespace.response(HttpStatus.OK.value, "Token is valid")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     def get(self):
-        try:
-            get_jwt_identity()
-            return {"message": "Token is valid"}, HttpStatus.OK.value
-        except Exception:
-            return {"message": "Unauthorized"}, HttpStatus.UNAUTHORIZED.value
+        get_jwt_identity()
+        return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
 
 
 @user_namespace.route("/check_admin/")
@@ -120,15 +99,7 @@ class CheckIfAdmin(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     @marshal_with(user_schema_retriever.retrieve("is_admin"))
     def get(self):
-        try:
-            current_user_id = get_jwt_identity()
-            current_user_profile = UserCRUDService.get_user(current_user_id)
-            return current_user_profile
-        except DoesNotExist:
-            return (
-                {"message": "User not found"},
-                HttpStatus.NOT_FOUND.value,
-            )
+        return UserCRUDService.get_user(get_jwt_identity())
 
 
 @user_namespace.route("/check_active/")
@@ -144,15 +115,7 @@ class CheckIfActive(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     @marshal_with(user_schema_retriever.retrieve("is_active"))
     def get(self):
-        try:
-            current_user_id = get_jwt_identity()
-            current_user_profile = UserCRUDService.get_user(current_user_id)
-            return current_user_profile
-        except DoesNotExist:
-            return (
-                {"message": "User not found"},
-                HttpStatus.NOT_FOUND.value,
-            )
+        return UserCRUDService.get_user(get_jwt_identity)
 
 
 @user_namespace.route("/change-password")
@@ -170,23 +133,13 @@ class ChangePassword(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
     def put(self):
         data = request.json
-        user_id = get_jwt_identity()
 
-        try:
-            user = UserCRUDService.get_user(user_id)
-            result = UserCRUDService.update_user_password(
-                user, data.get("old_password"), data.get("new_password")
-            )
+        user = UserCRUDService.get_user(get_jwt_identity())
+        result = UserCRUDService.update_user_password(
+            user, data.get("old_password"), data.get("new_password")
+        )
 
-            if result:
-                return result, HttpStatus.BAD_REQUEST.value
+        if result:
+            return result, HttpStatus.BAD_REQUEST.value
 
-            return {"message": "Password changed successfully"}, HttpStatus.OK.value
-
-        except DoesNotExist:
-            return {"message": "User not found"}, HttpStatus.NOT_FOUND.value
-
-        except Exception as e:
-            return {
-                "message": f"Internal server error: {str(e)}"
-            }, HttpStatus.INTERNAL_SERVER_ERROR.value
+        return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
