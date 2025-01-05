@@ -83,7 +83,7 @@ class CheckAuth(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     def get(self):
         get_jwt_identity()
-        return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
 
 @user_namespace.route("/check_admin/")
@@ -142,4 +142,4 @@ class ChangePassword(Resource):
         if result:
             return result, HttpStatus.BAD_REQUEST.value
 
-        return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
