@@ -46,6 +46,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         password = pw.TextField(null=False)
         is_admin = pw.BooleanField(default=False)
         is_active = pw.BooleanField(default=True)
+        is_sso = pw.BooleanField(default=False)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):

@@ -33,6 +33,7 @@ class UserAuthService:
         surname = data.get("surname")
         email = data.get("email")
         password = data.get("password")
+        is_sso = data.get("is_sso", False)
         hashed_password = generate_password_hash(password)
 
         user = UserProfile.create(
@@ -40,21 +41,16 @@ class UserAuthService:
             surname=surname,
             email=email,
             password=hashed_password,
+            is_sso=is_sso,
             is_admin=False,
             is_active=True,
         )
         user.save()
 
-        access_token = create_access_token(
-            identity=str(user.id),
-            expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
-        )
-
         response = make_response(
             {"message": "User created successfully"},
             HttpStatus.OK.value,
         )
-        response.set_cookie("access_token_cookie", access_token, httponly=True)
         return response
 
     @staticmethod

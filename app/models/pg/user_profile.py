@@ -10,3 +10,4 @@ class UserProfile(BaseModel):
     password = TextField(null=False)
     is_admin = BooleanField(default=False)
     is_active = BooleanField(default=True)
+    is_sso = BooleanField(default=False)

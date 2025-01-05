@@ -22,6 +22,11 @@ def create_user_models(namespace):
                 description="Password for account creation",
                 example="Strong password",
             ),
+            "is_sso": fields.Boolean(
+                description="Flag noting if the user is using single sign on authentication",
+                required=False,
+                example=False,
+            ),
         },
     )
 
@@ -69,6 +74,10 @@ def create_user_models(namespace):
             ),
             "is_active": fields.Boolean(
                 description="Flag noting if the user is active or not", example=True
+            ),
+            "is_sso": fields.Boolean(
+                description="Flag noting if the user is using single sign on authentication",
+                example=False,
             ),
             "created_at": fields.DateTime(
                 dt_format="iso8601",
