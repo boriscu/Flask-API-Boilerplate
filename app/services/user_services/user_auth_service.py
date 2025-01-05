@@ -1,6 +1,6 @@
 from typing import Dict, Union
-from flask import jsonify, make_response
-from flask_jwt_extended import create_access_token, jwt_required
+from flask import make_response
+from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
