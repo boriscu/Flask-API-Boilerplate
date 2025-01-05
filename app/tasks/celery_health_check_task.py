@@ -1,6 +1,7 @@
 import time
-from app.logger_setup import LoggerSetup
 from celery import shared_task
+
+from app.init.logger_setup import LoggerSetup
 
 
 @shared_task(ignore_result=False)

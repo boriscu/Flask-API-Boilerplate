@@ -1,6 +1,6 @@
 from peewee import PostgresqlDatabase
-from dotenv import load_dotenv, find_dotenv
 from peewee_migrate import Router
+from dotenv import load_dotenv, find_dotenv
 
 from config.app_config import AppConfig
 

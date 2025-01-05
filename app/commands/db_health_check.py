@@ -1,8 +1,10 @@
 import click
 from flask.cli import with_appcontext
-from app.db_init import db
-from app.logger_setup import LoggerSetup
+
 from config.app_config import AppConfig
+
+from app.init.db_init import db
+from app.init.logger_setup import LoggerSetup
 
 
 @click.command("health_check:db")

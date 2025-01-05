@@ -1,6 +1,7 @@
 from datetime import datetime
 from peewee import Model, DateTimeField
-from app.db_init import db
+
+from app.init.db_init import db
 
 
 class BaseModel(Model):

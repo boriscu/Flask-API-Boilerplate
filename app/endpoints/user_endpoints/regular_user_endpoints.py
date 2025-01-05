@@ -1,11 +1,13 @@
-from flask import request, jsonify
+from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
 from peewee import DoesNotExist
 
-from app.enums.http_status import HttpStatus
-from app.logger_setup import LoggerSetup
+from app.models.enums.http_status import HttpStatus
+
+from app.init.logger_setup import LoggerSetup
+
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_crud_service import UserCRUDService
 

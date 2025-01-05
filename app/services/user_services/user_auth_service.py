@@ -1,13 +1,17 @@
 from typing import Dict, Union
 from flask import make_response
+from flask_jwt_extended import create_access_token, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from peewee import IntegrityError
-from flask_jwt_extended import create_access_token, jwt_required
 from datetime import timedelta
-from app.enums.http_status import HttpStatus
-from app.logger_setup import LoggerSetup
-from app.models.user_profile import UserProfile
+
 from config.app_config import AppConfig
+
+from app.init.logger_setup import LoggerSetup
+
+from app.models.enums.http_status import HttpStatus
+
+from app.models.pg.user_profile import UserProfile
 
 
 class UserAuthService:

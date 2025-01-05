@@ -1,7 +1,8 @@
 import click
 from flask.cli import with_appcontext
-from app.logger_setup import LoggerSetup
-from app.db_init import router
+
+from app.init.logger_setup import LoggerSetup
+from app.init.db_init import router
 
 
 @click.command("db:migrate", help="This command is used to run migrations.")

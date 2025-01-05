@@ -21,7 +21,7 @@ class BaseConfig(ABC):
         """
         Checks for any None values in the class attributes and logs a warning if any are found.
         """
-        from app.logger_setup import LoggerSetup
+        from app.init.logger_setup import LoggerSetup
 
         logger = LoggerSetup.get_logger("general")
         for key, value in cls.__dict__.items():

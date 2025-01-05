@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Tuple, Union
-from app.models.user_profile import UserProfile
 from peewee import DoesNotExist, PeeweeException
+
+from app.models.pg.user_profile import UserProfile
 
 from app.services.user_services.user_auth_service import UserAuthService
 

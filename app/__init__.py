@@ -5,10 +5,12 @@ from flask_cors import CORS
 import redis
 
 from app import routes
+
+from config.app_config import AppConfig
+
 from app.commands import register_commands
 
-from .services.celery_service import CeleryService
-from config.app_config import AppConfig
+from app.services.celery_service import CeleryService
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)

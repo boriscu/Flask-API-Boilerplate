@@ -1,9 +1,11 @@
 import click
 from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
-from app.logger_setup import LoggerSetup
-from app.models.user_profile import UserProfile
+
 from config.app_config import AppConfig
+
+from app.init.logger_setup import LoggerSetup
+from app.models.pg.user_profile import UserProfile
 
 
 @click.command(

@@ -6,8 +6,10 @@ from peewee import DoesNotExist
 
 from werkzeug.exceptions import Unauthorized
 
-from app.enums.http_status import HttpStatus
-from app.logger_setup import LoggerSetup
+from app.init.logger_setup import LoggerSetup
+
+from app.models.enums.http_status import HttpStatus
+
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_crud_service import UserCRUDService
 from app.services.user_services.user_pagination_service import UserPaginationService

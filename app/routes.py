@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restx import Api
-from .endpoints.user_endpoints import user_namespace
+
+from app.endpoints.user_endpoints import user_namespace
 
 
 def init_app_routes(app: Flask) -> None:

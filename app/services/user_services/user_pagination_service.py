@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Tuple
-from app.models.user_profile import UserProfile
+
+from app.models.pg.user_profile import UserProfile
+
 from app.services.base_crud_services.base_pagination_service import (
     BasePaginationService,
 )

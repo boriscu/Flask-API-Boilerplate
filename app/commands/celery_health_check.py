@@ -1,5 +1,6 @@
 import click
 from flask.cli import with_appcontext
+
 from app.tasks.celery_health_check_task import celery_health_check_task
 
 
