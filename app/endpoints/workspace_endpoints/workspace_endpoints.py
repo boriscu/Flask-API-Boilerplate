@@ -34,13 +34,6 @@ class CreateWorkspace(Resource):
         HttpStatus.UNAUTHORIZED.value, "Authentication is required"
     )
     def post(self):
-        try:
-            args = workspace_schema_retriever.retrieve(
-                "create_workspace_request"
-            ).parse_args()
-            return WorkspaceCRUDService.create_workspace(args)
-        except Exception as e:
-            print(e)
-            return HttpResponseGenerator.generate_response(
-                HttpStatus.INTERNAL_SERVER_ERROR.value
-            )
+        return WorkspaceCRUDService.create_workspace(
+            workspace_schema_retriever.retrieve("create_workspace_request").parse_args()
+        )
