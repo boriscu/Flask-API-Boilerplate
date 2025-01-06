@@ -13,7 +13,7 @@ class UserCRUDService:
     @staticmethod
     def get_user(user_id: int) -> UserProfile:
         """
-        Retrieves a user by their ID, excluding the password from the output. Requires admin privileges
+        Retrieves a user by their ID. Requires admin privileges
 
         Args:
             user_id (int): The ID of the user to retrieve.

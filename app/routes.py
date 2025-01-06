@@ -22,10 +22,11 @@ def init_app_routes(app: Flask) -> None:
         description="A detailed description of the Flask API",
         authorizations=authorizations,
         security="Bearer Auth",
+        prefix="/api",
     )
 
-    api.add_namespace(user_namespace, path="/api/v1/user")
-    api.add_namespace(workspace_namespace, path="/api/v1/workspace")
+    api.add_namespace(user_namespace, path="/v1/user")
+    api.add_namespace(workspace_namespace, path="/v1/workspace")
 
     from flask_jwt_extended import JWTManager
 
