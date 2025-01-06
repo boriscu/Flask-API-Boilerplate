@@ -71,6 +71,7 @@ class UserAuthService:
             access_token = create_access_token(
                 identity=str(user.id),
                 expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+                additional_claims={"is_admin": user.is_admin},
             )
 
             response = make_response(
