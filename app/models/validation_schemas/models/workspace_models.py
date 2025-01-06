@@ -24,7 +24,7 @@ def create_workspace_models(namespace):
         type=str,
         location="form",
         help="Comma-separated list of namespaces",
-        default="[company1.com,company2.co]",
+        default="[company1.com,company2.com]",
     )
     file_upload_parser.add_argument(
         "icon_image",

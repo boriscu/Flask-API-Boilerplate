@@ -1,5 +1,5 @@
 from typing import Tuple
-from flask import jsonify
+from flask import jsonify, Response
 
 from app.models.maps.http_status_message_map import http_status_message_map
 
@@ -20,4 +20,8 @@ class HttpResponseGenerator:
         """
 
         message = http_status_message_map.get(status, "An unknown error occurred")
-        return jsonify({"message": message}), status.value
+        return Response(
+            f'{{"message": "{message}"}}',
+            status=status.value,
+            mimetype="application/json",
+        )

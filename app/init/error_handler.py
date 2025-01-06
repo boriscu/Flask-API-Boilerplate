@@ -90,7 +90,7 @@ def register_error_handlers(app: Flask):
         return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
 
     @app.errorhandler(TypeError)
-    def handle_key_exception(e):
+    def handle_type_exception(e):
         """Handle TypeError exceptions."""
         sentry_sdk.capture_message(e)
         return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
