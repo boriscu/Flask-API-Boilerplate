@@ -47,7 +47,7 @@ def create_user_models(namespace):
     user_login_response_model = namespace.model(
         "UserLoginResponse",
         {
-            "message": fields.String(
+            "msg": fields.String(
                 required=True,
                 description="Response message",
                 example="Login successful",
@@ -96,7 +96,7 @@ def create_user_models(namespace):
     toggle_user_status_response_model = namespace.model(
         "ToggleUserStatusResponse",
         {
-            "message": fields.String(
+            "msg": fields.String(
                 required=True,
                 description="A message indicating the result of the status toggle operation.",
                 example="User status changed to active.",

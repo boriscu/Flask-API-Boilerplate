@@ -64,7 +64,7 @@ class ToggleUserStatus(Resource):
 
         new_status, message = UserCRUDService.toggle_active_status(user_profile)
 
-        return {"message": message, "is_active": new_status}, HttpStatus.OK.value
+        return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
 
 
 @user_namespace.route("/change-password/<int:user_id>")

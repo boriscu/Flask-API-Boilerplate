@@ -10,6 +10,8 @@ from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
 
+from app.helpers.http_response_generator import HttpResponseGenerator
+
 
 class UserAuthService:
     """
@@ -47,11 +49,7 @@ class UserAuthService:
         )
         user.save()
 
-        response = make_response(
-            {"message": "User created successfully"},
-            HttpStatus.OK.value,
-        )
-        return response
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @staticmethod
     def login(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
@@ -77,14 +75,14 @@ class UserAuthService:
 
             response = make_response(
                 {
-                    "message": "Login successful",
+                    "msg": "Login successful",
                     "access_token": access_token,
                 },
                 HttpStatus.OK.value,
             )
             return response
         else:
-            return {"message": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
+            return {"msg": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
 
     @staticmethod
     def check_if_admin(user: UserProfile) -> bool:

@@ -3,8 +3,8 @@ from werkzeug.datastructures import FileStorage
 
 
 def create_workspace_models(namespace):
-    file_upload_parser = reqparse.RequestParser(bundle_errors=True)
-    file_upload_parser.add_argument(
+    create_workspace_request = reqparse.RequestParser(bundle_errors=True)
+    create_workspace_request.add_argument(
         "name",
         type=str,
         required=True,
@@ -12,21 +12,21 @@ def create_workspace_models(namespace):
         help="Name of the workspace",
         default="Development",
     )
-    file_upload_parser.add_argument(
+    create_workspace_request.add_argument(
         "description",
         type=str,
         location="form",
         help="Description of the workspace",
         default="Workspace for development team",
     )
-    file_upload_parser.add_argument(
+    create_workspace_request.add_argument(
         "namespaces",
         type=str,
         location="form",
         help="Comma-separated list of namespaces",
         default="[company1.com,company2.com]",
     )
-    file_upload_parser.add_argument(
+    create_workspace_request.add_argument(
         "icon_image",
         type=FileStorage,
         location="files",
@@ -34,4 +34,23 @@ def create_workspace_models(namespace):
         help="Upload workspace icon image",
     )
 
-    return {"file_upload_parser": file_upload_parser}
+    create_workspace_response = namespace.model(
+        "WorkspaceCreationResponse",
+        {
+            "msg": fields.String(
+                required=True,
+                description="Response message indicating the outcome of the operation",
+                example="Workspace created successfully.",
+            ),
+            "workspace_id": fields.Integer(
+                required=True,
+                description="The unique identifier of the newly created workspace",
+                example=123,
+            ),
+        },
+    )
+
+    return {
+        "create_workspace_request": create_workspace_request,
+        "create_workspace_response": create_workspace_response,
+    }

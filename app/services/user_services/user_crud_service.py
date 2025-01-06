@@ -58,7 +58,7 @@ class UserCRUDService:
             Union[Dict[str, str], None]: A message dictionary in case of an error, None if the password was updated.
         """
         if not UserAuthService.check_password(user, old_password):
-            return {"message": "Old password is incorrect"}
+            return {"msg": "Old password is incorrect"}
 
         UserAuthService.change_password(user, new_password)
         return None

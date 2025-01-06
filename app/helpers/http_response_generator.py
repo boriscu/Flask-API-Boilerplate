@@ -21,7 +21,7 @@ class HttpResponseGenerator:
 
         message = http_status_message_map.get(status, "An unknown error occurred")
         return Response(
-            f'{{"message": "{message}"}}',
+            f'{{"msg": "{message}"}}',
             status=status.value,
             mimetype="application/json",
         )
