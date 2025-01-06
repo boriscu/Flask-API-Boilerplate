@@ -1,4 +1,8 @@
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Tuple, Union
+from flask import abort
+from flask_jwt_extended import get_jwt
+
+from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
 
@@ -7,9 +11,9 @@ from app.services.user_services.user_auth_service import UserAuthService
 
 class UserCRUDService:
     @staticmethod
-    def get_user(user_id: int) -> Optional[UserProfile]:
+    def get_user(user_id: int) -> UserProfile:
         """
-        Retrieves a user by their ID, excluding the password from the output.
+        Retrieves a user by their ID, excluding the password from the output. Requires admin privileges
 
         Args:
             user_id (int): The ID of the user to retrieve.
@@ -18,6 +22,7 @@ class UserCRUDService:
             Optional[UserProfile]: A UserProfile class instance containing current user data if the user exists, None otherwise.
 
         """
+        UserAuthService.check_if_admin()
         return UserProfile.get_by_id(user_id)
 
     @staticmethod

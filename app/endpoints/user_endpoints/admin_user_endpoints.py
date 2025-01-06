@@ -1,5 +1,5 @@
 from flask import abort, json, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
 from app.models.enums.http_status import HttpStatus
@@ -29,14 +29,7 @@ class GetUserById(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self, user_id):
-        current_user_profile = UserCRUDService.get_user(get_jwt_identity())
-
-        if not UserAuthService.check_if_admin(current_user_profile):
-            abort(HttpStatus.UNAUTHORIZED.value)
-
-        user_profile = UserCRUDService.get_user(user_id)
-
-        return user_profile
+        return UserCRUDService.get_user(user_id)
 
 
 @user_namespace.route("/<int:user_id>/status/")
@@ -54,14 +47,7 @@ class ToggleUserStatus(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     def put(self, user_id):
-        current_user_id = get_jwt_identity()
-        current_user_profile = UserCRUDService.get_user(current_user_id)
-
-        if not UserAuthService.check_if_admin(current_user_profile):
-            abort(HttpStatus.UNAUTHORIZED.value)
-
         user_profile = UserCRUDService.get_user(user_id)
-
         new_status, message = UserCRUDService.toggle_active_status(user_profile)
 
         return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
@@ -82,14 +68,10 @@ class AdminChangePassword(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def put(self, user_id):
-        current_user_id = get_jwt_identity()
-
-        current_user = UserCRUDService.get_user(current_user_id)
-        if not UserAuthService.check_if_admin(current_user):
-            abort(HttpStatus.UNAUTHORIZED.value)
+        data = request.json
 
         user = UserCRUDService.get_user(user_id)
-        data = request.json
+
         UserAuthService.change_password(user, data.get("new_password"))
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
@@ -114,11 +96,6 @@ class GetUsers(Resource):
     @jwt_required()
     def get(self):
         args = user_schema_retriever.retrieve("pagination_parser").parse_args()
-        current_user_id = get_jwt_identity()
-
-        current_user = UserCRUDService.get_user(current_user_id)
-        if not UserAuthService.check_if_admin(current_user):
-            abort(HttpStatus.UNAUTHORIZED.value)
 
         filters = json.loads(args["filters"]) if args["filters"] else {}
 

@@ -1,10 +1,12 @@
 from typing import Any, Dict, List, Tuple
 
+
 from app.models.pg.user_profile import UserProfile
 
 from app.services.base_crud_services.base_pagination_service import (
     BasePaginationService,
 )
+from app.services.user_services.user_auth_service import UserAuthService
 
 
 class UserPaginationService(BasePaginationService):
@@ -18,6 +20,9 @@ class UserPaginationService(BasePaginationService):
         search: str,
         filters: Dict[str, Any],
     ) -> Tuple[List[UserProfile], int, int]:
+
+        UserAuthService.check_if_admin()
+
         return super().get_rows(
             UserProfile, page, per_page, sort_field, sort_order, search, filters
         )

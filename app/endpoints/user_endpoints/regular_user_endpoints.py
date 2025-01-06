@@ -6,6 +6,7 @@ from app.models.enums.http_status import HttpStatus
 
 from app.helpers.http_response_generator import HttpResponseGenerator
 
+from app.models.pg.user_profile import UserProfile
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_crud_service import UserCRUDService
 
@@ -60,7 +61,7 @@ class GetMyself(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self):
-        return UserCRUDService.get_user(get_jwt_identity())
+        return UserProfile.get_by_id(get_jwt_identity())
 
 
 @user_namespace.route("/check_auth/")
@@ -92,7 +93,8 @@ class ChangePassword(Resource):
     def put(self):
         data = request.json
 
-        user = UserCRUDService.get_user(get_jwt_identity())
+        user = UserProfile.get_by_id(int(get_jwt_identity()))
+
         result = UserCRUDService.update_user_password(
             user, data.get("old_password"), data.get("new_password")
         )

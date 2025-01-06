@@ -1,6 +1,6 @@
 from typing import Dict, Union
-from flask import make_response
-from flask_jwt_extended import create_access_token
+from flask import abort, make_response
+from flask_jwt_extended import create_access_token, get_jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
@@ -86,14 +86,19 @@ class UserAuthService:
             return {"msg": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
 
     @staticmethod
-    def check_if_admin(user: UserProfile) -> bool:
+    def check_if_admin():
         """
-        Checks if the UserProfile instance is an admin
+        Validates if the current user token has admin privileges. If the user is not an admin,
+        the method aborts the process by sending a 403 Forbidden HTTP status.
 
-        Returns:
-            bool: True if the user is admin, false in other case
+        Raises:
+            HTTPException: A 403 Forbidden status if the user is not an admin.
         """
-        return user.is_admin
+
+        is_admin = bool(get_jwt().get("is_admin"))
+
+        if not is_admin:
+            abort(HttpStatus.FORBIDDEN.value)
 
     @staticmethod
     def check_password(user: UserProfile, password: str) -> bool:
