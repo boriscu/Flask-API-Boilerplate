@@ -27,6 +27,6 @@ def create_pagination_parser():
         type=str,
         required=False,
         help="Filtering criteria as a JSON string",
-        default='{"is_active":true}',
+        default='{"some_field":value}',
     )
     return pagination_parser

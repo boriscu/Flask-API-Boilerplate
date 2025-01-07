@@ -1,12 +1,17 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
-from flask import Response, jsonify
+from flask import Response, json
 
 from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.workspace import Workspace
 
 from app.helpers.image_processor import ImageProcessor
+
+from app.services.user_services.user_auth_service import UserAuthService
+from app.services.workspace_services.workspace_pagination_service import (
+    WorkspacePaginationService,
+)
 
 
 class WorkspaceCRUDService:
@@ -40,4 +45,16 @@ class WorkspaceCRUDService:
             f'{{"msg": "Workspace created successfully.", "workspace_id": {new_workspace.id}}}',
             status=HttpStatus.CREATED.value,
             mimetype="application/json",
+        )
+
+    @classmethod
+    def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
+        UserAuthService.check_if_admin()
+        return WorkspacePaginationService.get_rows(
+            page=args["page"],
+            per_page=args["per_page"],
+            sort_field=args["sort_field"],
+            sort_order=args["sort_order"],
+            search=args["search"],
+            filters=json.loads(args["filters"]) if args["filters"] else None,
         )

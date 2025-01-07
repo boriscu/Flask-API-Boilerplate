@@ -54,7 +54,7 @@ class UserCRUDService:
             sort_field=args["sort_field"],
             sort_order=args["sort_order"],
             search=args["search"],
-            filters=json.loads(args["filters"]) if args["filters"] else {},
+            filters=json.loads(args["filters"]) if args["filters"] else None,
         )
 
     @staticmethod

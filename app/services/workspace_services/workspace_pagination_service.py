@@ -1,14 +1,14 @@
 from typing import Any, Dict, List, Tuple
 
 
-from app.models.pg.user_profile import UserProfile
+from app.models.pg.workspace import Workspace
 
 from app.services.base_crud_services.base_pagination_service import (
     BasePaginationService,
 )
 
 
-class UserPaginationService(BasePaginationService):
+class WorkspacePaginationService(BasePaginationService):
     @classmethod
     def get_rows(
         cls,
@@ -18,8 +18,8 @@ class UserPaginationService(BasePaginationService):
         sort_order: str,
         search: str,
         filters: Dict[str, Any],
-    ) -> Tuple[List[UserProfile], int, int]:
+    ) -> Tuple[List[Workspace], int, int]:
 
         return super().get_rows(
-            UserProfile, page, per_page, sort_field, sort_order, search, filters
+            Workspace, page, per_page, sort_field, sort_order, search, filters
         )

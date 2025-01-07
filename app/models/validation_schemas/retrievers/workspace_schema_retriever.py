@@ -1,3 +1,4 @@
+from app.models.validation_schemas.models.base_models import create_pagination_parser
 from app.models.validation_schemas.models.workspace_models import (
     create_workspace_models,
 )
@@ -10,8 +11,11 @@ class WorkspaceSchemaRetriever(BaseSchemaRetriever):
     def __init__(self, namespace):
         super().__init__(namespace)
         self.models = create_workspace_models(namespace)
+        self.pagination_parser = create_pagination_parser()
 
     def retrieve(self, key):
+        if key == "pagination_parser":
+            return self.pagination_parser
         model = self.models.get(key)
         if not model:
             raise ValueError(f"Model with key `{key}` not found.")
