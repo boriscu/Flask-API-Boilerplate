@@ -29,7 +29,7 @@ class GetUserById(Resource):
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self, user_id):
-        return UserCRUDService.get_user(user_id)
+        return UserCRUDService.get_single_user(user_id)
 
 
 @user_namespace.route("/<int:user_id>/status/")
@@ -47,7 +47,7 @@ class ToggleUserStatus(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     def put(self, user_id):
-        user_profile = UserCRUDService.get_user(user_id)
+        user_profile = UserCRUDService.get_single_user(user_id)
         new_status, message = UserCRUDService.toggle_active_status(user_profile)
 
         return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
@@ -70,7 +70,7 @@ class AdminChangePassword(Resource):
     def put(self, user_id):
         data = request.json
 
-        user = UserCRUDService.get_user(user_id)
+        user = UserCRUDService.get_single_user(user_id)
 
         UserAuthService.change_password(user, data.get("new_password"))
 
@@ -97,16 +97,7 @@ class GetUsers(Resource):
     def get(self):
         args = user_schema_retriever.retrieve("pagination_parser").parse_args()
 
-        filters = json.loads(args["filters"]) if args["filters"] else {}
-
-        users, total_entries, total_pages = UserPaginationService.get_rows(
-            page=args["page"],
-            per_page=args["per_page"],
-            sort_field=args["sort_field"],
-            sort_order=args["sort_order"],
-            search=args["search"],
-            filters=filters,
-        )
+        users, total_entries, total_pages = UserCRUDService.get_all_users(args)
 
         return {
             "users": users,

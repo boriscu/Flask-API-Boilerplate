@@ -21,8 +21,6 @@ class UserPaginationService(BasePaginationService):
         filters: Dict[str, Any],
     ) -> Tuple[List[UserProfile], int, int]:
 
-        UserAuthService.check_if_admin()
-
         return super().get_rows(
             UserProfile, page, per_page, sort_field, sort_order, search, filters
         )
