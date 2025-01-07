@@ -4,7 +4,7 @@ from flask_restx import fields
 
 def create_user_models(namespace):
     user_registration_model = namespace.model(
-        "UserRegistration",
+        "User registration",
         {
             "name": fields.String(
                 required=True, description="First name of the user", example="John"
@@ -31,7 +31,7 @@ def create_user_models(namespace):
     )
 
     user_login_request_model = namespace.model(
-        "UserLoginRequest",
+        "User login request",
         {
             "email": fields.String(
                 required=True,
@@ -45,7 +45,7 @@ def create_user_models(namespace):
     )
 
     user_login_response_model = namespace.model(
-        "UserLoginResponse",
+        "User login response",
         {
             "msg": fields.String(
                 required=True,
@@ -61,7 +61,7 @@ def create_user_models(namespace):
     )
 
     user_profile_model = namespace.model(
-        "UserProfile",
+        "User",
         {
             "name": fields.String(description="First name of the user", example="John"),
             "surname": fields.String(description="Surname of the user", example="Doe"),
@@ -94,7 +94,7 @@ def create_user_models(namespace):
     )
 
     toggle_user_status_response_model = namespace.model(
-        "ToggleUserStatusResponse",
+        "Togle user status response",
         {
             "msg": fields.String(
                 required=True,
@@ -110,7 +110,7 @@ def create_user_models(namespace):
     )
 
     change_password_model = namespace.model(
-        "ChangePassword",
+        "User change password",
         {
             "old_password": fields.String(
                 required=True,
@@ -126,7 +126,7 @@ def create_user_models(namespace):
     )
 
     admin_change_password_model = namespace.model(
-        "AdminChangePassword",
+        "Admin change password",
         {
             "new_password": fields.String(
                 required=True,
@@ -136,8 +136,8 @@ def create_user_models(namespace):
         },
     )
 
-    user_response_model = namespace.model(
-        "UserPaginationResponse",
+    all_users_model = namespace.model(
+        "Users",
         {
             "users": fields.List(fields.Nested(user_profile_model)),
             "total_entries": fields.Integer(
@@ -157,5 +157,5 @@ def create_user_models(namespace):
         "toggle_status": toggle_user_status_response_model,
         "change_password": change_password_model,
         "admin_change_password": admin_change_password_model,
-        "users_response": user_response_model,
+        "users_response": all_users_model,
     }
