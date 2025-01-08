@@ -39,9 +39,9 @@ class Workspace(Resource):
     @workspace_namespace.doc(
         description="Fetches all workspaces with pagination, sorting, and filtering. Requires admin privileges."
     )
-    @jwt_required
+    @jwt_required()
     @workspace_namespace.expect(
-        workspace_schema_retriever.retrieve("pagination_parser")
+        workspace_schema_retriever.retrieve("pagination_parser"), validate=True
     )
     @workspace_namespace.response(
         HttpStatus.OK.value,

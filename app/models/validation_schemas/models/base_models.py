@@ -10,13 +10,17 @@ def create_pagination_parser():
         "per_page", type=int, default=10, required=False, help="Items per page"
     )
     pagination_parser.add_argument(
-        "sort_field", type=str, required=False, help="Field to sort by"
+        "sort_field",
+        type=str,
+        required=False,
+        help="Field to sort by",
+        default="created_at",
     )
     pagination_parser.add_argument(
         "sort_order",
         type=str,
         required=False,
-        help="Sort order: asc or desc",
+        help="Sort order: 'asc' or 'desc'",
     )
     pagination_parser.add_argument(
         "search", type=str, required=False, help="Search query"
@@ -25,6 +29,6 @@ def create_pagination_parser():
         "filters",
         type=str,
         required=False,
-        help="Filtering criteria as a JSON string, {'some_field':value}",
+        help="Filtering criteria as a JSON string, {'field1': value, 'field2': value, ...}",
     )
     return pagination_parser

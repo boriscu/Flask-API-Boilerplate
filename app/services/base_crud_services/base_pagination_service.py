@@ -80,7 +80,7 @@ class BasePaginationService(ABC):
 
     @staticmethod
     def sort_query(
-        query: ModelSelect, model: Type[Model], sort_field: str, sort_order: str
+        query: ModelSelect, model: Type[Model], sort_field: str, sort_order: str = "asc"
     ) -> ModelSelect:
         """
         Sorts the query based on the given sort field and order.
@@ -101,12 +101,12 @@ class BasePaginationService(ABC):
 
         try:
             model_field = getattr(model, sort_field)
-            if sort_order.lower() == "asc":
+            if sort_order and sort_order.lower() == "asc":
                 query = query.order_by(model_field.asc())
             else:
                 query = query.order_by(model_field.desc())
             return query
-        except AttributeError:
+        except AttributeError as e:
             raise ValueError(
                 f"Sort field {sort_field} does not exist in the model {model.__name__}."
             )
