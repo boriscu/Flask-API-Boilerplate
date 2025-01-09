@@ -2,7 +2,10 @@ from typing import Dict, List, Tuple, Union
 from flask import json
 
 
+from app.models.enums.http_status import HttpStatus
 from app.models.pg.user_profile import UserProfile
+
+from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_pagination_service import UserPaginationService
@@ -99,3 +102,15 @@ class UserCRUDService:
 
         UserAuthService.change_password(user, new_password)
         return None
+
+    @staticmethod
+    def delete_user(user_id: int):
+        UserAuthService.check_if_admin()
+
+        user = UserProfile.get_by_id(user_id)
+        if not user.is_admin:
+            UserProfile.delete().where(UserProfile.id == user_id).execute()
+        else:
+            return HttpResponseGenerator.generate_response(HttpStatus.FORBIDDEN)
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)

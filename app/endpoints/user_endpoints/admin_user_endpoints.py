@@ -40,7 +40,7 @@ class BaseUserResources(Resource):
         }, HttpStatus.OK.value
 
 
-@user_namespace.route("/<int:user_id>", methods=["GET"])
+@user_namespace.route("/<int:user_id>", methods=["GET", "DELETE"])
 class SingleUserResources(Resource):
     @user_namespace.doc(
         description="Retrieve any user's profile by user ID. Requires admin privileges."
@@ -56,6 +56,16 @@ class SingleUserResources(Resource):
     @jwt_required()
     def get(self, user_id):
         return UserCRUDService.get_single_user(user_id)
+
+    @user_namespace.doc(
+        description="Delete a user based on the user ID.  Requires admin privileges."
+    )
+    @user_namespace.response(HttpStatus.OK.value, "User deleted succesfully")
+    @user_namespace.response(HttpStatus.FORBIDDEN.value, "Can't delete an admin user")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @jwt_required()
+    def delete(self, user_id):
+        return UserCRUDService.delete_user(user_id)
 
 
 @user_namespace.route("/<int:user_id>/status/", methods=["PUT"])
