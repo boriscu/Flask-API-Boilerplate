@@ -22,8 +22,6 @@ class Register(Resource):
         user_schema_retriever.retrieve("registration"), validate=True
     )
     @user_namespace.response(HttpStatus.CREATED.value, "User Registered")
-    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Validation Error")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     def post(self):
         data = request.get_json()
         return UserAuthService.register(data)
@@ -41,7 +39,6 @@ class Login(Resource):
         user_schema_retriever.retrieve("login_response"),
     )
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
-    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
         return UserAuthService.login(request.get_json())
 
@@ -58,7 +55,6 @@ class GetMyself(Resource):
         user_schema_retriever.retrieve("profile"),
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server Error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
     def get(self):
         return UserProfile.get_by_id(get_jwt_identity())
@@ -87,9 +83,7 @@ class ChangePassword(Resource):
         user_schema_retriever.retrieve("change_password"), validate=True
     )
     @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
-    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Old password is incorrect.")
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
     def put(self):
         data = request.json
 

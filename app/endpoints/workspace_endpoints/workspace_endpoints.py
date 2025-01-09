@@ -45,13 +45,7 @@ class Workspace(Resource):
     @workspace_namespace.response(
         HttpStatus.CREATED.value,
         "Workspace created successfully",
-        workspace_namespace.model(
-            "WorkspaceCreationResponse",
-            workspace_schema_retriever.retrieve("create_workspace_response"),
-        ),
-    )
-    @workspace_namespace.response(
-        HttpStatus.BAD_REQUEST.value, "Invalid input or missing required fields"
+        model=workspace_schema_retriever.retrieve("create_workspace_response"),
     )
     @workspace_namespace.response(
         HttpStatus.UNAUTHORIZED.value, "Authentication is required"

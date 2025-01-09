@@ -18,7 +18,6 @@ class GetUserById(Resource):
     @user_namespace.doc(
         description="Retrieve any user's profile by user ID. Requires admin privileges."
     )
-    @jwt_required()
     @user_namespace.response(
         HttpStatus.OK.value,
         "User profile retrieved successfully.",
@@ -26,8 +25,8 @@ class GetUserById(Resource):
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
     @marshal_with(user_schema_retriever.retrieve("profile"))
+    @jwt_required()
     def get(self, user_id):
         return UserCRUDService.get_single_user(user_id)
 
@@ -37,7 +36,6 @@ class ToggleUserStatus(Resource):
     @user_namespace.doc(
         description="Toggle user's active status by user ID. Requires admin privileges."
     )
-    @jwt_required()
     @user_namespace.response(
         HttpStatus.OK.value,
         "User status updated successfully.",
@@ -45,7 +43,7 @@ class ToggleUserStatus(Resource):
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error")
+    @jwt_required()
     def put(self, user_id):
         user_profile = UserCRUDService.get_single_user(user_id)
         new_status, message = UserCRUDService.toggle_active_status(user_profile)
@@ -61,12 +59,9 @@ class AdminChangePassword(Resource):
     @user_namespace.expect(
         user_schema_retriever.retrieve("admin_change_password"), validate=True
     )
-    @jwt_required()
     @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
-    @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized.")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
-    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
+    @jwt_required()
     def put(self, user_id):
         data = request.json
 
@@ -91,7 +86,6 @@ class GetUsers(Resource):
         model=user_schema_retriever.retrieve("users_response"),
     )
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized.")
-    @user_namespace.response(HttpStatus.INTERNAL_SERVER_ERROR.value, "Server error.")
     @marshal_with(user_schema_retriever.retrieve("users_response"))
     @jwt_required()
     def get(self):
