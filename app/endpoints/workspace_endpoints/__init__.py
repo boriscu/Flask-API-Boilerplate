@@ -9,3 +9,4 @@ workspace_namespace = Namespace("Workspaces", description="Workspace operations"
 workspace_schema_retriever = WorkspaceSchemaRetriever(workspace_namespace)
 
 from .admin_workspace_endpoints import *
+from .user_workspace_endpoints import *
