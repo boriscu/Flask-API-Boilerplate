@@ -12,7 +12,7 @@ from app.services.user_services.user_crud_service import UserCRUDService
 from . import user_namespace, user_schema_retriever
 
 
-@user_namespace.route("/")
+@user_namespace.route("/", methods=["GET"])
 class BaseUserResources(Resource):
     @user_namespace.doc(
         description="Fetches all users with pagination, sorting, and filtering. Requires admin privileges."
@@ -40,7 +40,7 @@ class BaseUserResources(Resource):
         }, HttpStatus.OK.value
 
 
-@user_namespace.route("/<int:user_id>")
+@user_namespace.route("/<int:user_id>", methods=["GET"])
 class SingleUserResources(Resource):
     @user_namespace.doc(
         description="Retrieve any user's profile by user ID. Requires admin privileges."
@@ -58,7 +58,7 @@ class SingleUserResources(Resource):
         return UserCRUDService.get_single_user(user_id)
 
 
-@user_namespace.route("/<int:user_id>/status/")
+@user_namespace.route("/<int:user_id>/status/", methods=["PUT"])
 class UserStatusResources(Resource):
     @user_namespace.doc(
         description="Toggle user's active status by user ID. Requires admin privileges."
@@ -78,7 +78,7 @@ class UserStatusResources(Resource):
         return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
 
 
-@user_namespace.route("/change-password/<int:user_id>")
+@user_namespace.route("/change-password/<int:user_id>", methods=["PUT"])
 class AdminPasswordResources(Resource):
     @user_namespace.doc(
         description="Allows admin to change the password for a specified user by user ID. Requires admin privileges."

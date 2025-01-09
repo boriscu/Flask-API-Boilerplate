@@ -8,6 +8,7 @@ from app.services.workspace_services.workspace_crud_service import WorkspaceCRUD
 from . import workspace_namespace, workspace_schema_retriever
 
 
+@workspace_namespace.route("/<int:workspace_id>")
 @workspace_namespace.route("/", methods=["GET", "POST"])
 class BaseWorkspaceResources(Resource):
     @workspace_namespace.doc(

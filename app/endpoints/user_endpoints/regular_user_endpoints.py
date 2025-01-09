@@ -43,12 +43,11 @@ class LoginResources(Resource):
         return UserAuthService.login(request.get_json())
 
 
-@user_namespace.route("/get_myself/")
+@user_namespace.route("/get_myself/", methods=["GET"])
 class GetMyselfResources(Resource):
     @user_namespace.doc(
         description="Retrieve the logged-in user's profile. Requires a valid JWT token.",
     )
-    @jwt_required()
     @user_namespace.response(
         HttpStatus.OK.value,
         "Profile retrieved",
@@ -56,34 +55,35 @@ class GetMyselfResources(Resource):
     )
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User Not Found")
     @marshal_with(user_schema_retriever.retrieve("profile"))
+    @jwt_required()
     def get(self):
         return UserProfile.get_by_id(get_jwt_identity())
 
 
-@user_namespace.route("/check_auth/")
+@user_namespace.route("/check_auth/", methods=["GET"])
 class CheckAuthResources(Resource):
     @user_namespace.doc(
         description="Check the validity of the current user's JWT token."
     )
-    @jwt_required()
     @user_namespace.response(HttpStatus.OK.value, "Token is valid")
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @jwt_required()
     def get(self):
         get_jwt_identity()
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
 
-@user_namespace.route("/change-password")
+@user_namespace.route("/change-password", methods=["PUT"])
 class UserPasswordResources(Resource):
     @user_namespace.doc(
         description="Allows the current user to change their password. Requires authentication."
     )
-    @jwt_required()
     @user_namespace.expect(
         user_schema_retriever.retrieve("change_password"), validate=True
     )
     @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
+    @jwt_required()
     def put(self):
         data = request.json
 
