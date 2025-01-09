@@ -1,3 +1,4 @@
+from flask import abort
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource, marshal_with
 
@@ -8,7 +9,28 @@ from app.services.workspace_services.workspace_crud_service import WorkspaceCRUD
 from . import workspace_namespace, workspace_schema_retriever
 
 
-@workspace_namespace.route("/<int:workspace_id>")
+@workspace_namespace.route("/<int:workspace_id>", methods=["GET"])
+class SingleWorkspaceResources(Resource):
+    @workspace_namespace.doc(
+        description="Retrieve any workspace that belongs to the user by workspace ID. Admin can retrieve any workspace."
+    )
+    @workspace_namespace.response(
+        HttpStatus.OK.value,
+        "Workspace retrieved succesfully.",
+        workspace_schema_retriever.retrieve("workspace"),
+    )
+    @workspace_namespace.response(HttpStatus.NOT_FOUND.value, "Workspace not found")
+    @workspace_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @marshal_with(workspace_schema_retriever.retrieve("workspace"))
+    @jwt_required()
+    def get(self, workspace_id):
+        try:
+            return WorkspaceCRUDService.get_single_workspace(workspace_id)
+        except Exception as e:
+            print(e)
+            abort(HttpStatus.BAD_REQUEST.value)
+
+
 @workspace_namespace.route("/", methods=["GET", "POST"])
 class BaseWorkspaceResources(Resource):
     @workspace_namespace.doc(

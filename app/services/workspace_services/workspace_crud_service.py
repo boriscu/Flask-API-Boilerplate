@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Response, json
+from flask import Response, abort, json
+from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
 
@@ -61,12 +62,12 @@ class WorkspaceCRUDService:
         )
 
     @staticmethod
-    def get_single_workspace(workspace_id: int, user_id: int) -> Optional[Workspace]:
-        user = UserProfile.get_by_id(user_id)
+    def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
+        user = UserProfile.get_by_id(int(get_jwt_identity()))
 
         if (user.workspace and user.workspace.id == workspace_id) or user.is_admin:
             workspace = Workspace.get_by_id(workspace_id)
         else:
-            workspace = None
+            abort(HttpStatus.UNAUTHORIZED.value)
 
         return workspace

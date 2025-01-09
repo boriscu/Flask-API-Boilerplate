@@ -1,4 +1,6 @@
-from peewee import TextField, BooleanField
+from peewee import TextField, BooleanField, ForeignKeyField
+
+from app.models.pg.workspace import Workspace
 
 from .base import BaseModel
 
@@ -11,3 +13,4 @@ class UserProfile(BaseModel):
     is_admin = BooleanField(default=False)
     is_active = BooleanField(default=True)
     is_sso = BooleanField(default=False)
+    workspace = ForeignKeyField(Workspace, null=True, on_delete="SET NULL")
