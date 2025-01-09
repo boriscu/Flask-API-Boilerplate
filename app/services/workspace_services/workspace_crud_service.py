@@ -48,13 +48,13 @@ class WorkspaceCRUDService:
         )
 
     @classmethod
-    def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
+    def get_all_workspaces(cls, args: dict) -> Tuple[List[Workspace], int, int]:
         UserAuthService.check_if_admin()
         return WorkspacePaginationService.get_rows(
-            page=args["page"],
-            per_page=args["per_page"],
-            sort_field=args["sort_field"],
-            sort_order=args["sort_order"],
-            search=args["search"],
+            page=args.get("page", 1),
+            per_page=args.get("per_page", 10),
+            sort_field=args.get("sort_field", "created_at"),
+            sort_order=args.get("sort_order", "asc"),
+            search=args.get("search", " "),
             filters=json.loads(args["filters"]) if args["filters"] else None,
         )

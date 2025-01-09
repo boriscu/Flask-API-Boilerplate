@@ -26,7 +26,6 @@ class Workspace(Resource):
     @jwt_required()
     def get(self):
         args = workspace_schema_retriever.retrieve("pagination_parser").parse_args()
-
         workspaces, total_entries, total_pages = (
             WorkspaceCRUDService.get_all_workspaces(args)
         )
