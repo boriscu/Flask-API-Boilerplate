@@ -1,9 +1,10 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from flask import Response, json
 
 from app.models.enums.http_status import HttpStatus
 
+from app.models.pg.user_profile import UserProfile
 from app.models.pg.workspace import Workspace
 
 from app.helpers.image_processor import ImageProcessor
@@ -15,8 +16,8 @@ from app.services.workspace_services.workspace_pagination_service import (
 
 
 class WorkspaceCRUDService:
-    @classmethod
-    def create_workspace(cls, args: Dict[str, Any]) -> Response:
+    @staticmethod
+    def create_workspace(args: Dict[str, Any]) -> Response:
         """Create a new workspace in the database and return a Flask response object.
 
         Args:
@@ -47,8 +48,8 @@ class WorkspaceCRUDService:
             mimetype="application/json",
         )
 
-    @classmethod
-    def get_all_workspaces(cls, args: dict) -> Tuple[List[Workspace], int, int]:
+    @staticmethod
+    def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
         UserAuthService.check_if_admin()
         return WorkspacePaginationService.get_rows(
             page=args.get("page", 1),
@@ -58,3 +59,14 @@ class WorkspaceCRUDService:
             search=args.get("search", " "),
             filters=json.loads(args["filters"]) if args["filters"] else None,
         )
+
+    @staticmethod
+    def get_single_workspace(workspace_id: int, user_id: int) -> Optional[Workspace]:
+        user = UserProfile.get_by_id(user_id)
+
+        if (user.workspace and user.workspace.id == workspace_id) or user.is_admin:
+            workspace = Workspace.get_by_id(workspace_id)
+        else:
+            workspace = None
+
+        return workspace

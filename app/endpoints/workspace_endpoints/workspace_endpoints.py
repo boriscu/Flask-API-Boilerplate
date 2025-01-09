@@ -9,7 +9,7 @@ from . import workspace_namespace, workspace_schema_retriever
 
 
 @workspace_namespace.route("/", methods=["GET", "POST"])
-class Workspace(Resource):
+class BaseWorkspaceResources(Resource):
     @workspace_namespace.doc(
         description="Fetches all workspaces with pagination, sorting, and filtering. Requires admin privileges."
     )

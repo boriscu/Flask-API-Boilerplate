@@ -14,7 +14,7 @@ from . import user_namespace, user_schema_retriever
 
 
 @user_namespace.route("/register/", methods=["POST"])
-class Register(Resource):
+class RegisterResources(Resource):
     @user_namespace.doc(
         description="Register a new user. The request body must include name, surname, email, and password."
     )
@@ -28,7 +28,7 @@ class Register(Resource):
 
 
 @user_namespace.route("/login/", methods=["POST"])
-class Login(Resource):
+class LoginResources(Resource):
     @user_namespace.doc(description="Log in a user using their email and password.")
     @user_namespace.expect(
         user_schema_retriever.retrieve("login_request"), validate=True
@@ -44,7 +44,7 @@ class Login(Resource):
 
 
 @user_namespace.route("/get_myself/")
-class GetMyself(Resource):
+class GetMyselfResources(Resource):
     @user_namespace.doc(
         description="Retrieve the logged-in user's profile. Requires a valid JWT token.",
     )
@@ -61,7 +61,7 @@ class GetMyself(Resource):
 
 
 @user_namespace.route("/check_auth/")
-class CheckAuth(Resource):
+class CheckAuthResources(Resource):
     @user_namespace.doc(
         description="Check the validity of the current user's JWT token."
     )
@@ -74,7 +74,7 @@ class CheckAuth(Resource):
 
 
 @user_namespace.route("/change-password")
-class ChangePassword(Resource):
+class UserPasswordResources(Resource):
     @user_namespace.doc(
         description="Allows the current user to change their password. Requires authentication."
     )
