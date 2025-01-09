@@ -31,6 +31,8 @@ class WorkspaceCRUDService:
         Raises:
             ValueError: If required attributes are missing or invalid.
         """
+        UserAuthService.check_if_admin()
+
         name = args.get("name")
         description = args.get("description", "")
         namespaces = args.get("namespaces", "[]")
@@ -47,6 +49,39 @@ class WorkspaceCRUDService:
         return Response(
             f'{{"msg": "Workspace created successfully.", "workspace_id": {new_workspace.id}}}',
             status=HttpStatus.CREATED.value,
+            mimetype="application/json",
+        )
+
+    @staticmethod
+    def update_workspace(workspace_id: int, args: Dict[str, Any]) -> Response:
+        """Update an existing workspace in the database and return a Flask response object.
+
+        Args:
+            workspace_id (int): The ID of the workspace to update.
+            args (Dict[str, Any]): A dictionary containing workspace attributes.
+
+        Returns:
+            Response: Flask response object with the update status.
+
+        Raises:
+            ValueError: If required attributes are missing or invalid.
+            NotFoundError: If the workspace with the given ID does not exist.
+        """
+        workspace = Workspace.get_by_id(workspace_id)
+
+        workspace.name = args.get("name", workspace.name)
+        workspace.description = args.get("description", workspace.description)
+        workspace.namespaces = args.get("namespaces", workspace.namespaces)
+
+        icon_image = args.get("icon_image", None)
+        if icon_image:
+            workspace.icon_image = ImageProcessor.compress_image(icon_image)
+
+        workspace.save()
+
+        return Response(
+            f'{{"msg": "Workspace updated successfully.", "workspace_id": {workspace.id}}}',
+            status=HttpStatus.OK.value,
             mimetype="application/json",
         )
 

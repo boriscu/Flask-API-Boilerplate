@@ -9,7 +9,7 @@ from app.services.workspace_services.workspace_crud_service import WorkspaceCRUD
 from . import workspace_namespace, workspace_schema_retriever
 
 
-@workspace_namespace.route("/<int:workspace_id>", methods=["GET", "DELETE"])
+@workspace_namespace.route("/<int:workspace_id>", methods=["GET", "DELETE", "PUT"])
 class SingleWorkspaceResources(Resource):
     @workspace_namespace.doc(
         description="Retrieve any workspace that belongs by workspace ID.  Requires admin privileges."
@@ -35,6 +35,29 @@ class SingleWorkspaceResources(Resource):
     @jwt_required()
     def delete(self, workspace_id):
         return WorkspaceCRUDService.delete_workspace(workspace_id)
+
+    @workspace_namespace.doc(
+        description="Updates a workspace. Requires admin privileges."
+    )
+    @workspace_namespace.expect(
+        workspace_schema_retriever.retrieve("create_workspace_request")
+    )
+    @workspace_namespace.response(
+        HttpStatus.CREATED.value,
+        "Workspace updated successfully",
+        model=workspace_schema_retriever.retrieve("create_workspace_response"),
+    )
+    @workspace_namespace.response(
+        HttpStatus.UNAUTHORIZED.value, "Authentication is required"
+    )
+    @jwt_required()
+    def put(self, workspace_id):
+        return WorkspaceCRUDService.update_workspace(
+            workspace_id,
+            workspace_schema_retriever.retrieve(
+                "create_workspace_request"
+            ).parse_args(),
+        )
 
 
 @workspace_namespace.route("/", methods=["GET", "POST"])
