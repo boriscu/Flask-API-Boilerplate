@@ -63,12 +63,9 @@ class WorkspaceCRUDService:
 
     @staticmethod
     def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
-        user = UserProfile.get_by_id(int(get_jwt_identity()))
+        UserAuthService.check_if_admin()
 
-        if (user.workspace and user.workspace.id == workspace_id) or user.is_admin:
-            workspace = Workspace.get_by_id(workspace_id)
-        else:
-            abort(HttpStatus.UNAUTHORIZED.value)
+        workspace = Workspace.get_by_id(workspace_id)
 
         if workspace.icon_image:
             encoded_image = ImageProcessor.encode_image(workspace.icon_image)

@@ -8,4 +8,4 @@ from app.models.validation_schemas.retrievers.workspace_schema_retriever import 
 workspace_namespace = Namespace("Workspaces", description="Workspace operations")
 workspace_schema_retriever = WorkspaceSchemaRetriever(workspace_namespace)
 
-from .workspace_endpoints import *
+from .admin_workspace_endpoints import *

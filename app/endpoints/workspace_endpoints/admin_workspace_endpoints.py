@@ -12,7 +12,7 @@ from . import workspace_namespace, workspace_schema_retriever
 @workspace_namespace.route("/<int:workspace_id>", methods=["GET"])
 class SingleWorkspaceResources(Resource):
     @workspace_namespace.doc(
-        description="Retrieve any workspace that belongs to the user by workspace ID. Admin can retrieve any workspace."
+        description="Retrieve any workspace that belongs by workspace ID.  Requires admin privileges."
     )
     @workspace_namespace.response(
         HttpStatus.OK.value,
@@ -24,11 +24,7 @@ class SingleWorkspaceResources(Resource):
     @marshal_with(workspace_schema_retriever.retrieve("workspace"))
     @jwt_required()
     def get(self, workspace_id):
-        try:
-            return WorkspaceCRUDService.get_single_workspace(workspace_id)
-        except Exception as e:
-            print(e)
-            abort(HttpStatus.BAD_REQUEST.value)
+        return WorkspaceCRUDService.get_single_workspace(workspace_id)
 
 
 @workspace_namespace.route("/", methods=["GET", "POST"])
