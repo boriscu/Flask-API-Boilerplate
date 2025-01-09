@@ -1,4 +1,6 @@
+import base64
 import io
+from typing import Optional
 from PIL import Image
 from werkzeug.datastructures import FileStorage
 
@@ -24,3 +26,18 @@ class ImageProcessor:
         byte_stream = io.BytesIO()
         img.save(byte_stream, format="PNG")
         return byte_stream.getvalue()
+
+    @staticmethod
+    def encode_image(image: bytes) -> Optional[str]:
+        """
+        Encodes a binary image to a base64 string suitable for JSON output.
+
+        Args:
+            image (bytes): The binary data of the image.
+
+        Returns:
+            Optional[str]: The base64-encoded string of the image, or None if the image is None.
+        """
+        if image:
+            return base64.b64encode(image).decode("utf-8")
+        return None

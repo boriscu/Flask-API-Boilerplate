@@ -70,4 +70,8 @@ class WorkspaceCRUDService:
         else:
             abort(HttpStatus.UNAUTHORIZED.value)
 
+        if workspace.icon_image:
+            encoded_image = ImageProcessor.encode_image(workspace.icon_image)
+            workspace.icon_image = encoded_image
+
         return workspace
