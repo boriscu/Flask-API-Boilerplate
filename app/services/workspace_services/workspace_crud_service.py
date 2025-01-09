@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Response, abort, json
+from flask import Response, json
 from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
@@ -8,6 +8,7 @@ from app.models.enums.http_status import HttpStatus
 from app.models.pg.user_profile import UserProfile
 from app.models.pg.workspace import Workspace
 
+from app.helpers.http_response_generator import HttpResponseGenerator
 from app.helpers.image_processor import ImageProcessor
 
 from app.services.user_services.user_auth_service import UserAuthService
@@ -89,3 +90,11 @@ class WorkspaceCRUDService:
             workspace = None
 
         return workspace
+
+    @staticmethod
+    def delete_workspace(workspace_id: int):
+        UserAuthService.check_if_admin()
+
+        Workspace.delete().where(Workspace.id == workspace_id).execute()
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
