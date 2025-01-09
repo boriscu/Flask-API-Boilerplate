@@ -35,6 +35,9 @@ class UserAuthService:
         surname = data.get("surname")
         email = data.get("email")
         password = data.get("password")
+        birthday = data.get("birthday", None)
+        sex = data.get("sex", None)
+        profession = data.get("profession", None)
         is_sso = data.get("is_sso", False)
         hashed_password = generate_password_hash(password)
 
@@ -43,6 +46,9 @@ class UserAuthService:
             surname=surname,
             email=email,
             password=hashed_password,
+            birthday=birthday,
+            sex=sex,
+            profession=profession,
             is_sso=is_sso,
             is_admin=False,
             is_active=True,

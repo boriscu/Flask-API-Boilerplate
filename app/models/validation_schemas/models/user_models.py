@@ -22,6 +22,21 @@ def create_user_models(namespace):
                 description="Password for account creation",
                 example="Strong password",
             ),
+            "birthday": fields.Date(
+                required=False, description="User's date of birth", example="1990-01-01"
+            ),
+            "sex": fields.String(
+                required=False,
+                description="Sex of the user",
+                enum=["Male", "Female", "Other"],
+                example="Male",
+            ),
+            "profession": fields.String(
+                required=False,
+                description="Profession of the user",
+                enum=["Student", "Employed", "Teaching", "Retired", "Unemployed"],
+                example="Employed",
+            ),
             "is_sso": fields.Boolean(
                 description="Flag noting if the user is using single sign on authentication",
                 required=False,
@@ -67,6 +82,19 @@ def create_user_models(namespace):
             "surname": fields.String(description="Surname of the user", example="Doe"),
             "email": fields.String(
                 description="Email address of the user", example="john.doe@mail.com"
+            ),
+            "birthday": fields.Date(
+                description="User's date of birth", example="1990-01-01"
+            ),
+            "sex": fields.String(
+                description="Sex of the user",
+                enum=["Male", "Female", "Other"],
+                example="Male",
+            ),
+            "profession": fields.String(
+                description="Profession of the user",
+                enum=["Student", "Employed", "Teaching", "Retired", "Unemployed"],
+                example="Employed",
             ),
             "is_admin": fields.Boolean(
                 description="Flag noting if the user has the admin role",

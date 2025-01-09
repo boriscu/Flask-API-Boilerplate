@@ -22,6 +22,7 @@ class RegisterResources(Resource):
         user_schema_retriever.retrieve("registration"), validate=True
     )
     @user_namespace.response(HttpStatus.CREATED.value, "User Registered")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
         data = request.get_json()
         return UserAuthService.register(data)
