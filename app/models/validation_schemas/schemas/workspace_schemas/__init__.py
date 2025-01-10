@@ -12,7 +12,7 @@ from app.models.validation_schemas.schemas.workspace_schemas.workspace_creation_
 )
 
 
-def create_workspace_models(namespace):
+def create_workspace_schemas(namespace):
 
     return {
         "create_workspace_request": get_workspace_creation_schema(),

@@ -106,4 +106,4 @@ class AdminPasswordEndpoint(Resource):
 
         UserAuthService.change_password(user, data.get("new_password"))
 
-        return HttpResponseGenerator.generate_response(HttpStatus.OK.value)
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
