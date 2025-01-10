@@ -1,4 +1,6 @@
-from app.models.validation_schemas.schemas.base_models import create_pagination_parser
+from app.models.validation_schemas.schemas.base_schemas.pagination_parser_schema import (
+    create_pagination_parser,
+)
 from app.models.validation_schemas.schemas.user_schemas import (
     create_user_models,
 )
