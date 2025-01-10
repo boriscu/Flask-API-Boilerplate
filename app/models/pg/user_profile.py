@@ -20,6 +20,7 @@ class UserProfile(BaseModel):
     birthday = DateField(null=True)
     sex = CharField(null=True)
     profession = TextField(null=True)
+    profile_picture = BlobField(null=True)
     is_admin = BooleanField(default=False)
     is_active = BooleanField(default=True)
     is_sso = BooleanField(default=False)

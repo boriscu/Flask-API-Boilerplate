@@ -47,6 +47,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         birthday = pw.DateField(null=True)
         sex = pw.CharField(null=True)
         profession = pw.TextField(null=True)
+        profile_picture = pw.BlobField(null=True)
         is_admin = pw.BooleanField(default=False)
         is_active = pw.BooleanField(default=True)
         is_sso = pw.BooleanField(default=False)

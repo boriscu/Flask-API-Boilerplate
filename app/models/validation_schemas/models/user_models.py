@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_restx import fields, reqparse
+from werkzeug.datastructures import FileStorage
 
 from app.helpers.date_formater import DateFormatter
 
@@ -39,7 +40,7 @@ def create_user_models(namespace):
         type=DateFormatter.date_from_string,
         required=False,
         location="form",
-        help="User's date of birth. Example: 1990-01-01",
+        help="User's date of birth. Example: 2001-11-27",
     )
     user_registration_model.add_argument(
         "sex",
@@ -73,6 +74,14 @@ def create_user_models(namespace):
         help="Should the user account be active, only the admin can submit this param. Example: False",
         default=False,
     )
+    user_registration_model.add_argument(
+        "profile_picture",
+        type=FileStorage,
+        location="files",
+        required=False,
+        help="User profile picture",
+    )
+
     user_login_request_model = namespace.model(
         "User login request",
         {

@@ -6,6 +6,8 @@ from datetime import timedelta
 
 from config.app_config import AppConfig
 
+from app.helpers.image_processor import ImageProcessor
+
 from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
@@ -45,6 +47,10 @@ class UserAuthService:
         birthday = args.get("birthday", None)
         sex = args.get("sex", None)
         profession = args.get("profession", None)
+        profile_picture = args.get("profile_picture", None)
+        profile_picture_data = (
+            ImageProcessor.compress_image(profile_picture) if profile_picture else None
+        )
 
         try:
             verify_jwt_in_request()
@@ -65,6 +71,7 @@ class UserAuthService:
             birthday=birthday,
             sex=sex,
             profession=profession,
+            profile_picture=profile_picture_data,
             is_sso=is_sso,
             is_admin=False,
             is_active=is_active,
