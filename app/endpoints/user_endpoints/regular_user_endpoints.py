@@ -16,7 +16,7 @@ from . import user_namespace, user_schema_retriever
 @user_namespace.route("/register/", methods=["POST"])
 class RegisterResources(Resource):
     @user_namespace.doc(
-        description="Register a new user. The request body must include name, surname, email, and password."
+        description="Register a new user. Upon self-registration, users receive an access token for initial authorization, but their account remains inactive. Conversely, when an admin registers a user, the account is activated immediately, but no access token is provided."
     )
     @user_namespace.expect(
         user_schema_retriever.retrieve("registration"), validate=True
