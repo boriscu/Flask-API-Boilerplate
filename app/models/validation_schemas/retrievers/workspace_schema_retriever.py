@@ -1,5 +1,5 @@
-from app.models.validation_schemas.models.base_models import create_pagination_parser
-from app.models.validation_schemas.models.workspace_models import (
+from app.models.validation_schemas.schemas.base_models import create_pagination_parser
+from app.models.validation_schemas.schemas.workspace_models import (
     create_workspace_models,
 )
 from app.models.validation_schemas.retrievers.base_schema_retriever import (
