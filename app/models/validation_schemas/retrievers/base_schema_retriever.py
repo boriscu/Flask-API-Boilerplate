@@ -9,13 +9,13 @@ class BaseSchemaRetriever(ABC):
     @abstractmethod
     def retrieve(self, key: str):
         """
-        Retrieve a model based on a provided key.
+        Retrieve a schema based on a provided key.
 
         Args:
-            key (str): The key for the model to retrieve.
+            key (str): The key for the schema to retrieve.
 
         Returns:
-            Model: The retrieved model.
+            Schema: The retrieved schema.
         """
         pass
 

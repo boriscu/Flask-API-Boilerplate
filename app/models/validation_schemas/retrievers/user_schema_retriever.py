@@ -2,7 +2,7 @@ from app.models.validation_schemas.schemas.base_schemas.pagination_parser_schema
     create_pagination_parser,
 )
 from app.models.validation_schemas.schemas.user_schemas import (
-    create_user_models,
+    create_user_schemas,
 )
 from app.models.validation_schemas.retrievers.base_schema_retriever import (
     BaseSchemaRetriever,
@@ -12,13 +12,13 @@ from app.models.validation_schemas.retrievers.base_schema_retriever import (
 class UserSchemaRetriever(BaseSchemaRetriever):
     def __init__(self, namespace):
         super().__init__(namespace)
-        self.models = create_user_models(namespace)
+        self.schemas = create_user_schemas(namespace)
         self.pagination_parser = create_pagination_parser()
 
     def retrieve(self, key: str):
         if key == "pagination_parser":
             return self.pagination_parser
-        model = self.models.get(key)
-        if not model:
-            raise ValueError(f"Model with key '{key}' not found.")
-        return model
+        schema = self.schemas.get(key)
+        if not schema:
+            raise ValueError(f"Schema with key '{key}' not found.")
+        return schema

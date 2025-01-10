@@ -24,7 +24,7 @@ from app.models.validation_schemas.schemas.user_schemas.toggle_user_status_respo
 )
 
 
-def create_user_models(namespace):
+def create_user_schemas(namespace):
 
     return {
         "registration": get_user_registration_schema(),
