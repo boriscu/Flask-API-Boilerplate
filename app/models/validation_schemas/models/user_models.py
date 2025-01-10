@@ -112,8 +112,58 @@ def create_user_models(namespace):
         },
     )
 
-    user_profile_model = namespace.model(
-        "User",
+    full_user_profile_model = namespace.model(
+        "Full User",
+        {
+            "name": fields.String(description="First name of the user", example="John"),
+            "surname": fields.String(description="Surname of the user", example="Doe"),
+            "email": fields.String(
+                description="Email address of the user", example="john.doe@mail.com"
+            ),
+            "birthday": fields.Date(
+                description="User's date of birth", example="1990-01-01"
+            ),
+            "sex": fields.String(
+                description="Sex of the user",
+                enum=["Male", "Female", "Other"],
+                example="Male",
+            ),
+            "profession": fields.String(
+                description="Profession of the user",
+                enum=["Student", "Employed", "Teaching", "Retired", "Unemployed"],
+                example="Employed",
+            ),
+            "is_admin": fields.Boolean(
+                description="Flag noting if the user has the admin role",
+                example=False,
+            ),
+            "is_active": fields.Boolean(
+                description="Flag noting if the user is active or not", example=True
+            ),
+            "is_sso": fields.Boolean(
+                description="Flag noting if the user is using single sign on authentication",
+                example=False,
+            ),
+            "profile_picture": fields.String(
+                description="A binary string representing the compressed profile picture.",
+                example="Base64 encoded PNG image data",
+            ),
+            "created_at": fields.DateTime(
+                dt_format="iso8601",
+                description="Date the user was created",
+                example=datetime.now().isoformat(),
+            ),
+            "updated_at": fields.DateTime(
+                dt_format="iso8601",
+                description="Date the user profile was last updated",
+                example=datetime.now().isoformat(),
+            ),
+            "id": fields.Integer(description="ID of the user profile", example=2),
+        },
+    )
+
+    partial_user_model = namespace.model(
+        "Partial User",
         {
             "name": fields.String(description="First name of the user", example="John"),
             "surname": fields.String(description="Surname of the user", example="Doe"),
@@ -204,7 +254,7 @@ def create_user_models(namespace):
     all_users_model = namespace.model(
         "Users",
         {
-            "users": fields.List(fields.Nested(user_profile_model)),
+            "users": fields.List(fields.Nested(partial_user_model)),
             "total_entries": fields.Integer(
                 description="Total number of users", example=100
             ),
@@ -218,7 +268,7 @@ def create_user_models(namespace):
         "registration": user_registration_model,
         "login_request": user_login_request_model,
         "login_response": user_login_response_model,
-        "profile": user_profile_model,
+        "profile": full_user_profile_model,
         "toggle_status": toggle_user_status_response_model,
         "change_password": change_password_model,
         "admin_change_password": admin_change_password_model,

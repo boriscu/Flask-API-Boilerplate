@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple, Union
 from flask import json
 
 
+from app.helpers.image_processor import ImageProcessor
 from app.models.enums.http_status import HttpStatus
 from app.models.pg.user_profile import UserProfile
 
@@ -13,19 +14,27 @@ from app.services.user_services.user_pagination_service import UserPaginationSer
 
 class UserCRUDService:
     @staticmethod
-    def get_single_user(user_id: int) -> UserProfile:
+    def get_single_user(user_id: int, check_admin: bool = False) -> UserProfile:
         """
         Retrieves a user by their ID. Requires admin privileges
 
         Args:
             user_id (int): The ID of the user to retrieve.
+            check_admin (bool): A flag that instructs admin check
 
         Returns:
             Optional[UserProfile]: A UserProfile class instance containing current user data if the user exists, None otherwise.
 
         """
         UserAuthService.check_if_admin()
-        return UserProfile.get_by_id(user_id)
+
+        user_profile = UserProfile.get_by_id(user_id)
+
+        if user_profile.profile_picture:
+            encoded_image = ImageProcessor.encode_image(user_profile.profile_picture)
+            user_profile.profile_picture = encoded_image
+
+        return user_profile
 
     @staticmethod
     def get_all_users(args: dict) -> Tuple[List[UserProfile], int, int]:

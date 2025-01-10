@@ -63,7 +63,7 @@ class GetMyselfEndpoint(Resource):
     @marshal_with(user_schema_retriever.retrieve("profile"))
     @jwt_required()
     def get(self):
-        return UserProfile.get_by_id(get_jwt_identity())
+        return UserCRUDService.get_single_user(user_id=get_jwt_identity())
 
 
 @user_namespace.route("/check_auth/", methods=["GET"])

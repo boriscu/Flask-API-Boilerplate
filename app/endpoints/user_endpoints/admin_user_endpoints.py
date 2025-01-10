@@ -55,7 +55,7 @@ class SingleUserEndpoint(Resource):
     @marshal_with(user_schema_retriever.retrieve("profile"))
     @jwt_required()
     def get(self, user_id):
-        return UserCRUDService.get_single_user(user_id)
+        return UserCRUDService.get_single_user(user_id=user_id, check_admin=True)
 
     @user_namespace.doc(
         description="Delete a user based on the user ID.  Requires admin privileges."
