@@ -1,50 +1,78 @@
 from datetime import datetime
-from flask_restx import fields
+from flask_restx import fields, reqparse
+
+from app.helpers.date_formater import DateFormatter
 
 
 def create_user_models(namespace):
-    user_registration_model = namespace.model(
-        "User registration",
-        {
-            "name": fields.String(
-                required=True, description="First name of the user", example="John"
-            ),
-            "surname": fields.String(
-                required=True, description="Surname of the user", example="Doe"
-            ),
-            "email": fields.String(
-                required=True,
-                description="Email address of the user, must be unique",
-                example="john.doe@mail.com",
-            ),
-            "password": fields.String(
-                required=True,
-                description="Password for account creation",
-                example="Strong password",
-            ),
-            "birthday": fields.Date(
-                required=False, description="User's date of birth", example="1990-01-01"
-            ),
-            "sex": fields.String(
-                required=False,
-                description="Sex of the user",
-                enum=["Male", "Female", "Other"],
-                example="Male",
-            ),
-            "profession": fields.String(
-                required=False,
-                description="Profession of the user",
-                enum=["Student", "Employed", "Teaching", "Retired", "Unemployed"],
-                example="Employed",
-            ),
-            "is_sso": fields.Boolean(
-                description="Flag noting if the user is using single sign on authentication",
-                required=False,
-                example=False,
-            ),
-        },
+    user_registration_model = reqparse.RequestParser(bundle_errors=True)
+    user_registration_model.add_argument(
+        "name",
+        type=str,
+        required=True,
+        location="form",
+        help="First name of the user. Example: John",
     )
-
+    user_registration_model.add_argument(
+        "surname",
+        type=str,
+        required=True,
+        location="form",
+        help="Last name of the user. Example: Doe",
+    )
+    user_registration_model.add_argument(
+        "email",
+        type=str,
+        required=True,
+        location="form",
+        help="Email address of the user, must be unique. Example: john@mail.com",
+    )
+    user_registration_model.add_argument(
+        "password",
+        type=str,
+        required=True,
+        location="form",
+        help="Password for account creation. Example: Strong password",
+    )
+    user_registration_model.add_argument(
+        "birthday",
+        type=DateFormatter.date_from_string,
+        required=False,
+        location="form",
+        help="User's date of birth. Example: 1990-01-01",
+    )
+    user_registration_model.add_argument(
+        "sex",
+        type=str,
+        required=False,
+        location="form",
+        help="Sex of the user. Example: Male",
+        choices=["Male", "Female", "Other"],
+    )
+    user_registration_model.add_argument(
+        "profession",
+        type=str,
+        required=False,
+        location="form",
+        help="Profession of the user. Example: Student",
+        choices=["Student", "Employed", "Teaching", "Retired", "Unemployed"],
+    )
+    user_registration_model.add_argument(
+        "is_sso",
+        type=bool,
+        required=False,
+        location="form",
+        help="Is the user using single sign on authentication, only the admin can submit this param. Example: False",
+        default=False,
+    )
+    user_registration_model.add_argument(
+        "is_active",
+        type=bool,
+        required=False,
+        location="form",
+        help="Should the user account be active, only the admin can submit this param. Example: False",
+        default=False,
+    )
     user_login_request_model = namespace.model(
         "User login request",
         {

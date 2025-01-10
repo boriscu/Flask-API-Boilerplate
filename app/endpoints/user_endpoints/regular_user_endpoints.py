@@ -21,11 +21,16 @@ class RegisterResources(Resource):
     @user_namespace.expect(
         user_schema_retriever.retrieve("registration"), validate=True
     )
-    @user_namespace.response(HttpStatus.CREATED.value, "User Registered")
+    @user_namespace.response(
+        HttpStatus.CREATED.value,
+        "User Registered",
+        user_schema_retriever.retrieve("login_response"),
+    )
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
-        data = request.get_json()
-        return UserAuthService.register(data)
+        return UserAuthService.register(
+            user_schema_retriever.retrieve("registration").parse_args()
+        )
 
 
 @user_namespace.route("/login/", methods=["POST"])

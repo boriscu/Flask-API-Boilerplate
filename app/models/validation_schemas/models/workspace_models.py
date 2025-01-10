@@ -5,30 +5,27 @@ from werkzeug.datastructures import FileStorage
 
 def create_workspace_models(namespace):
 
-    create_workspace_request = reqparse.RequestParser(bundle_errors=True)
-    create_workspace_request.add_argument(
+    workspace_creation_model = reqparse.RequestParser(bundle_errors=True)
+    workspace_creation_model.add_argument(
         "name",
         type=str,
         required=True,
         location="form",
         help="Name of the workspace",
-        default="Development",
     )
-    create_workspace_request.add_argument(
+    workspace_creation_model.add_argument(
         "description",
         type=str,
         location="form",
         help="Description of the workspace",
-        default="Workspace for development team",
     )
-    create_workspace_request.add_argument(
+    workspace_creation_model.add_argument(
         "namespaces",
         type=str,
         location="form",
         help="Comma-separated list of namespaces",
-        default="[company1.com,company2.com]",
     )
-    create_workspace_request.add_argument(
+    workspace_creation_model.add_argument(
         "icon_image",
         type=FileStorage,
         location="files",
@@ -125,7 +122,7 @@ def create_workspace_models(namespace):
         },
     )
     return {
-        "create_workspace_request": create_workspace_request,
+        "create_workspace_request": workspace_creation_model,
         "create_workspace_response": create_workspace_response,
         "workspaces": all_workspaces_model,
         "workspace": full_workspace_model,

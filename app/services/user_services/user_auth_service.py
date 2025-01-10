@@ -1,6 +1,6 @@
-from typing import Dict, Union
-from flask import abort, make_response
-from flask_jwt_extended import create_access_token, get_jwt
+from typing import Any, Dict, Union
+from flask import Response, abort, make_response
+from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
@@ -10,8 +10,6 @@ from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
 
-from app.helpers.http_response_generator import HttpResponseGenerator
-
 
 class UserAuthService:
     """
@@ -19,26 +17,44 @@ class UserAuthService:
     login, util methods.
     """
 
-    @staticmethod
-    def register(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
+    def register(args: Dict[str, Any]) -> Response:
         """
-        Registers a new user with just the required fields (name, surname, email, password)
-        and returns a JWT token.
+        Registers a new user with the required and optional fields, handles SSO based on admin rights,
+        and returns a consistent response format with an access token, which is empty if registered by an admin.
 
         Args:
-            data (dict): A dictionary containing the user's name, surname, email, and password.
+            args (Dict[str, Union[str, bool, None]]): A dictionary containing the user's registration information:
+                - name (str): User's first name.
+                - surname (str): User's last name.
+                - email (str): User's unique email address.
+                - password (str): User's password.
+                - birthday (str, optional): User's date of birth.
+                - sex (str, optional): User's sex.
+                - profession (str, optional): User's profession.
+                - is_active(bool, optional): Flag indicating if the user account is activated (only modifiable by admins).
+                - is_sso (bool, optional): Flag indicating if the user is using SSO (only modifiable by admins).
 
         Returns:
-            Union[Dict[str, str], make_response]: A response message with the status code and a token.
+            Response: A Flask Response object with a message and an access token (empty if registered by an admin).
         """
-        name = data.get("name")
-        surname = data.get("surname")
-        email = data.get("email")
-        password = data.get("password")
-        birthday = data.get("birthday", None)
-        sex = data.get("sex", None)
-        profession = data.get("profession", None)
-        is_sso = data.get("is_sso", False)
+
+        name = args.get("name")
+        surname = args.get("surname")
+        email = args.get("email")
+        password = args.get("password")
+        birthday = args.get("birthday", None)
+        sex = args.get("sex", None)
+        profession = args.get("profession", None)
+
+        try:
+            verify_jwt_in_request()
+            is_admin = bool(get_jwt().get("is_admin"))
+        except:
+            is_admin = False
+
+        is_sso = args.get("is_sso", False) if is_admin else False
+        is_active = args.get("is_sso", False) if is_admin else False
+
         hashed_password = generate_password_hash(password)
 
         user = UserProfile.create(
@@ -51,11 +67,24 @@ class UserAuthService:
             profession=profession,
             is_sso=is_sso,
             is_admin=False,
-            is_active=True,
+            is_active=is_active,
         )
         user.save()
 
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)
+        access_token = ""
+        if not is_admin:
+            access_token = create_access_token(
+                identity=str(user.id),
+                expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+            )
+
+        return make_response(
+            {
+                "msg": "User registered successfully",
+                "access_token": access_token,
+            },
+            HttpStatus.CREATED.value,
+        )
 
     @staticmethod
     def login(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
