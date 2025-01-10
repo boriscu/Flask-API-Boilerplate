@@ -14,7 +14,7 @@ from . import user_namespace, user_schema_retriever
 
 
 @user_namespace.route("/register/", methods=["POST"])
-class RegisterResources(Resource):
+class RegisterEndpoint(Resource):
     @user_namespace.doc(
         description="Register a new user. Upon self-registration, users receive an access token for initial authorization, but their account remains inactive. Conversely, when an admin registers a user, the account is activated immediately, but no access token is provided."
     )
@@ -34,7 +34,7 @@ class RegisterResources(Resource):
 
 
 @user_namespace.route("/login/", methods=["POST"])
-class LoginResources(Resource):
+class LoginEndpoint(Resource):
     @user_namespace.doc(description="Log in a user using their email and password.")
     @user_namespace.expect(
         user_schema_retriever.retrieve("login_request"), validate=True
@@ -50,7 +50,7 @@ class LoginResources(Resource):
 
 
 @user_namespace.route("/get_myself/", methods=["GET"])
-class GetMyselfResources(Resource):
+class GetMyselfEndpoint(Resource):
     @user_namespace.doc(
         description="Retrieve the logged-in user's profile. Requires a valid JWT token.",
     )
@@ -67,7 +67,7 @@ class GetMyselfResources(Resource):
 
 
 @user_namespace.route("/check_auth/", methods=["GET"])
-class CheckAuthResources(Resource):
+class CheckAuthEndpoint(Resource):
     @user_namespace.doc(
         description="Check the validity of the current user's JWT token."
     )
@@ -80,7 +80,7 @@ class CheckAuthResources(Resource):
 
 
 @user_namespace.route("/change-password", methods=["PUT"])
-class UserPasswordResources(Resource):
+class UserPasswordEndpoint(Resource):
     @user_namespace.doc(
         description="Allows the current user to change their password. Requires authentication."
     )

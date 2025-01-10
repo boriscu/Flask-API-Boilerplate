@@ -7,7 +7,7 @@ from . import workspace_namespace, workspace_schema_retriever
 
 
 @workspace_namespace.route("/current", methods=["GET"])
-class CurrentWorkspaceResoures(Resource):
+class CurrentWorkspaceEndpoint(Resource):
     @workspace_namespace.doc(description="Retrieve current user workspace")
     @workspace_namespace.response(
         HttpStatus.OK.value,

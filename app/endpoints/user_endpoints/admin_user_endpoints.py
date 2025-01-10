@@ -13,7 +13,7 @@ from . import user_namespace, user_schema_retriever
 
 
 @user_namespace.route("/", methods=["GET"])
-class BaseUserResources(Resource):
+class BaseUserEndpoint(Resource):
     @user_namespace.doc(
         description="Fetches all users with pagination, sorting, and filtering. Requires admin privileges."
     )
@@ -41,7 +41,7 @@ class BaseUserResources(Resource):
 
 
 @user_namespace.route("/<int:user_id>", methods=["GET", "DELETE"])
-class SingleUserResources(Resource):
+class SingleUserEndpoint(Resource):
     @user_namespace.doc(
         description="Retrieve any user's profile by user ID. Requires admin privileges."
     )
@@ -69,7 +69,7 @@ class SingleUserResources(Resource):
 
 
 @user_namespace.route("/<int:user_id>/status/", methods=["PUT"])
-class UserStatusResources(Resource):
+class UserStatusEndpoint(Resource):
     @user_namespace.doc(
         description="Toggle user's active status by user ID. Requires admin privileges."
     )
@@ -89,7 +89,7 @@ class UserStatusResources(Resource):
 
 
 @user_namespace.route("/change-password/<int:user_id>", methods=["PUT"])
-class AdminPasswordResources(Resource):
+class AdminPasswordEndpoint(Resource):
     @user_namespace.doc(
         description="Allows admin to change the password for a specified user by user ID. Requires admin privileges."
     )

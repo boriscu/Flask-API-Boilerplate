@@ -10,7 +10,7 @@ from . import workspace_namespace, workspace_schema_retriever
 
 
 @workspace_namespace.route("/<int:workspace_id>", methods=["GET", "DELETE", "PUT"])
-class SingleWorkspaceResources(Resource):
+class SingleWorkspaceEndpoint(Resource):
     @workspace_namespace.doc(
         description="Retrieve any workspace that belongs by workspace ID.  Requires admin privileges."
     )
@@ -61,7 +61,7 @@ class SingleWorkspaceResources(Resource):
 
 
 @workspace_namespace.route("/", methods=["GET", "POST"])
-class BaseWorkspaceResources(Resource):
+class BaseWorkspaceEndpoint(Resource):
     @workspace_namespace.doc(
         description="Fetches all workspaces with pagination, sorting, and filtering. Requires admin privileges."
     )
