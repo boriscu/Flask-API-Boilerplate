@@ -21,7 +21,7 @@ def get_workspace_creation_schema():
         "namespaces",
         type=str,
         location="form",
-        help="Comma-separated list of namespaces",
+        help="Comma-separated list of namespaces. Example: ['uns.ac.rs','jjzmaj.edu.rs',...]",
     )
     workspace_creation_schema.add_argument(
         "icon_image",
