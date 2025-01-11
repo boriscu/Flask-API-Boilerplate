@@ -1,7 +1,6 @@
 from peewee import (
     TextField,
     BooleanField,
-    ForeignKeyField,
     DateField,
     CharField,
     BlobField,
@@ -24,4 +23,3 @@ class UserProfile(BaseModel):
     is_admin = BooleanField(default=False)
     is_active = BooleanField(default=True)
     is_sso = BooleanField(default=False)
-    workspace = ForeignKeyField(Workspace, null=True, on_delete="SET NULL")
