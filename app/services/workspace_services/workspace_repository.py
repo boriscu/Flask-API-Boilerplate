@@ -15,6 +15,12 @@ from app.services.user_services.user_auth_service import UserAuthService
 from app.services.workspace_services.workspace_pagination_service import (
     WorkspacePaginationService,
 )
+from app.services.workspace_services.workspace_validation_service import (
+    WorkspaceValidationService,
+)
+from app.services.workspace_user_services.workspace_user_repository import (
+    WorkspaceUserRepository,
+)
 
 
 class WorkspaceRepository:
@@ -32,6 +38,10 @@ class WorkspaceRepository:
             ValueError: If required attributes are missing or invalid.
         """
 
+        user_id = int(get_jwt_identity())
+
+        WorkspaceValidationService.check_workspace_creation_quota(user_id)
+
         name = args.get("name")
         description = args.get("description", "")
 
@@ -47,6 +57,10 @@ class WorkspaceRepository:
             description=description,
             namespaces=namespaces,
             icon_image=icon_data,
+        )
+
+        WorkspaceUserRepository.create_workspace_user_relation(
+            user_id, new_workspace.id
         )
 
         return Response(

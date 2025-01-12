@@ -42,12 +42,12 @@ with suppress(ImportError):
 
 def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
     @migrator.create_model
-    class WorkspaceUserProfile(BaseModel):
+    class WorkspaceUser(BaseModel):
         id = pw.AutoField()
         workspace = pw.ForeignKeyField(Workspace, null=False, on_delete="CASCADE")
-        user_profile = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
+        user = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
         workspace_user_role = pw.IntegerField(default=WorkspaceUserRole.VIEW.value)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):
-    migrator.drop_table("workspaceuserprofile")
+    migrator.drop_table("workspaceuser")

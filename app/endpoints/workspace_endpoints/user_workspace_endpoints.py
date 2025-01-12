@@ -35,6 +35,9 @@ class BaseWorkspaceEndpoint(Resource):
     @workspace_namespace.response(
         HttpStatus.UNAUTHORIZED.value, "Authentication is required"
     )
+    @workspace_namespace.response(
+        HttpStatus.NOT_ACCEPTABLE.value, "User is over their workspace creation quota"
+    )
     @jwt_required()
     def post(self):
         return WorkspaceRepository.create_workspace(
