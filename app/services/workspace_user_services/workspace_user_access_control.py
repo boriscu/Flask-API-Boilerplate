@@ -24,8 +24,40 @@ class WorkspaceUserAccessControl:
 
     @staticmethod
     def get_user_role(workspace_id: int, user_id: int) -> int:
+        """
+        Retrieves the role value of a user within a specific workspace.
+
+        Args:
+            workspace_id (int): The ID of the workspace.
+            user_id (int): The ID of the user.
+
+        Returns:
+            Optional[int]: The role value of the user in the workspace if they have a role; otherwise, None.
+
+        Notes:
+            This method returns None if the workspace-user relationship does not exist.
+        """
         try:
             workspace_user = WorkspaceUser.get(workspace=workspace_id, user=user_id)
             return WorkspaceUserRole(workspace_user.workspace_user_role).value
         except:
             return None
+
+    @staticmethod
+    def check_workspace_user_access(workspace_id: int, user_id: int) -> bool:
+        """
+        Checks if a user has access to a specific workspace by verifying the existence of a workspace-user relationship.
+
+        Args:
+            workspace_id (int): The ID of the workspace.
+            user_id (int): The ID of the user.
+
+        Returns:
+            bool: True if the user has access to the workspace, False otherwise.
+
+        """
+        try:
+            WorkspaceUser.get(workspace=workspace_id, user=user_id)
+            return True
+        except:
+            return False

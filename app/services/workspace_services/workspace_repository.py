@@ -1,11 +1,9 @@
 from typing import Any, Dict, List, Optional, Tuple
-
-from flask import Response, json
+from flask import Response, abort, json
 from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
 
-from app.models.pg.user_profile import UserProfile
 from app.models.pg.workspace import Workspace
 
 from app.helpers.http_response_generator import HttpResponseGenerator
@@ -146,11 +144,19 @@ class WorkspaceRepository:
     @staticmethod
     def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
 
-        UserAuthService.check_if_admin_and_raise()
+        user_id = int(get_jwt_identity())
+        if (
+            not UserAuthService.check_if_admin()
+            and not WorkspaceUserAccessControl.check_workspace_user_access(
+                workspace_id, user_id
+            )
+        ):
+            abort(HttpStatus.FORBIDDEN.value)
+
         workspace = Workspace.get_by_id(workspace_id)
 
         workspace.user_role = WorkspaceUserAccessControl.get_user_role(
-            workspace.id, int(get_jwt_identity())
+            workspace.id, user_id
         )
 
         if workspace.icon_image:
