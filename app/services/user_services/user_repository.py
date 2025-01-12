@@ -26,7 +26,8 @@ class UserRepository:
             Optional[UserProfile]: A UserProfile class instance containing current user data if the user exists, None otherwise.
 
         """
-        UserAuthService.check_if_admin_and_raise()
+        if check_admin:
+            UserAuthService.check_if_admin_and_raise()
 
         user_profile = UserProfile.get_by_id(user_id)
 

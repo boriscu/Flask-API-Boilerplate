@@ -82,7 +82,7 @@ class UserStatusEndpoint(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def put(self, user_id):
-        user_profile = UserRepository.get_single_user(user_id)
+        user_profile = UserRepository.get_single_user(user_id, check_admin=True)
         new_status, message = UserRepository.toggle_active_status(user_profile)
 
         return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
@@ -102,7 +102,7 @@ class AdminPasswordEndpoint(Resource):
     def put(self, user_id):
         data = request.json
 
-        user = UserRepository.get_single_user(user_id)
+        user = UserRepository.get_single_user(user_id, check_admin=True)
 
         UserAuthService.change_password(user, data.get("new_password"))
 
