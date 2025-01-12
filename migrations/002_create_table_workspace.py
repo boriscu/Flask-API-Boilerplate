@@ -44,6 +44,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         description = pw.TextField(default="")
         namespaces = pw.TextField()
         icon_image = pw.BlobField(null=True)
+        is_personal = pw.BooleanField(default=False, null=False)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):
