@@ -1,7 +1,7 @@
 from flask_restx import fields
 
-from app.models.validation_schemas.schemas.workspace_schemas.partial_workspace_schema import (
-    get_partial_workspace_schema,
+from app.models.validation_schemas.schemas.workspace_schemas.full_workspace_schema import (
+    get_full_workspace_schema,
 )
 
 
@@ -10,13 +10,13 @@ def get_all_workspace_schema(namespace):
         "Workspaces",
         {
             "workspaces": fields.List(
-                fields.Nested(get_partial_workspace_schema(namespace))
+                fields.Nested(get_full_workspace_schema(namespace))
             ),
             "total_entries": fields.Integer(
-                description="Total number of workspaces", example=100
+                description="Total number of workspaces", example=10
             ),
             "total_pages": fields.Integer(
-                description="Total number of pages", example=10
+                description="Total number of pages", example=2
             ),
         },
     )

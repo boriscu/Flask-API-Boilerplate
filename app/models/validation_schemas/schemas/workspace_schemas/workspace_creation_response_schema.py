@@ -3,7 +3,7 @@ from flask_restx import fields
 
 def get_create_workspace_response_schema(namespace):
     create_workspace_response_schema = namespace.model(
-        "WorkspaceCreationResponse",
+        "Workspace creation response",
         {
             "msg": fields.String(
                 required=True,
