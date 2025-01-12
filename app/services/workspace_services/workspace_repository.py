@@ -18,6 +18,9 @@ from app.services.workspace_services.workspace_pagination_service import (
 from app.services.workspace_services.workspace_validation_service import (
     WorkspaceValidationService,
 )
+from app.services.workspace_user_services.workspace_user_access_control import (
+    WorkspaceUserAccessControl,
+)
 from app.services.workspace_user_services.workspace_user_repository import (
     WorkspaceUserRepository,
 )
@@ -104,21 +107,51 @@ class WorkspaceRepository:
 
     @staticmethod
     def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
-        UserAuthService.check_if_admin_and_raise()
-        return WorkspacePaginationService.get_rows(
-            page=args.get("page", 1),
-            per_page=args.get("per_page", 10),
-            sort_field=args.get("sort_field", "created_at"),
-            sort_order=args.get("sort_order", "asc"),
-            search=args.get("search", " "),
-            filters=json.loads(args["filters"]) if args["filters"] else None,
-        )
+
+        user_id = int(get_jwt_identity())
+
+        if UserAuthService.check_if_admin():
+            workspaces_info = WorkspacePaginationService.get_rows(
+                page=args.get("page", 1),
+                per_page=args.get("per_page", 10),
+                sort_field=args.get("sort_field", "created_at"),
+                sort_order=args.get("sort_order", "asc"),
+                search=args.get("search", " "),
+                filters=json.loads(args["filters"]) if args["filters"] else None,
+            )
+        else:
+            workspaces_info = WorkspacePaginationService.get_user_accessible_rows(
+                user_id=user_id,
+                page=args.get("page", 1),
+                per_page=args.get("per_page", 10),
+                sort_field=args.get("sort_field", "created_at"),
+                sort_order=args.get("sort_order", "asc"),
+                search=args.get("search", " "),
+                filters=json.loads(args["filters"]) if args["filters"] else None,
+            )
+
+        workspaces, total_entries, total_pages = workspaces_info
+
+        for workspace in workspaces:
+
+            if workspace.icon_image:
+                workspace.icon_image = ImageProcessor.encode_image(workspace.icon_image)
+
+            workspace.user_role = WorkspaceUserAccessControl.get_user_role(
+                workspace.id, user_id
+            )
+
+        return (workspaces, total_entries, total_pages)
 
     @staticmethod
     def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
 
         UserAuthService.check_if_admin_and_raise()
         workspace = Workspace.get_by_id(workspace_id)
+
+        workspace.user_role = WorkspaceUserAccessControl.get_user_role(
+            workspace.id, int(get_jwt_identity())
+        )
 
         if workspace.icon_image:
             encoded_image = ImageProcessor.encode_image(workspace.icon_image)

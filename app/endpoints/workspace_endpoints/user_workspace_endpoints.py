@@ -46,11 +46,15 @@ class BaseUserWorkspaceEndpoint(Resource):
     @jwt_required()
     def get(self):
         args = workspace_schema_retriever.retrieve("pagination_parser").parse_args()
-        workspaces, total_entries, total_pages = WorkspaceRepository.get_all_workspaces(
-            args
-        )
-        return {
-            "workspaces": workspaces,
-            "total_entries": total_entries,
-            "total_pages": total_pages,
-        }, HttpStatus.OK.value
+        try:
+            workspaces, total_entries, total_pages = (
+                WorkspaceRepository.get_all_workspaces(args)
+            )
+            return {
+                "workspaces": workspaces,
+                "total_entries": total_entries,
+                "total_pages": total_pages,
+            }, HttpStatus.OK.value
+        except Exception as e:
+            print(e)
+            abort(HttpStatus.INTERNAL_SERVER_ERROR.value)
