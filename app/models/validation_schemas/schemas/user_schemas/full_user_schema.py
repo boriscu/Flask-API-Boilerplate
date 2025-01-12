@@ -39,6 +39,10 @@ def get_full_user_schema(namespace):
                 description="A binary string representing the compressed profile picture.",
                 example="Base64 encoded PNG image data",
             ),
+            "workspace_creation_quota": fields.Integer(
+                description="Number of workspaces the user is allowed to create",
+                example=3,
+            ),
             "created_at": fields.DateTime(
                 dt_format="iso8601",
                 description="Date the user was created",
@@ -49,9 +53,7 @@ def get_full_user_schema(namespace):
                 description="Date the user profile was last updated",
                 example=datetime.now().isoformat(),
             ),
-            "entity_id": fields.Integer(
-                description="ID of the user profile", example=2
-            ),
+            "id": fields.Integer(description="ID of the user profile", example=2),
         },
     )
     return full_user_profile_schema

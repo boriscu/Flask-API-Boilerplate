@@ -15,7 +15,7 @@ class WorkspaceUserRepository:
         """
 
         WorkspaceUser.create(
-            user_profile_id=user_id,
+            user_id=user_id,
             workspace_id=workspace_id,
             workspace_user_role=WorkspaceUserRole.ADMIN.value,
         )

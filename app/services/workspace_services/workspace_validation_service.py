@@ -28,5 +28,8 @@ class WorkspaceValidationService:
             user_profile.id
         )
 
-        if workspace_count >= user_profile.workspace_creation_quota:
+        if (
+            user_profile.workspace_creation_quota
+            and workspace_count >= user_profile.workspace_creation_quota
+        ):
             abort(HttpStatus.NOT_ACCEPTABLE.value)

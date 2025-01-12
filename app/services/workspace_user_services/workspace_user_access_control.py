@@ -15,9 +15,8 @@ class UserWorkspaceAccessControl:
         Returns:
         int: The number of workspaces associated with the user. Returns None if the user does not exist or an error occurs.
         """
-
         return (
-            WorkspaceUser.select(fn.COUNT(WorkspaceUser.workspace))
+            WorkspaceUser.select(fn.COUNT(WorkspaceUser.workspace_id))
             .where(WorkspaceUser.user_id == user_id)
             .scalar()
         )

@@ -127,23 +127,6 @@ class WorkspaceRepository:
         return workspace
 
     @staticmethod
-    def get_current_workspace() -> Optional[Workspace]:
-
-        current_user = UserProfile.get_by_id(int(get_jwt_identity()))
-
-        if current_user.workspace:
-            workspace = current_user.workspace
-
-            if workspace.icon_image:
-                encoded_image = ImageProcessor.encode_image(workspace.icon_image)
-                workspace.icon_image = encoded_image
-
-        else:
-            workspace = None
-
-        return workspace
-
-    @staticmethod
     def delete_workspace(workspace_id: int):
         UserAuthService.check_if_admin_and_raise()
 
