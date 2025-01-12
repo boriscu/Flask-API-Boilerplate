@@ -1,4 +1,4 @@
-from app.models.validation_schemas.schemas.workspace_schemas.all_workspace_schema import (
+from app.models.validation_schemas.schemas.workspace_schemas.all_workspaces_schema import (
     get_all_workspace_schema,
 )
 from app.models.validation_schemas.schemas.workspace_schemas.create_workspace_response_schema import (
