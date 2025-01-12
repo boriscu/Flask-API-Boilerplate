@@ -7,7 +7,7 @@ from app.models.enums.http_status import HttpStatus
 from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
-from app.services.user_services.user_crud_service import UserCRUDService
+from app.services.user_services.user_repository import UserRepository
 
 from . import user_namespace, user_schema_retriever
 
@@ -31,7 +31,7 @@ class BaseUserEndpoint(Resource):
     def get(self):
         args = user_schema_retriever.retrieve("pagination_parser").parse_args()
 
-        users, total_entries, total_pages = UserCRUDService.get_all_users(args)
+        users, total_entries, total_pages = UserRepository.get_all_users(args)
 
         return {
             "users": users,
@@ -55,7 +55,7 @@ class SingleUserEndpoint(Resource):
     @marshal_with(user_schema_retriever.retrieve("profile"))
     @jwt_required()
     def get(self, user_id):
-        return UserCRUDService.get_single_user(user_id=user_id, check_admin=True)
+        return UserRepository.get_single_user(user_id=user_id, check_admin=True)
 
     @user_namespace.doc(
         description="Delete a user based on the user ID.  Requires admin privileges."
@@ -65,7 +65,7 @@ class SingleUserEndpoint(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def delete(self, user_id):
-        return UserCRUDService.delete_user(user_id)
+        return UserRepository.delete_user(user_id)
 
 
 @user_namespace.route("/<int:user_id>/status/", methods=["PUT"])
@@ -82,8 +82,8 @@ class UserStatusEndpoint(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def put(self, user_id):
-        user_profile = UserCRUDService.get_single_user(user_id)
-        new_status, message = UserCRUDService.toggle_active_status(user_profile)
+        user_profile = UserRepository.get_single_user(user_id)
+        new_status, message = UserRepository.toggle_active_status(user_profile)
 
         return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
 
@@ -102,7 +102,7 @@ class AdminPasswordEndpoint(Resource):
     def put(self, user_id):
         data = request.json
 
-        user = UserCRUDService.get_single_user(user_id)
+        user = UserRepository.get_single_user(user_id)
 
         UserAuthService.change_password(user, data.get("new_password"))
 

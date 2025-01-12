@@ -8,7 +8,7 @@ from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.models.pg.user_profile import UserProfile
 from app.services.user_services.user_auth_service import UserAuthService
-from app.services.user_services.user_crud_service import UserCRUDService
+from app.services.user_services.user_repository import UserRepository
 
 from . import user_namespace, user_schema_retriever
 
@@ -63,7 +63,7 @@ class GetMyselfEndpoint(Resource):
     @marshal_with(user_schema_retriever.retrieve("profile"))
     @jwt_required()
     def get(self):
-        return UserCRUDService.get_single_user(user_id=get_jwt_identity())
+        return UserRepository.get_single_user(user_id=get_jwt_identity())
 
 
 @user_namespace.route("/check_auth/", methods=["GET"])
@@ -95,7 +95,7 @@ class UserPasswordEndpoint(Resource):
 
         user = UserProfile.get_by_id(int(get_jwt_identity()))
 
-        result = UserCRUDService.update_user_password(
+        result = UserRepository.update_user_password(
             user, data.get("old_password"), data.get("new_password")
         )
 

@@ -17,7 +17,7 @@ from app.services.workspace_services.workspace_pagination_service import (
 )
 
 
-class WorkspaceCRUDService:
+class WorkspaceRepository:
     @staticmethod
     def create_workspace(args: Dict[str, Any]) -> Response:
         """Create a new workspace in the database and return a Flask response object.

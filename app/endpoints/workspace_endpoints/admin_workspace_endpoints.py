@@ -4,7 +4,7 @@ from flask_restx import Resource, marshal_with
 
 from app.models.enums.http_status import HttpStatus
 
-from app.services.workspace_services.workspace_crud_service import WorkspaceCRUDService
+from app.services.workspace_services.workspace_repository import WorkspaceRepository
 
 from . import workspace_namespace, workspace_schema_retriever
 
@@ -24,7 +24,7 @@ class SingleWorkspaceEndpoint(Resource):
     @marshal_with(workspace_schema_retriever.retrieve("workspace"))
     @jwt_required()
     def get(self, workspace_id):
-        return WorkspaceCRUDService.get_single_workspace(workspace_id)
+        return WorkspaceRepository.get_single_workspace(workspace_id)
 
     @workspace_namespace.doc(
         description="Delete a workspace based on the workspace ID.  Requires admin privileges."
@@ -34,7 +34,7 @@ class SingleWorkspaceEndpoint(Resource):
     @workspace_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def delete(self, workspace_id):
-        return WorkspaceCRUDService.delete_workspace(workspace_id)
+        return WorkspaceRepository.delete_workspace(workspace_id)
 
     @workspace_namespace.doc(
         description="Updates a workspace. Requires admin privileges."
@@ -52,7 +52,7 @@ class SingleWorkspaceEndpoint(Resource):
     )
     @jwt_required()
     def put(self, workspace_id):
-        return WorkspaceCRUDService.update_workspace(
+        return WorkspaceRepository.update_workspace(
             workspace_id,
             workspace_schema_retriever.retrieve(
                 "create_workspace_request"
@@ -78,8 +78,8 @@ class BaseWorkspaceEndpoint(Resource):
     @jwt_required()
     def get(self):
         args = workspace_schema_retriever.retrieve("pagination_parser").parse_args()
-        workspaces, total_entries, total_pages = (
-            WorkspaceCRUDService.get_all_workspaces(args)
+        workspaces, total_entries, total_pages = WorkspaceRepository.get_all_workspaces(
+            args
         )
 
         return {

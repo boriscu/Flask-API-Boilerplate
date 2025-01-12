@@ -2,7 +2,7 @@ from flask_jwt_extended import jwt_required
 from flask_restx import Resource, marshal_with
 
 from app.models.enums.http_status import HttpStatus
-from app.services.workspace_services.workspace_crud_service import WorkspaceCRUDService
+from app.services.workspace_services.workspace_repository import WorkspaceRepository
 from . import workspace_namespace, workspace_schema_retriever
 
 
@@ -18,7 +18,7 @@ class CurrentWorkspaceEndpoint(Resource):
     @marshal_with(workspace_schema_retriever.retrieve("workspace"))
     @jwt_required()
     def get(self):
-        return WorkspaceCRUDService.get_current_workspace()
+        return WorkspaceRepository.get_current_workspace()
 
 
 @workspace_namespace.route("/", methods=["POST"])
@@ -37,6 +37,6 @@ class BaseWorkspaceEndpoint(Resource):
     )
     @jwt_required()
     def post(self):
-        return WorkspaceCRUDService.create_workspace(
+        return WorkspaceRepository.create_workspace(
             workspace_schema_retriever.retrieve("create_workspace_request").parse_args()
         )

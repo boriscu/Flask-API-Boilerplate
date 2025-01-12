@@ -12,7 +12,7 @@ from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_pagination_service import UserPaginationService
 
 
-class UserCRUDService:
+class UserRepository:
     @staticmethod
     def get_single_user(user_id: int, check_admin: bool = False) -> UserProfile:
         """
