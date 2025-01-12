@@ -1,7 +1,12 @@
+from flask import abort
 from peewee import fn
 
+from app.models.enums.http_status import HttpStatus
 from app.models.enums.workspace_user_role import WorkspaceUserRole
+
 from app.models.pg.workspace_user import WorkspaceUser
+
+from app.services.user_services.user_auth_service import UserAuthService
 
 
 class WorkspaceUserAccessControl:
@@ -61,3 +66,24 @@ class WorkspaceUserAccessControl:
             return True
         except:
             return False
+
+    @staticmethod
+    def check_operation_access_rights(workspace_id: int, user_id: int):
+        """
+        Verifies if a user has administrative rights or specific access rights to a workspace. If the user does not have the necessary rights, the operation is aborted with an HTTP 403 Forbidden status.
+
+        Args:
+            workspace_id (int): The ID of the workspace for which access rights are being checked.
+            user_id (int): The ID of the user whose access rights are being verified.
+
+        Raises:
+            HTTPException: Aborts the current request and raises an HTTP 403 Forbidden if the user does not have the required access rights.
+        """
+
+        if (
+            not UserAuthService.check_if_admin()
+            and not WorkspaceUserAccessControl.check_workspace_user_access(
+                workspace_id, user_id
+            )
+        ):
+            abort(HttpStatus.FORBIDDEN.value)

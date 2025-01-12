@@ -1,5 +1,4 @@
 from flask import abort
-from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
 from app.models.pg.user_profile import UserProfile

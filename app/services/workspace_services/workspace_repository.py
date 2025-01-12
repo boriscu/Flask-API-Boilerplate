@@ -85,15 +85,25 @@ class WorkspaceRepository:
             ValueError: If required attributes are missing or invalid.
             NotFoundError: If the workspace with the given ID does not exist.
         """
+        user_id = int(get_jwt_identity())
+
+        WorkspaceUserAccessControl.check_operation_access_rights(
+            workspace_id=workspace_id, user_id=user_id
+        )
+
         workspace = Workspace.get_by_id(workspace_id)
 
         workspace.name = args.get("name", workspace.name)
         workspace.description = args.get("description", workspace.description)
-        workspace.namespaces = args.get("namespaces", workspace.namespaces)
+        workspace.namespaces = args.get(
+            "namespaces", "[]" if workspace.namespaces == None else workspace.namespaces
+        )
 
         icon_image = args.get("icon_image", None)
         if icon_image:
             workspace.icon_image = ImageProcessor.compress_image(icon_image)
+        else:
+            workspace.icon_image = None
 
         workspace.save()
 
@@ -145,13 +155,10 @@ class WorkspaceRepository:
     def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
 
         user_id = int(get_jwt_identity())
-        if (
-            not UserAuthService.check_if_admin()
-            and not WorkspaceUserAccessControl.check_workspace_user_access(
-                workspace_id, user_id
-            )
-        ):
-            abort(HttpStatus.FORBIDDEN.value)
+
+        WorkspaceUserAccessControl.check_operation_access_rights(
+            workspace_id=workspace_id, user_id=user_id
+        )
 
         workspace = Workspace.get_by_id(workspace_id)
 
@@ -167,6 +174,12 @@ class WorkspaceRepository:
 
     @staticmethod
     def delete_workspace(workspace_id: int):
+        user_id = int(get_jwt_identity())
+
+        WorkspaceUserAccessControl.check_operation_access_rights(
+            workspace_id=workspace_id, user_id=user_id
+        )
+
         UserAuthService.check_if_admin_and_raise()
 
         Workspace.delete().where(Workspace.id == workspace_id).execute()

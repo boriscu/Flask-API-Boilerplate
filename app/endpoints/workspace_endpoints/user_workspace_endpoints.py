@@ -79,17 +79,20 @@ class SingleWorkspaceEndpoint(Resource):
         return WorkspaceRepository.get_single_workspace(workspace_id)
 
     @workspace_namespace.doc(
-        description="Delete a workspace based on the workspace ID.  Requires admin privileges."
+        description="Delete a workspace based on the workspace ID. Admin can delete any workspace."
     )
     @workspace_namespace.response(HttpStatus.OK.value, "Workspace deleted succesfully")
     @workspace_namespace.response(HttpStatus.NOT_FOUND.value, "Workspace not found")
+    @workspace_namespace.response(
+        HttpStatus.FORBIDDEN.value, "User does not have access to specified workspace"
+    )
     @workspace_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def delete(self, workspace_id):
         return WorkspaceRepository.delete_workspace(workspace_id)
 
     @workspace_namespace.doc(
-        description="Updates a workspace. Requires admin privileges."
+        description="Updates a workspace. Admin can update any workspace."
     )
     @workspace_namespace.expect(
         workspace_schema_retriever.retrieve("create_workspace_request")
@@ -98,6 +101,9 @@ class SingleWorkspaceEndpoint(Resource):
         HttpStatus.CREATED.value,
         "Workspace updated successfully",
         model=workspace_schema_retriever.retrieve("create_workspace_response"),
+    )
+    @workspace_namespace.response(
+        HttpStatus.FORBIDDEN.value, "User does not have access to specified workspace"
     )
     @workspace_namespace.response(
         HttpStatus.UNAUTHORIZED.value, "Authentication is required"
