@@ -31,13 +31,16 @@ class WorkspaceCRUDService:
         Raises:
             ValueError: If required attributes are missing or invalid.
         """
-        UserAuthService.check_if_admin_and_raise()
 
         name = args.get("name")
         description = args.get("description", "")
-        namespaces = args.get("namespaces", "[]")
+
         icon_image = args.get("icon_image", None)
         icon_data = ImageProcessor.compress_image(icon_image) if icon_image else None
+
+        namespaces = (
+            args.get("namespaces", "[]") if UserAuthService.check_if_admin() else "[]"
+        )
 
         new_workspace = Workspace.create(
             name=name,
