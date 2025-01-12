@@ -45,7 +45,9 @@ def get_partial_user_schema(namespace):
                 description="Date the user profile was last updated",
                 example=datetime.now().isoformat(),
             ),
-            "id": fields.Integer(description="ID of the user profile", example=2),
+            "entity_id": fields.Integer(
+                description="ID of the user profile", example=2
+            ),
         },
     )
     return partial_user_schema

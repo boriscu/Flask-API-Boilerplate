@@ -51,6 +51,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         is_admin = pw.BooleanField(default=False)
         is_active = pw.BooleanField(default=True)
         is_sso = pw.BooleanField(default=False)
+        workspace_creation_quota = pw.IntegerField(default=3, null=True)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):

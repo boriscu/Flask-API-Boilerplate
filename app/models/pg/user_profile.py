@@ -4,9 +4,9 @@ from peewee import (
     DateField,
     CharField,
     BlobField,
+    IntegerField,
 )
 
-from app.models.pg.workspace import Workspace
 
 from .base import BaseModel
 
@@ -23,3 +23,4 @@ class UserProfile(BaseModel):
     is_admin = BooleanField(default=False)
     is_active = BooleanField(default=True)
     is_sso = BooleanField(default=False)
+    workspace_creation_quota = IntegerField(default=3, null=True)

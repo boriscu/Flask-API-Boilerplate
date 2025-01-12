@@ -23,7 +23,7 @@ def get_partial_workspace_schema(namespace):
                 description="The timestamp of the last update made to the workspace.",
                 example=datetime.now().isoformat(),
             ),
-            "id": fields.Integer(
+            "entity_id": fields.Integer(
                 description="A unique identifier for the workspace.", example=101
             ),
         },
