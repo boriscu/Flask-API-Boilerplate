@@ -1,4 +1,4 @@
-"""Peewee migrations -- 003_create_table_workspace_user.py.
+"""Peewee migrations -- 003_create_table_workspace_user_invite.py.
 
 Some examples (model - class or model name)::
 
@@ -29,6 +29,7 @@ from contextlib import suppress
 import peewee as pw
 from peewee_migrate import Migrator
 
+from app.models.enums.invite_status import InviteStatus
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.base import BaseModel
@@ -42,12 +43,13 @@ with suppress(ImportError):
 
 def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
     @migrator.create_model
-    class WorkspaceUser(BaseModel):
+    class WorkspaceUserInvite(BaseModel):
         id = pw.AutoField()
         workspace = pw.ForeignKeyField(Workspace, null=False, on_delete="CASCADE")
         user = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
         workspace_user_role = pw.IntegerField(default=WorkspaceUserRole.VIEW.value)
+        invite_status = pw.IntegerField(default=InviteStatus.PENDING.value)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):
-    migrator.drop_table("workspaceuser")
+    migrator.drop_table("workspaceuserinvite")
