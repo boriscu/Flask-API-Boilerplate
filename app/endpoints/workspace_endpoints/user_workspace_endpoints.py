@@ -19,3 +19,24 @@ class CurrentWorkspaceEndpoint(Resource):
     @jwt_required()
     def get(self):
         return WorkspaceCRUDService.get_current_workspace()
+
+
+@workspace_namespace.route("/", methods=["POST"])
+class BaseWorkspaceEndpoint(Resource):
+    @workspace_namespace.doc(description="Creates a workspace.")
+    @workspace_namespace.expect(
+        workspace_schema_retriever.retrieve("create_workspace_request")
+    )
+    @workspace_namespace.response(
+        HttpStatus.CREATED.value,
+        "Workspace created successfully",
+        model=workspace_schema_retriever.retrieve("create_workspace_response"),
+    )
+    @workspace_namespace.response(
+        HttpStatus.UNAUTHORIZED.value, "Authentication is required"
+    )
+    @jwt_required()
+    def post(self):
+        return WorkspaceCRUDService.create_workspace(
+            workspace_schema_retriever.retrieve("create_workspace_request").parse_args()
+        )

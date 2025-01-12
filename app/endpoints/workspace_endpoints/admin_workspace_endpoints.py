@@ -60,7 +60,7 @@ class SingleWorkspaceEndpoint(Resource):
         )
 
 
-@workspace_namespace.route("/", methods=["GET", "POST"])
+@workspace_namespace.route("/", methods=["GET"])
 class BaseWorkspaceEndpoint(Resource):
     @workspace_namespace.doc(
         description="Fetches all workspaces with pagination, sorting, and filtering. Requires admin privileges."
@@ -87,23 +87,3 @@ class BaseWorkspaceEndpoint(Resource):
             "total_entries": total_entries,
             "total_pages": total_pages,
         }, HttpStatus.OK.value
-
-    @workspace_namespace.doc(
-        description="Creates a workspace. Requires admin privileges."
-    )
-    @workspace_namespace.expect(
-        workspace_schema_retriever.retrieve("create_workspace_request")
-    )
-    @workspace_namespace.response(
-        HttpStatus.CREATED.value,
-        "Workspace created successfully",
-        model=workspace_schema_retriever.retrieve("create_workspace_response"),
-    )
-    @workspace_namespace.response(
-        HttpStatus.UNAUTHORIZED.value, "Authentication is required"
-    )
-    @jwt_required()
-    def post(self):
-        return WorkspaceCRUDService.create_workspace(
-            workspace_schema_retriever.retrieve("create_workspace_request").parse_args()
-        )

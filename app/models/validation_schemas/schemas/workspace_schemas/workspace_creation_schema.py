@@ -15,13 +15,15 @@ def get_workspace_creation_schema():
         "description",
         type=str,
         location="form",
+        required=False,
         help="Description of the workspace",
     )
     workspace_creation_schema.add_argument(
         "namespaces",
         type=str,
         location="form",
-        help="Comma-separated list of namespaces. Example: ['uns.ac.rs','jjzmaj.edu.rs',...]",
+        required=False,
+        help="Specify a comma-separated list of namespaces that can access the workspace. For example: ['uns.ac.rs,jjzmaj.edu.rs',...]. Note: This field is accessible only to admins.",
     )
     workspace_creation_schema.add_argument(
         "icon_image",
