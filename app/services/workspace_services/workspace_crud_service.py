@@ -31,7 +31,7 @@ class WorkspaceCRUDService:
         Raises:
             ValueError: If required attributes are missing or invalid.
         """
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
 
         name = args.get("name")
         description = args.get("description", "")
@@ -87,7 +87,7 @@ class WorkspaceCRUDService:
 
     @staticmethod
     def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
         return WorkspacePaginationService.get_rows(
             page=args.get("page", 1),
             per_page=args.get("per_page", 10),
@@ -100,7 +100,7 @@ class WorkspaceCRUDService:
     @staticmethod
     def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
 
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
         workspace = Workspace.get_by_id(workspace_id)
 
         if workspace.icon_image:
@@ -128,7 +128,7 @@ class WorkspaceCRUDService:
 
     @staticmethod
     def delete_workspace(workspace_id: int):
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
 
         Workspace.delete().where(Workspace.id == workspace_id).execute()
 

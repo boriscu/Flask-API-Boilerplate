@@ -26,7 +26,7 @@ class UserCRUDService:
             Optional[UserProfile]: A UserProfile class instance containing current user data if the user exists, None otherwise.
 
         """
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
 
         user_profile = UserProfile.get_by_id(user_id)
 
@@ -58,7 +58,7 @@ class UserCRUDService:
             ValueError: If JSON decoding fails for filters.
         """
 
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
 
         return UserPaginationService.get_rows(
             page=args["page"],
@@ -114,7 +114,7 @@ class UserCRUDService:
 
     @staticmethod
     def delete_user(user_id: int):
-        UserAuthService.check_if_admin()
+        UserAuthService.check_if_admin_and_raise()
 
         user = UserProfile.get_by_id(user_id)
         if not user.is_admin:

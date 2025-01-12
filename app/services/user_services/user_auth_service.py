@@ -52,11 +52,7 @@ class UserAuthService:
             ImageProcessor.compress_image(profile_picture) if profile_picture else None
         )
 
-        try:
-            verify_jwt_in_request()
-            is_admin = bool(get_jwt().get("is_admin"))
-        except:
-            is_admin = False
+        is_admin = UserAuthService.check_if_admin()
 
         is_sso = args.get("is_sso", False) if is_admin else False
         is_active = args.get("is_sso", False) if is_admin else False
@@ -128,7 +124,28 @@ class UserAuthService:
             return {"msg": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
 
     @staticmethod
-    def check_if_admin():
+    def check_if_admin() -> bool:
+        """
+        Check if the current user is an admin based on the JWT token.
+
+        Returns:
+            bool: True if the user is an admin, False otherwise.
+
+        Notes:
+            If the JWT verification fails or the 'is_admin' field is not present,
+            the method will return False.
+        """
+
+        try:
+            verify_jwt_in_request()
+            is_admin = bool(get_jwt().get("is_admin"))
+        except:
+            is_admin = False
+
+        return is_admin
+
+    @staticmethod
+    def check_if_admin_and_raise():
         """
         Validates if the current user token has admin privileges. If the user is not an admin,
         the method aborts the process by sending a 403 Forbidden HTTP status.
@@ -136,10 +153,7 @@ class UserAuthService:
         Raises:
             HTTPException: A 403 Forbidden status if the user is not an admin.
         """
-
-        is_admin = bool(get_jwt().get("is_admin"))
-
-        if not is_admin:
+        if not UserAuthService.check_if_admin():
             abort(HttpStatus.FORBIDDEN.value)
 
     @staticmethod
