@@ -12,6 +12,10 @@ from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
 
+from app.services.workspace_user_services.workspace_user_repository import (
+    WorkspaceUserRepository,
+)
+
 
 class UserAuthService:
     """
@@ -72,7 +76,8 @@ class UserAuthService:
             is_admin=False,
             is_active=is_active,
         )
-        user.save()
+
+        WorkspaceUserRepository.create_personal_workspace(name, user.id)
 
         access_token = ""
         if not is_admin:

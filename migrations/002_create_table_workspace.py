@@ -42,7 +42,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         id = pw.AutoField()
         name = pw.TextField(null=False)
         description = pw.TextField(default="")
-        namespaces = pw.TextField()
+        namespaces = pw.TextField(default="[]")
         icon_image = pw.BlobField(null=True)
         is_personal = pw.BooleanField(default=False, null=False)
 

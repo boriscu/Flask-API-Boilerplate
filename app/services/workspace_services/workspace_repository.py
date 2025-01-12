@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple
-from flask import Response, abort, json
+from flask import Response, json
 from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
