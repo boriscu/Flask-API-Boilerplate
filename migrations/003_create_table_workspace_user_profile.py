@@ -29,6 +29,8 @@ from contextlib import suppress
 import peewee as pw
 from peewee_migrate import Migrator
 
+from app.models.enums.workspace_user_role import WorkspaceUserRole
+
 from app.models.pg.base import BaseModel
 from app.models.pg.user_profile import UserProfile
 from app.models.pg.workspace import Workspace
@@ -44,6 +46,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         id = pw.AutoField()
         workspace = pw.ForeignKeyField(Workspace, null=False, on_delete="CASCADE")
         user_profile = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
+        workspace_user_role = pw.IntegerField(default=WorkspaceUserRole.VIEW.value)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):
