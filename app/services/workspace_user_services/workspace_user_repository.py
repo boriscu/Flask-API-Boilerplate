@@ -1,3 +1,4 @@
+from flask_jwt_extended import get_jwt_identity
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.workspace import Workspace
@@ -48,3 +49,23 @@ class WorkspaceUserRepository:
         )
 
         return new_workspace
+
+    @staticmethod
+    def get_personal_workspace() -> Workspace:
+        """
+        Retrieve the personal workspace associated with the current user.
+
+        Returns:
+            A Workspace instance representing the user's personal workspace
+            or None if no personal workspace is found.
+        """
+
+        return (
+            WorkspaceUser.select()
+            .join(Workspace)
+            .where(
+                (WorkspaceUser.user == int(get_jwt_identity()))
+                & (Workspace.is_personal == True)
+            )
+            .get()
+        ).workspace
