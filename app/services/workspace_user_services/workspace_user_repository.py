@@ -61,8 +61,7 @@ class WorkspaceUserRepository:
             A Workspace instance representing the user's personal workspace
             or None if no personal workspace is found.
         """
-
-        return (
+        workspace = (
             WorkspaceUser.select()
             .join(Workspace)
             .where(
@@ -71,3 +70,7 @@ class WorkspaceUserRepository:
             )
             .get()
         ).workspace
+
+        workspace.user_role = WorkspaceUserRole.ADMIN.value
+
+        return workspace

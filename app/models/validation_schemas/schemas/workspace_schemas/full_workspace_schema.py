@@ -27,7 +27,7 @@ def get_full_workspace_schema(namespace):
             ),
             "workspace_type": fields.Integer(
                 description="An identifier of the workspace type. Personal - 0, Regular - 1, Public - 2",
-                example=False,
+                example=0,
             ),
             "created_at": fields.DateTime(
                 dt_format="iso8601",
