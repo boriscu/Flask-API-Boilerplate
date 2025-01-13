@@ -4,6 +4,7 @@ from peewee import fn
 from app.models.enums.http_status import HttpStatus
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
+from app.models.pg.workspace import Workspace
 from app.models.pg.workspace_user import WorkspaceUser
 
 from app.services.user_services.user_auth_service import UserAuthService
@@ -76,19 +77,29 @@ class WorkspaceUserAccessControl:
 
     @staticmethod
     def check_operation_access_rights(
-        workspace_id: int, user_id: int, required_role: WorkspaceUserRole
+        workspace_id: int,
+        user_id: int,
+        required_role: WorkspaceUserRole,
+        check_personal: bool = False,
     ):
         """
-        Verifies if a user has a specified access level or higher to a workspace. The function checks if the user is an admin or meets the minimum required role for a workspace. If the user does not meet these criteria, the operation is aborted with an HTTP 403 Forbidden status.
+        Verifies if a user has a specified access level or higher to a workspace, considering personal workspace restrictions.
+        The function checks if the workspace is personal and if so, restricts operations to those with a 'VIEW' role only.
 
         Args:
             workspace_id (int): The ID of the workspace for which access rights are being checked.
             user_id (int): The ID of the user whose access rights are being verified.
             required_role (WorkspaceUserRole): The minimum required role the user must have to access the workspace (e.g., WorkspaceUserRole.VIEW, WorkspaceUserRole.EDIT, WorkspaceUserRole.ADMIN).
+            check_personal (bool): A flag to check if the workspace is personal and restrict higher-level operations.
 
         Raises:
             HTTPException: Aborts the current request and raises an HTTP 403 Forbidden if the user does not have the required access rights or higher.
         """
+
+        workspace = Workspace.get_by_id(workspace_id)
+        if workspace.is_personal and check_personal:
+            if required_role != WorkspaceUserRole.VIEW:
+                abort(HttpStatus.FORBIDDEN.value)
 
         if (
             not UserAuthService.check_if_admin()

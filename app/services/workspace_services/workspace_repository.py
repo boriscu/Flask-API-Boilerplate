@@ -91,7 +91,8 @@ class WorkspaceRepository:
         WorkspaceUserAccessControl.check_operation_access_rights(
             workspace_id=workspace_id,
             user_id=user_id,
-            required_role=WorkspaceUserRole.EDIT,
+            required_role=WorkspaceUserRole.ADMIN,
+            check_personal=True,
         )
 
         workspace = Workspace.get_by_id(workspace_id)
@@ -185,6 +186,7 @@ class WorkspaceRepository:
             workspace_id=workspace_id,
             user_id=user_id,
             required_role=WorkspaceUserRole.ADMIN,
+            check_personal=True,
         )
 
         Workspace.delete().where(Workspace.id == workspace_id).execute()
