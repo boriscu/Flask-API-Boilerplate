@@ -3,6 +3,7 @@ from typing import Optional
 from flask import abort
 
 from app.models.enums.http_status import HttpStatus
+
 from app.models.pg.user_profile import UserProfile
 
 from app.services.user_services.user_auth_service import UserAuthService
