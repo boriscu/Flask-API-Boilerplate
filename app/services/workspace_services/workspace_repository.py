@@ -4,6 +4,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
 
+from app.models.enums.workspace_type import WorkspaceType
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 from app.models.pg.workspace import Workspace
 
@@ -50,6 +51,8 @@ class WorkspaceRepository:
         icon_image = args.get("icon_image", None)
         icon_data = ImageProcessor.compress_image(icon_image) if icon_image else None
 
+        workspace_type = WorkspaceType.REGULAR.value
+
         if not UserAuthService.check_if_admin():
             namespaces = "[]"
         else:
@@ -57,11 +60,15 @@ class WorkspaceRepository:
             if namespaces is None:
                 namespaces = "[]"
 
+            if args.get("is_public", False):
+                workspace_type = WorkspaceType.PUBLIC.value
+
         new_workspace = Workspace.create(
             name=name,
             description=description,
             namespaces=namespaces,
             icon_image=icon_data,
+            workspace_type=workspace_type,
         )
 
         WorkspaceUserRepository.create_workspace_user_relation(

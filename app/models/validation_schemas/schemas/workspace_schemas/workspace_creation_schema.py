@@ -23,7 +23,14 @@ def get_workspace_creation_schema():
         type=str,
         location="form",
         required=False,
-        help="Specify a comma-separated list of namespaces that can access the workspace. For example: ['uns.ac.rs,jjzmaj.edu.rs',...]. Note: This field is accessible only to admins.",
+        help="Specify a comma-separated list of namespaces that can access the workspace. For example: ['uns.ac.rs,jjzmaj.edu.rs',...]. If all namespaces are allowed put '*'. Note: This field is accessible only to admins.",
+    )
+    workspace_creation_schema.add_argument(
+        "is_public",
+        type=bool,
+        location="form",
+        required=False,
+        help="Flag noting if the workspace is public. Note: This field is accessible only to admins.",
     )
     workspace_creation_schema.add_argument(
         "icon_image",
