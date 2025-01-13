@@ -50,9 +50,12 @@ class WorkspaceRepository:
         icon_image = args.get("icon_image", None)
         icon_data = ImageProcessor.compress_image(icon_image) if icon_image else None
 
-        namespaces = (
-            args.get("namespaces", "[]") if UserAuthService.check_if_admin() else "[]"
-        )
+        if not UserAuthService.check_if_admin():
+            namespaces = "[]"
+        else:
+            namespaces = args.get("namespaces")
+            if namespaces is None:
+                namespaces = "[]"
 
         new_workspace = Workspace.create(
             name=name,
