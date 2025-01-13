@@ -49,41 +49,51 @@ class WorkspaceUserAccessControl:
             return None
 
     @staticmethod
-    def check_workspace_user_access(workspace_id: int, user_id: int) -> bool:
+    def check_workspace_user_access(
+        workspace_id: int, user_id: int, required_role: WorkspaceUserRole
+    ) -> bool:
         """
-        Checks if a user has access to a specific workspace by verifying the existence of a workspace-user relationship.
+        Checks if a user has a specific access level to a workspace by verifying the workspace-user relationship
+        and comparing the role.
 
         Args:
             workspace_id (int): The ID of the workspace.
             user_id (int): The ID of the user.
+            required_role (WorkspaceUserRole): The minimum required role the user must have to access the workspace (e.g., WorkspaceUserRole.VIEW, WorkspaceUserRole.EDIT, WorkspaceUserRole.ADMIN).
 
         Returns:
-            bool: True if the user has access to the workspace, False otherwise.
-
+            bool: True if the user has the required access level or higher, False otherwise.
         """
         try:
-            WorkspaceUser.get(workspace=workspace_id, user=user_id)
-            return True
+            return (
+                WorkspaceUser.get(
+                    workspace=workspace_id, user=user_id
+                ).workspace_user_role
+                >= required_role.value
+            )
         except:
             return False
 
     @staticmethod
-    def check_operation_access_rights(workspace_id: int, user_id: int):
+    def check_operation_access_rights(
+        workspace_id: int, user_id: int, required_role: WorkspaceUserRole
+    ):
         """
-        Verifies if a user has administrative rights or specific access rights to a workspace. If the user does not have the necessary rights, the operation is aborted with an HTTP 403 Forbidden status.
+        Verifies if a user has a specified access level or higher to a workspace. The function checks if the user is an admin or meets the minimum required role for a workspace. If the user does not meet these criteria, the operation is aborted with an HTTP 403 Forbidden status.
 
         Args:
             workspace_id (int): The ID of the workspace for which access rights are being checked.
             user_id (int): The ID of the user whose access rights are being verified.
+            required_role (WorkspaceUserRole): The minimum required role the user must have to access the workspace (e.g., WorkspaceUserRole.VIEW, WorkspaceUserRole.EDIT, WorkspaceUserRole.ADMIN).
 
         Raises:
-            HTTPException: Aborts the current request and raises an HTTP 403 Forbidden if the user does not have the required access rights.
+            HTTPException: Aborts the current request and raises an HTTP 403 Forbidden if the user does not have the required access rights or higher.
         """
 
         if (
             not UserAuthService.check_if_admin()
             and not WorkspaceUserAccessControl.check_workspace_user_access(
-                workspace_id, user_id
+                workspace_id, user_id, required_role
             )
         ):
             abort(HttpStatus.FORBIDDEN.value)

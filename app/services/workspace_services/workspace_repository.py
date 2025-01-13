@@ -4,6 +4,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
 
+from app.models.enums.workspace_user_role import WorkspaceUserRole
 from app.models.pg.workspace import Workspace
 
 from app.helpers.http_response_generator import HttpResponseGenerator
@@ -88,7 +89,9 @@ class WorkspaceRepository:
         user_id = int(get_jwt_identity())
 
         WorkspaceUserAccessControl.check_operation_access_rights(
-            workspace_id=workspace_id, user_id=user_id
+            workspace_id=workspace_id,
+            user_id=user_id,
+            required_role=WorkspaceUserRole.EDIT,
         )
 
         workspace = Workspace.get_by_id(workspace_id)
@@ -157,7 +160,9 @@ class WorkspaceRepository:
         user_id = int(get_jwt_identity())
 
         WorkspaceUserAccessControl.check_operation_access_rights(
-            workspace_id=workspace_id, user_id=user_id
+            workspace_id=workspace_id,
+            user_id=user_id,
+            required_role=WorkspaceUserRole.VIEW,
         )
 
         workspace = Workspace.get_by_id(workspace_id)
@@ -177,10 +182,10 @@ class WorkspaceRepository:
         user_id = int(get_jwt_identity())
 
         WorkspaceUserAccessControl.check_operation_access_rights(
-            workspace_id=workspace_id, user_id=user_id
+            workspace_id=workspace_id,
+            user_id=user_id,
+            required_role=WorkspaceUserRole.ADMIN,
         )
-
-        UserAuthService.check_if_admin_and_raise()
 
         Workspace.delete().where(Workspace.id == workspace_id).execute()
 
