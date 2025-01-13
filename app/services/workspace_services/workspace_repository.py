@@ -51,17 +51,14 @@ class WorkspaceRepository:
         icon_image = args.get("icon_image", None)
         icon_data = ImageProcessor.compress_image(icon_image) if icon_image else None
 
-        workspace_type = WorkspaceType.REGULAR.value
-
-        if not UserAuthService.check_if_admin():
-            namespaces = "[]"
+        if UserAuthService.check_if_admin() and args.get("is_public", False):
+            workspace_type = WorkspaceType.PUBLIC.value
         else:
-            namespaces = args.get("namespaces")
-            if namespaces is None:
-                namespaces = "[]"
+            workspace_type = WorkspaceType.REGULAR.value
 
-            if args.get("is_public", False):
-                workspace_type = WorkspaceType.PUBLIC.value
+        namespaces = WorkspaceValidationService.get_parsed_admin_namespaces(
+            args.get("namespaces")
+        )
 
         new_workspace = Workspace.create(
             name=name,
