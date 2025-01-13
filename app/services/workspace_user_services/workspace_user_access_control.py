@@ -2,6 +2,7 @@ from flask import abort
 from peewee import fn
 
 from app.models.enums.http_status import HttpStatus
+from app.models.enums.workspace_type import WorkspaceType
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.workspace import Workspace
@@ -97,7 +98,7 @@ class WorkspaceUserAccessControl:
         """
 
         workspace = Workspace.get_by_id(workspace_id)
-        if workspace.is_personal and check_personal:
+        if workspace.workspace_type == WorkspaceType.PERSONAL.value and check_personal:
             if required_role != WorkspaceUserRole.VIEW:
                 abort(HttpStatus.FORBIDDEN.value)
 

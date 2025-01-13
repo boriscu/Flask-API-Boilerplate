@@ -29,6 +29,8 @@ from contextlib import suppress
 import peewee as pw
 from peewee_migrate import Migrator
 
+from app.models.enums.workspace_type import WorkspaceType
+
 from app.models.pg.base import BaseModel
 
 
@@ -44,7 +46,9 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         description = pw.TextField(default="")
         namespaces = pw.TextField(default="[]")
         icon_image = pw.BlobField(null=True)
-        is_personal = pw.BooleanField(default=False, null=False)
+        workspace_type = pw.IntegerField(
+            default=WorkspaceType.REGULAR.value, null=False
+        )
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):

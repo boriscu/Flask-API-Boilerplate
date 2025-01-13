@@ -1,4 +1,6 @@
 from flask_jwt_extended import get_jwt_identity
+
+from app.models.enums.workspace_type import WorkspaceType
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.workspace import Workspace
@@ -41,7 +43,7 @@ class WorkspaceUserRepository:
             description=f"Personal workspace for {user_name}",
             namespaces="[]",
             icon_image=None,
-            is_personal=True,
+            workspace_type=WorkspaceType.PERSONAL.value,
         )
 
         WorkspaceUserRepository.create_workspace_user_relation(
@@ -65,7 +67,7 @@ class WorkspaceUserRepository:
             .join(Workspace)
             .where(
                 (WorkspaceUser.user == int(get_jwt_identity()))
-                & (Workspace.is_personal == True)
+                & (Workspace.workspace_type == WorkspaceType.PERSONAL.value)
             )
             .get()
         ).workspace

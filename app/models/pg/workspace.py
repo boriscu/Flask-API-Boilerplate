@@ -1,4 +1,6 @@
-from peewee import TextField, BlobField, BooleanField
+from peewee import TextField, BlobField, IntegerField
+
+from app.models.enums.workspace_type import WorkspaceType
 
 from .base import BaseModel
 
@@ -9,4 +11,4 @@ class Workspace(BaseModel):
     description = TextField(default="")
     namespaces = TextField()
     icon_image = BlobField(null=True)
-    is_personal = BooleanField(default=False, null=False)
+    workspace_type = IntegerField(default=WorkspaceType.REGULAR.value, null=False)

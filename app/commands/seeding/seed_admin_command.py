@@ -6,6 +6,7 @@ from app.init.logger_setup import LoggerSetup
 
 from config.app_config import AppConfig
 
+from app.models.enums.workspace_type import WorkspaceType
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.workspace import Workspace
@@ -37,7 +38,7 @@ def seed_admin_command():
             description="Workspace that belongs to the admin",
             namespaces="[]",
             icon_image=None,
-            is_personal=True,
+            workspace_type=WorkspaceType.PERSONAL.value,
         )
 
         WorkspaceUser.create(

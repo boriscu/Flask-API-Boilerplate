@@ -25,8 +25,8 @@ def get_full_workspace_schema(namespace):
                 description="An integer representing the users role in the workspace. View = 0, Edit = 1, Admin = 2",
                 example=2,
             ),
-            "is_personal": fields.Boolean(
-                description="A flag representing if the workspace is personal. Each user has only 1 personal workspace",
+            "workspace_type": fields.Integer(
+                description="An identifier of the workspace type. Personal - 0, Regular - 1, Public - 2",
                 example=False,
             ),
             "created_at": fields.DateTime(
