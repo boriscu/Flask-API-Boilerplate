@@ -163,6 +163,34 @@ class WorkspaceRepository:
         return (workspaces, total_entries, total_pages)
 
     @staticmethod
+    def get_public_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
+
+        user_id = int(get_jwt_identity())
+
+        workspaces, total_entries, total_pages = (
+            WorkspacePaginationService.get_public_workspaces(
+                user_id=user_id,
+                page=args.get("page", 1),
+                per_page=args.get("per_page", 10),
+                sort_field=args.get("sort_field", "created_at"),
+                sort_order=args.get("sort_order", "asc"),
+                search=args.get("search", " "),
+                filters=json.loads(args["filters"]) if args["filters"] else None,
+            )
+        )
+
+        for workspace in workspaces:
+
+            if workspace.icon_image:
+                workspace.icon_image = ImageProcessor.encode_image(workspace.icon_image)
+
+            workspace.user_role = WorkspaceUserAccessControl.get_user_role(
+                workspace.id, user_id
+            )
+
+        return (workspaces, total_entries, total_pages)
+
+    @staticmethod
     def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
 
         user_id = int(get_jwt_identity())
