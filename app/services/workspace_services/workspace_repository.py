@@ -104,10 +104,18 @@ class WorkspaceRepository:
 
         workspace = Workspace.get_by_id(workspace_id)
 
-        workspace.name = args.get("name", workspace.name)
-        workspace.description = args.get("description", workspace.description)
-        workspace.namespaces = args.get(
-            "namespaces", "[]" if workspace.namespaces == None else workspace.namespaces
+        workspace.name = (
+            args["name"] if args.get("name") is not None else workspace.name
+        )
+        workspace.description = (
+            args["description"]
+            if args.get("description") is not None
+            else workspace.description
+        )
+        workspace.namespaces = (
+            args["namespaces"]
+            if args.get("namespaces") is not None
+            else workspace.namespaces
         )
 
         icon_image = args.get("icon_image", None)
