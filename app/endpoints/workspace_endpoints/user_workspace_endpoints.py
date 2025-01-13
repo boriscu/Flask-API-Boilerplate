@@ -86,7 +86,8 @@ class SingleWorkspaceEndpoint(Resource):
     @workspace_namespace.response(HttpStatus.OK.value, "Workspace deleted succesfully")
     @workspace_namespace.response(HttpStatus.NOT_FOUND.value, "Workspace not found")
     @workspace_namespace.response(
-        HttpStatus.FORBIDDEN.value, "User does not have access to specified workspace"
+        HttpStatus.FORBIDDEN.value,
+        "User does not have admin access to the specified workspace, or the workspace is personal",
     )
     @workspace_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
@@ -105,7 +106,8 @@ class SingleWorkspaceEndpoint(Resource):
         model=workspace_schema_retriever.retrieve("create_workspace_response"),
     )
     @workspace_namespace.response(
-        HttpStatus.FORBIDDEN.value, "User does not have access to specified workspace"
+        HttpStatus.FORBIDDEN.value,
+        "User does not have admin access to the specified workspace, or the workspace is personal",
     )
     @workspace_namespace.response(
         HttpStatus.UNAUTHORIZED.value, "Authentication is required"
