@@ -1,3 +1,5 @@
+from flask import Flask
+
 from app.commands.celery_health_check import celery_health_check_command
 from app.commands.db_health_check import db_health_check_command
 
@@ -10,8 +12,13 @@ from app.commands.migrations.db_migrate_status import (
     command as db_migrate_status_command,
 )
 
+from app.commands.mail.send_mail import command as send_mail
+from app.commands.mail.send_mail import initialize_email_client
 
-def register_commands(app):
+
+def register_commands(app: Flask):
+    initialize_email_client()
+
     app.cli.add_command(celery_health_check_command)
     app.cli.add_command(db_health_check_command)
 
@@ -21,3 +28,5 @@ def register_commands(app):
     app.cli.add_command(db_migrate_command)
     app.cli.add_command(db_rollback_command)
     app.cli.add_command(db_migrate_status_command)
+
+    app.cli.add_command(send_mail)
