@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
 from peewee import DoesNotExist, IntegrityError, PeeweeException
+from werkzeug.exceptions import HTTPException
 import sentry_sdk
 
 from app.models.enums.http_status import HttpStatus
@@ -100,6 +101,12 @@ def register_error_handlers(app: Flask):
         """Handle IndexError exceptions."""
         sentry_sdk.capture_exception(e)
         return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
+
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        """Handle exceptions raised by abort."""
+        status_code = e.code if hasattr(e, "code") and e.code else 500
+        return HttpResponseGenerator.generate_response(HttpStatus(status_code))
 
     @app.errorhandler(Exception)
     def handle_general_exception(e):
