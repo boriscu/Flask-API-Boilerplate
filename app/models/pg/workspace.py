@@ -12,3 +12,4 @@ class Workspace(BaseModel):
     namespaces = TextField()
     icon_image = BlobField(null=True)
     workspace_type = IntegerField(default=WorkspaceType.REGULAR.value, null=False)
+    user_limit = IntegerField(default=10, null=False)

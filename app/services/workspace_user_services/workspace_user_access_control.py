@@ -89,14 +89,14 @@ class WorkspaceUserAccessControl:
 
         if (
             not UserAuthService.check_if_admin()
-            and not WorkspaceUserAccessControl._check_workspace_user_access(
+            and not WorkspaceUserAccessControl.check_workspace_user_access(
                 workspace_id, user_id, required_role
             )
         ):
             abort(HttpStatus.FORBIDDEN.value)
 
     @staticmethod
-    def _check_workspace_user_access(
+    def check_workspace_user_access(
         workspace_id: int, user_id: int, required_role: WorkspaceUserRole
     ) -> bool:
         """

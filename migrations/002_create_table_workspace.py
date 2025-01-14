@@ -49,6 +49,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         workspace_type = pw.IntegerField(
             default=WorkspaceType.REGULAR.value, null=False
         )
+        user_limit = pw.IntegerField(default=10, null=False)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):

@@ -5,6 +5,7 @@ from flask import abort
 from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
+from app.models.pg.workspace_user import WorkspaceUser
 
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.workspace_user_services.workspace_user_access_control import (
@@ -67,3 +68,20 @@ class WorkspaceValidationService:
             return "*"
         else:
             return ast.literal_eval(raw_namespaces)
+
+    @staticmethod
+    def count_workspace_users(workspace_id: int) -> int:
+        """
+        Counts the number of users that are part of a specified workspace.
+
+        Args:
+            workspace_id (int): The unique identifier of the workspace.
+
+        Returns:
+            int: The number of users associated with the workspace.
+        """
+        return (
+            WorkspaceUser.select()
+            .where(WorkspaceUser.workspace == workspace_id)
+            .count()
+        )
