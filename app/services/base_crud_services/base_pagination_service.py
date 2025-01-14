@@ -9,7 +9,6 @@ from operator import or_
 class BasePaginationService(ABC):
 
     @classmethod
-    @abstractmethod
     def get_rows(
         cls,
         model: Type[Model],
