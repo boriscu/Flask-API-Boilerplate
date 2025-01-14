@@ -16,7 +16,6 @@ class WorkspaceUserInviteRepository:
     def create_workspace_user_invite(
         workspace_id: int, data: Dict[str, Any]
     ) -> Response:
-
         invited_id, workspace_user_role = (
             WorkspaceUserInviteValidationService.validate_invitation(
                 workspace_id=workspace_id, invitor_id=int(get_jwt_identity()), data=data

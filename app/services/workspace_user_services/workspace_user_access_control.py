@@ -78,7 +78,6 @@ class WorkspaceUserAccessControl:
         if workspace.workspace_type == WorkspaceType.PERSONAL.value and check_personal:
             if required_role != WorkspaceUserRole.VIEW:
                 abort(HttpStatus.FORBIDDEN.value)
-
         if (
             WorkspaceUserAccessControl._check_public_workspace_access(
                 workspace, user_id

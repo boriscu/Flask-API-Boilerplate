@@ -47,7 +47,7 @@ class WorkspaceUserInviteValidationService:
         Raises:
         - HttpStatus.FORBIDDEN: If the invitor does not have admin rights.
         """
-        if not WorkspaceUserAccessControl.check_operation_access_rights(
+        if not WorkspaceUserAccessControl.check_workspace_user_access(
             workspace_id=workspace_id,
             user_id=invitor_id,
             required_role=WorkspaceUserRole.ADMIN,
@@ -55,7 +55,7 @@ class WorkspaceUserInviteValidationService:
             abort(HttpStatus.FORBIDDEN.value)
 
     @staticmethod
-    def _check_invited(invited_id: int, workspace_id):
+    def _check_invited(invited_id: int, workspace_id: int):
         """
         Checks if the invited user is already part of the workspace with any assigned role.
 
@@ -66,7 +66,8 @@ class WorkspaceUserInviteValidationService:
         Raises:
         - HttpStatus.BAD_REQUEST: If the invited user is already part of the workspace.
         """
-        if WorkspaceUserAccessControl.check_operation_access_rights(
+
+        if WorkspaceUserAccessControl.check_workspace_user_access(
             workspace_id=workspace_id,
             user_id=invited_id,
             required_role=WorkspaceUserRole.VIEW,
@@ -112,14 +113,11 @@ class WorkspaceUserInviteValidationService:
         invited_id = data.get("user_id")
 
         WorkspaceUserInviteValidationService._check_invitor(invitor_id, workspace_id)
-        WorkspaceUserInviteValidationService._check_invited(invited_id)
-
+        WorkspaceUserInviteValidationService._check_invited(invited_id, workspace_id)
         workspace_user_role = (
             WorkspaceUserInviteValidationService._validate_workspace_user_role(
                 data.get("workspace_user_role", WorkspaceUserRole.VIEW.value)
             )
         )
-
         WorkspaceUserInviteValidationService._check_workspace_limit(workspace_id)
-
         return invited_id, workspace_user_role
