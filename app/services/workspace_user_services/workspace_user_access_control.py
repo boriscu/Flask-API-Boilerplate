@@ -1,3 +1,4 @@
+import ast
 from flask import abort
 from peewee import fn
 
@@ -9,6 +10,7 @@ from app.models.pg.workspace import Workspace
 from app.models.pg.workspace_user import WorkspaceUser
 
 from app.services.user_services.user_auth_service import UserAuthService
+from app.services.user_services.user_validation_service import UserValidationService
 
 
 class WorkspaceUserAccessControl:
@@ -51,6 +53,48 @@ class WorkspaceUserAccessControl:
             return None
 
     @staticmethod
+    def check_operation_access_rights(
+        workspace_id: int,
+        user_id: int,
+        required_role: WorkspaceUserRole,
+        check_personal: bool = False,
+    ):
+        """
+        Verifies if a user has a specified access level or higher to a workspace, considering personal workspace restrictions.
+        The function checks if the workspace is personal and if so, restricts operations to those with a 'VIEW' role only.
+
+        Args:
+            workspace_id (int): The ID of the workspace for which access rights are being checked.
+            user_id (int): The ID of the user whose access rights are being verified.
+            required_role (WorkspaceUserRole): The minimum required role the user must have to access the workspace (e.g., WorkspaceUserRole.VIEW, WorkspaceUserRole.EDIT, WorkspaceUserRole.ADMIN).
+            check_personal (bool): A flag to check if the workspace is personal and restrict higher-level operations.
+
+        Raises:
+            HTTPException: Aborts the current request and raises an HTTP 403 Forbidden if the user does not have the required access rights or higher.
+        """
+
+        workspace = Workspace.get_by_id(workspace_id)
+
+        if workspace.workspace_type == WorkspaceType.PERSONAL.value and check_personal:
+            if required_role != WorkspaceUserRole.VIEW:
+                abort(HttpStatus.FORBIDDEN.value)
+        if (
+            WorkspaceUserAccessControl._check_public_workspace_access(
+                workspace, user_id
+            )
+            and required_role == WorkspaceUserRole.VIEW
+        ):
+            return
+
+        if (
+            not UserAuthService.check_if_admin()
+            and not WorkspaceUserAccessControl.check_workspace_user_access(
+                workspace_id, user_id, required_role
+            )
+        ):
+            abort(HttpStatus.FORBIDDEN.value)
+
+    @staticmethod
     def check_workspace_user_access(
         workspace_id: int, user_id: int, required_role: WorkspaceUserRole
     ) -> bool:
@@ -77,35 +121,22 @@ class WorkspaceUserAccessControl:
             return False
 
     @staticmethod
-    def check_operation_access_rights(
-        workspace_id: int,
-        user_id: int,
-        required_role: WorkspaceUserRole,
-        check_personal: bool = False,
-    ):
+    def _check_public_workspace_access(workspace: Workspace, user_id: int) -> bool:
         """
-        Verifies if a user has a specified access level or higher to a workspace, considering personal workspace restrictions.
-        The function checks if the workspace is personal and if so, restricts operations to those with a 'VIEW' role only.
+        Checks if a user has access to a public workspace based on namespaces.
 
         Args:
-            workspace_id (int): The ID of the workspace for which access rights are being checked.
-            user_id (int): The ID of the user whose access rights are being verified.
-            required_role (WorkspaceUserRole): The minimum required role the user must have to access the workspace (e.g., WorkspaceUserRole.VIEW, WorkspaceUserRole.EDIT, WorkspaceUserRole.ADMIN).
-            check_personal (bool): A flag to check if the workspace is personal and restrict higher-level operations.
+            workspace (Workspace): The workspace object.
+            user_id (int): The ID of the user whose access is being verified.
 
-        Raises:
-            HTTPException: Aborts the current request and raises an HTTP 403 Forbidden if the user does not have the required access rights or higher.
+        Returns:
+            bool: True if access is granted, False otherwise.
         """
-
-        workspace = Workspace.get_by_id(workspace_id)
-        if workspace.workspace_type == WorkspaceType.PERSONAL.value and check_personal:
-            if required_role != WorkspaceUserRole.VIEW:
-                abort(HttpStatus.FORBIDDEN.value)
-
-        if (
-            not UserAuthService.check_if_admin()
-            and not WorkspaceUserAccessControl.check_workspace_user_access(
-                workspace_id, user_id, required_role
-            )
-        ):
-            abort(HttpStatus.FORBIDDEN.value)
+        user_namespace = UserValidationService.get_user_namespace(user_id)
+        if workspace.workspace_type == WorkspaceType.PUBLIC.value:
+            if workspace.namespaces == "*":
+                return True
+            else:
+                return user_namespace in ast.literal_eval(workspace.namespaces)
+        else:
+            return False

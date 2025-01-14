@@ -40,7 +40,7 @@ class BaseUserEndpoint(Resource):
         }, HttpStatus.OK.value
 
 
-@user_namespace.route("/<int:user_id>", methods=["GET", "DELETE"])
+@user_namespace.route("/<int:user_id>", methods=["GET", "DELETE", "PUT"])
 class SingleUserEndpoint(Resource):
     @user_namespace.doc(
         description="Retrieve any user's profile by user ID. Requires admin privileges."
@@ -66,6 +66,18 @@ class SingleUserEndpoint(Resource):
     @jwt_required()
     def delete(self, user_id):
         return UserRepository.delete_user(user_id)
+
+    @user_namespace.doc(
+        description="Update a user. Admin can update any user. Only the admin can change the is_sso field"
+    )
+    @user_namespace.expect(user_schema_retriever.retrieve("update_user"), validate=True)
+    @user_namespace.response(HttpStatus.OK.value, "User updated succesfully")
+    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
+    def put(self, user_id):
+        return UserRepository.update_user(
+            user_id, user_schema_retriever.retrieve("update_user").parse_args()
+        )
 
 
 @user_namespace.route("/<int:user_id>/status/", methods=["PUT"])

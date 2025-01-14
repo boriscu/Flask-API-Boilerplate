@@ -1,5 +1,5 @@
-from typing import Dict, List, Tuple, Union
-from flask import json
+from typing import Any, Dict, List, Tuple, Union
+from flask import Response, abort, json
 
 
 from app.helpers.image_processor import ImageProcessor
@@ -13,6 +13,7 @@ from app.services.user_services.user_pagination_service import UserPaginationSer
 
 
 class UserRepository:
+
     @staticmethod
     def get_single_user(user_id: int, check_admin: bool = False) -> UserProfile:
         """
@@ -122,5 +123,57 @@ class UserRepository:
             UserProfile.delete().where(UserProfile.id == user_id).execute()
         else:
             return HttpResponseGenerator.generate_response(HttpStatus.FORBIDDEN)
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
+
+    @staticmethod
+    def update_user(user_id: int, args: Dict[str, Any]) -> Response:
+        """Update an existing user in the database and return a Flask response object.
+
+        Args:
+            user_id (int): The ID of the user to update.
+            args (Dict[str, Any]): A dictionary containing user attributes.
+
+        Returns:
+            Response: Flask response object with the update status.
+
+        Note: A regular user can only update himself. The is_sso, workspace_creation_quota fields are editable only by admin
+        """
+        user = UserProfile.get_by_id(user_id)
+
+        if not UserAuthService.check_if_admin() and user.id != user_id:
+            abort(HttpStatus.FORBIDDEN.value)
+
+        user.name = args["name"] if args.get("name") is not None else user.name
+        user.surname = (
+            args["surname"] if args.get("surname") is not None else user.surname
+        )
+        user.birthday = (
+            args["birthday"] if args.get("birthday") is not None else user.birthday
+        )
+        user.profession = (
+            args["profession"]
+            if args.get("profession") is not None
+            else user.profession
+        )
+        user.sex = args["sex"] if args.get("sex") is not None else user.sex
+
+        profile_picture = args.get("profile_picture", None)
+        profile_picture_data = (
+            ImageProcessor.compress_image(profile_picture) if profile_picture else None
+        )
+        user.profile_picture = profile_picture_data
+
+        if UserAuthService.check_if_admin():
+            user.is_sso = (
+                args["is_sso"] if args.get("is_sso") is not None else user.is_sso
+            )
+            user.workspace_creation_quota = (
+                args["workspace_creation_quota"]
+                if args.get("workspace_creation_quota") is not None
+                else user.workspace_creation_quota
+            )
+
+        user.save()
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)

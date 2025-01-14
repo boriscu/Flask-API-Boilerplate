@@ -22,6 +22,9 @@ from app.models.validation_schemas.schemas.user_schemas.registration_schema impo
 from app.models.validation_schemas.schemas.user_schemas.toggle_user_status_response_schema import (
     get_toggle_user_status_response_schema,
 )
+from app.models.validation_schemas.schemas.user_schemas.update_user_schema import (
+    get_update_user_schema,
+)
 
 
 def create_user_schemas(namespace):
@@ -35,4 +38,5 @@ def create_user_schemas(namespace):
         "change_password": get_change_password_schema(namespace),
         "admin_change_password": get_admin_change_password_schema(namespace),
         "users_response": get_all_users_schema(namespace),
+        "update_user": get_update_user_schema(namespace),
     }
