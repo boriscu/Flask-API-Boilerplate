@@ -4,6 +4,7 @@ import click
 from flask import Flask, current_app
 from flask_mail import Mail, Message
 
+from app.init.logger_setup import LoggerSetup
 from config.app_config import AppConfig
 
 # A regex pattern for validating email addresses
@@ -31,40 +32,55 @@ def initialize_email_client() -> None:
         app.config["MAIL_USE_SSL"] = False
 
 
-def validate_email(ctx, param, value: str) -> str:
-    if not re.match(EMAIL_REGEX, value):
-        raise click.BadParameter("Invalid email address format.")
-    return value
+def validate_recipients(ctx, param, to: tuple) -> str:
+    for receiptient in to:
+        if not re.match(EMAIL_REGEX, receiptient):
+            raise click.BadParameter("Invalid email address format.")
+    return to
 
 
-def validate_body(ctx, param, value: click.Path) -> click.Path:
-    if not value.endswith(".html"):
+def validate_body(ctx, param, body: click.Path) -> click.Path:
+    if not body.endswith(".html"):
         raise click.BadParameter("Body must be of type .html.")
-    return value
+    return body
 
 
 @click.command("mail:send", help="This command is used to send an email.")
-@click.argument(
-    "email",
-    type=click.STRING,
-    callback=validate_email,
+@click.option(
+    "--to",
+    multiple=True,
+    callback=validate_recipients,
     required=True,
 )
-@click.argument(
-    "path_to_body",
+@click.option("--subject", type=str, required=True)
+@click.option(
+    "--body",
     type=click.Path(exists=True, dir_okay=False),
     callback=validate_body,
     required=True,
 )
-def command(email: str, path_to_body: str) -> None:
-    with open(path_to_body, "r", encoding="utf-8") as file:
-        body = file.read()
+def command(to: tuple, subject: str, body: str) -> None:
+    logger = LoggerSetup.get_logger("cli")
+
+    try:
+        with open(body, "r", encoding="utf-8") as file:
+            body = file.read()
+    except Exception as e:
+        logger.info("There was an error while reading email body.")
+        logger.info(e)
+        return
 
     mail = get_mail_object()
     message: Message = Message(
-        subject="Welcome, user!",
-        recipients=[email],
+        subject=subject,
+        recipients=to,
         sender="radovic.nenad158@gmail.com",
     )
     message.body = body
-    mail.send(message)
+    try:
+        logger.info("Trying to send email...")
+        mail.send(message)
+        logger.info("Email sent successfully!")
+    except Exception as e:
+        logger.info("There was an error while sending email.")
+        logger.info(e)
