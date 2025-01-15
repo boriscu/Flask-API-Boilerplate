@@ -13,10 +13,6 @@ def get_invite_schema(namespace):
     full_workspace_schema = namespace.model(
         "Invite",
         {
-            "invite_status": fields.Integer(
-                description="Status of the invite. Pending = 0, Accepted = 1, Declined = 2",
-                example=0,
-            ),
             "workspace_user_role": fields.Integer(
                 description="Role that the user will receive at the workspace. View = 0, Edit = 1",
                 example=1,

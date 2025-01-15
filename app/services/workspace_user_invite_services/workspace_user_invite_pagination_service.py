@@ -78,7 +78,6 @@ class WorkspaceUserInvitePaginationService(BasePaginationService):
                     "profile_picture": encoded_profile_picture,
                     "id": user_profile.id,
                 },
-                "invite_status": invite.invite_status,
                 "workspace_user_role": invite.workspace_user_role,
                 "created_at": invite.created_at,
                 "id": invite.id,
