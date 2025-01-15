@@ -6,7 +6,7 @@ from flask_mail import Mail, Message
 
 from config.app_config import AppConfig
 
-# Define a regex pattern for validating email addresses
+# A regex pattern for validating email addresses
 EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
 _mail: Mail | None = None

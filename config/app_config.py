@@ -103,6 +103,11 @@ class AppConfig(BaseConfig):
 
             cls.SENTRY_DSN = os.getenv("SENTRY_DSN")
 
+            cls.MAIL_SERVER = os.getenv("MAIL_SERVER")
+            cls.MAIL_PORT = os.getenv("MAIL_PORT")
+            cls.MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+            cls.MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
         super().check_none_values()
 
     @classmethod
