@@ -1,6 +1,6 @@
 from flask import request
 from flask_jwt_extended import jwt_required
-from flask_restx import Resource
+from flask_restx import Resource, marshal_with
 from app.models.enums.http_status import HttpStatus
 from app.services.workspace_user_invite_services.workspace_user_invite_repository import (
     WorkspaceUserInviteRepository,
@@ -9,9 +9,7 @@ from app.services.workspace_user_invite_services.workspace_user_invite_repositor
 from . import workspace_user_invite_namespace, workspace_user_invite_schema_retriever
 
 
-@workspace_user_invite_namespace.route(
-    "/workspace/<int:workspace_id>", methods=["POST"]
-)
+@workspace_user_invite_namespace.route("/<int:workspace_id>", methods=["POST"])
 class WorkspaceInviteEndpoint(Resource):
     @workspace_user_invite_namespace.doc(description="Creates an invite.")
     @workspace_user_invite_namespace.expect(
@@ -47,3 +45,36 @@ class WorkspaceInviteEndpoint(Resource):
         return WorkspaceUserInviteRepository.create_workspace_user_invite(
             workspace_id, request.get_json()
         )
+
+
+@workspace_user_invite_namespace.route("/", methods=["GET"])
+class BaseUserWorkspaceEndpoint(Resource):
+    @workspace_user_invite_namespace.doc(
+        description="Fetches all invites with pagination, sorting, and filtering. In most cases you would use the filter to show only pending invites"
+    )
+    @workspace_user_invite_namespace.expect(
+        workspace_user_invite_schema_retriever.retrieve("pagination_parser"),
+        validate=True,
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.OK.value,
+        "Workspaces fetched successfully.",
+        model=workspace_user_invite_schema_retriever.retrieve("invites"),
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.UNAUTHORIZED.value, "Unauthorized."
+    )
+    @marshal_with(workspace_user_invite_schema_retriever.retrieve("invites"))
+    @jwt_required()
+    def get(self):
+        args = workspace_user_invite_schema_retriever.retrieve(
+            "pagination_parser"
+        ).parse_args()
+        invites, total_entries, total_pages = (
+            WorkspaceUserInviteRepository.get_all_invites(args)
+        )
+        return {
+            "invites": invites,
+            "total_entries": total_entries,
+            "total_pages": total_pages,
+        }, HttpStatus.OK.value

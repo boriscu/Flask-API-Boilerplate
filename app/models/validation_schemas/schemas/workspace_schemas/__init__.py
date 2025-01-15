@@ -1,6 +1,9 @@
 from app.models.validation_schemas.schemas.workspace_schemas.all_workspaces_schema import (
     get_all_workspace_schema,
 )
+from app.models.validation_schemas.schemas.workspace_schemas.partial_workspace_schema import (
+    get_partial_workspace_schema,
+)
 from app.models.validation_schemas.schemas.workspace_schemas.workspace_creation_response_schema import (
     get_create_workspace_response_schema,
 )
@@ -19,4 +22,5 @@ def create_workspace_schemas(namespace):
         "create_workspace_response": get_create_workspace_response_schema(namespace),
         "workspaces": get_all_workspace_schema(namespace),
         "workspace": get_full_workspace_schema(namespace),
+        "partial_workspace": get_partial_workspace_schema(namespace),
     }
