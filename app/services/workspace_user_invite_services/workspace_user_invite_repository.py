@@ -35,7 +35,12 @@ class WorkspaceUserInviteRepository:
 
     @staticmethod
     def get_all_invites(args: dict) -> Tuple[List[WorkspaceUserInvite], int, int]:
-        try:
-            return WorkspaceUserInvitePaginationService.get_serialized_invites(args)
-        except Exception as e:
-            print(e)
+        return WorkspaceUserInvitePaginationService.get_serialized_invites(args)
+
+    @staticmethod
+    def decline_user_invite(invite_id: int) -> Response:
+        WorkspaceUserInvite.delete().where(
+            (WorkspaceUserInvite.user == int(get_jwt_identity()))
+            & (WorkspaceUserInvite.id == invite_id)
+        ).execute()
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
