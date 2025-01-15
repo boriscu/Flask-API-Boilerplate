@@ -24,12 +24,14 @@ class WorkspaceUserInviteRepository:
                 workspace_id=workspace_id, invitor_id=int(get_jwt_identity()), data=data
             )
         )
-
-        WorkspaceUserInvite.create(
-            workspace=workspace_id,
-            user=invited_id,
-            workspace_user_role=workspace_user_role.value,
-        )
+        if not WorkspaceUserInviteValidationService.check_existing_invitation(
+            workspace_id=workspace_id, data=data
+        ):
+            WorkspaceUserInvite.create(
+                workspace=workspace_id,
+                user=invited_id,
+                workspace_user_role=workspace_user_role.value,
+            )
 
         return HttpResponseGenerator.generate_response(HttpStatus.CREATED)
 
