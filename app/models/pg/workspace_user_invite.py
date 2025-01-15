@@ -9,5 +9,6 @@ from app.models.pg.workspace import Workspace
 
 class WorkspaceUserInvite(BaseModel):
     workspace = ForeignKeyField(Workspace, null=False, on_delete="CASCADE")
+    invitor = ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
     user = ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
     workspace_user_role = IntegerField(default=WorkspaceUserRole.VIEW.value)
