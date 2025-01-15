@@ -62,6 +62,12 @@ class AppConfig(BaseConfig):
     # Sentry
     SENTRY_DSN = os.getenv("SENTRY_DSN")
 
+    # Email server
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = os.getenv("MAIL_PORT")
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
     @classmethod
     def load_config(cls):
         """
@@ -96,6 +102,11 @@ class AppConfig(BaseConfig):
             cls.ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
             cls.SENTRY_DSN = os.getenv("SENTRY_DSN")
+
+            cls.MAIL_SERVER = os.getenv("MAIL_SERVER")
+            cls.MAIL_PORT = os.getenv("MAIL_PORT")
+            cls.MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+            cls.MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
         super().check_none_values()
 
