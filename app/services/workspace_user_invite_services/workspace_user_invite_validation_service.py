@@ -5,6 +5,8 @@ from app.models.enums.http_status import HttpStatus
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.workspace import Workspace
+from app.models.pg.workspace_user_invite import WorkspaceUserInvite
+
 from app.services.workspace_services.workspace_validation_service import (
     WorkspaceValidationService,
 )
@@ -14,6 +16,47 @@ from app.services.workspace_user_services.workspace_user_access_control import (
 
 
 class WorkspaceUserInviteValidationService:
+
+    @staticmethod
+    def check_existing_invitation(workspace_id: int, data: Dict[str, Any]) -> bool:
+
+        if WorkspaceUserInvite.get_or_none(
+            WorkspaceUserInvite.workspace == workspace_id,
+            WorkspaceUserInvite.user == data.get("user_id"),
+        ):
+            return True
+
+        return False
+
+    @staticmethod
+    def validate_invitation(
+        workspace_id: int, invitor_id: int, data: Dict[str, Any]
+    ) -> Tuple[int, WorkspaceUserRole]:
+        """
+        Validates an invitation based on workspace rules and roles.
+
+        Parameters:
+        - workspace_id (int): The ID of the workspace.
+        - invitor_id (int): The ID of the invitor.
+        - data (dict): Contains details of the invitation such as 'user_id' and 'workspace_user_role'.
+
+        Returns:
+        - Tuple[int, WorkspaceUserRole]: Returns the invited user's ID and role.
+
+        Raises relevant HTTP status exceptions based on various checks.
+        """
+        invited_id = data.get("user_id")
+
+        WorkspaceUserInviteValidationService._check_invitor(invitor_id, workspace_id)
+        WorkspaceUserInviteValidationService._check_invited(invited_id, workspace_id)
+        workspace_user_role = (
+            WorkspaceUserInviteValidationService._validate_workspace_user_role(
+                data.get("workspace_user_role", WorkspaceUserRole.VIEW.value)
+            )
+        )
+        WorkspaceUserInviteValidationService._check_workspace_limit(workspace_id)
+        return invited_id, workspace_user_role
+
     @staticmethod
     def _validate_workspace_user_role(workspace_user_role: int) -> WorkspaceUserRole:
         """
@@ -92,32 +135,3 @@ class WorkspaceUserInviteValidationService:
             >= workspace.user_limit
         ):
             abort(HttpStatus.NOT_ACCEPTABLE.value)
-
-    @staticmethod
-    def validate_invitation(
-        workspace_id: int, invitor_id: int, data: Dict[str, Any]
-    ) -> Tuple[int, WorkspaceUserRole]:
-        """
-        Validates an invitation based on workspace rules and roles.
-
-        Parameters:
-        - workspace_id (int): The ID of the workspace.
-        - invitor_id (int): The ID of the invitor.
-        - data (dict): Contains details of the invitation such as 'user_id' and 'workspace_user_role'.
-
-        Returns:
-        - Tuple[int, WorkspaceUserRole]: Returns the invited user's ID and role.
-
-        Raises relevant HTTP status exceptions based on various checks.
-        """
-        invited_id = data.get("user_id")
-
-        WorkspaceUserInviteValidationService._check_invitor(invitor_id, workspace_id)
-        WorkspaceUserInviteValidationService._check_invited(invited_id, workspace_id)
-        workspace_user_role = (
-            WorkspaceUserInviteValidationService._validate_workspace_user_role(
-                data.get("workspace_user_role", WorkspaceUserRole.VIEW.value)
-            )
-        )
-        WorkspaceUserInviteValidationService._check_workspace_limit(workspace_id)
-        return invited_id, workspace_user_role

@@ -29,7 +29,6 @@ from contextlib import suppress
 import peewee as pw
 from peewee_migrate import Migrator
 
-from app.models.enums.invite_status import InviteStatus
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
 from app.models.pg.base import BaseModel
@@ -48,7 +47,6 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         workspace = pw.ForeignKeyField(Workspace, null=False, on_delete="CASCADE")
         user = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
         workspace_user_role = pw.IntegerField(default=WorkspaceUserRole.VIEW.value)
-        invite_status = pw.IntegerField(default=InviteStatus.PENDING.value)
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):
