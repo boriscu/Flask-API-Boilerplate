@@ -46,6 +46,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         id = pw.AutoField()
         workspace = pw.ForeignKeyField(Workspace, null=False, on_delete="CASCADE")
         user = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
+        invitor = pw.ForeignKeyField(UserProfile, null=False, on_delete="CASCADE")
         workspace_user_role = pw.IntegerField(default=WorkspaceUserRole.VIEW.value)
 
 

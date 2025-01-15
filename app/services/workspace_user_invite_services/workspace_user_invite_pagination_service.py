@@ -58,7 +58,7 @@ class WorkspaceUserInvitePaginationService(BasePaginationService):
 
         result = []
         for invite in invites:
-            user_profile = invite.user
+            user_profile = invite.invitor
             workspace = invite.workspace
             encoded_profile_picture = ImageProcessor.encode_image(
                 user_profile.profile_picture
