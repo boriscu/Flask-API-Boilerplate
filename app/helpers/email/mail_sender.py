@@ -1,6 +1,6 @@
 import re
 
-from flask import Flask
+from flask import Flask, current_app
 from flask_mail import Mail, Message
 
 from config.app_config import AppConfig
@@ -14,45 +14,45 @@ class MailSender:
             cls._instance = super(MailSender, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, app: Flask):
+    def __init__(self, app: Flask = current_app):
         if not hasattr(self, "_initialized"):
             self._initialized = True
             self.app = app
-            self.mail = Mail(app)
 
+            # TODO: Replace sender.
             app.config["MAIL_SERVER"] = AppConfig.MAIL_SERVER
             app.config["MAIL_PORT"] = AppConfig.MAIL_PORT
             app.config["MAIL_USERNAME"] = AppConfig.MAIL_USERNAME
             app.config["MAIL_PASSWORD"] = AppConfig.MAIL_PASSWORD
+            app.config["MAIL_DEFAULT_SENDER"] = "radovic.nenad158@gmail.com"
             app.config["MAIL_USE_TLS"] = True
             app.config["MAIL_USE_SSL"] = False
 
-    # TODO: Replace sender.
-    def send_email(
-        self, recipients: list[str] | str, subject: str, path_to_body: str
-    ) -> None:
-        """
-        Sends an email to the specified recipients with the given subject and body.
+            self.mail = Mail(app)
 
-        :param recipients: Can be a single email or a list of emails.
-        :param subject: The subject of the email.
-        :param path_to_body: The body of the email.
+    def send_html(self, recipients: list[str] | str, subject: str, html: str) -> None:
+        """
+        Sends an HTML email to the specified recipients with the given subject and HTML content.
+
+        :param recipients: Can be a single email address or a list of email addresses.
+        :param subject: The subject line of the email.
+        :param html: The HTML content to be sent as the body of the email.
         :return: None
         """
+
         if isinstance(recipients, str):
             recipients = [recipients]
 
-        if not self._validate_email(recipients) and self._validate_body(path_to_body):
+        if not self._validate_email(recipients):
             return
 
         message = Message(
-            subject=subject, recipients=recipients, sender="radovic.nenad158@gmail.com"
+            subject=subject,
+            recipients=recipients,
+            html=html,
         )
 
-        with open(path_to_body, "r", encoding="utf-8") as file:
-            message.body = file.read()
-
-        self.mail.send(message)
+        return self.mail.send(message)
 
     def get_email_regex(self) -> str:
         """
@@ -78,15 +78,4 @@ class MailSender:
         for receiptient in recipients:
             if not re.match(self.get_email_regex(), receiptient):
                 return False
-        return True
-
-    def _validate_body(self, path_to_body: str) -> bool:
-        """
-        Validates the body of the email by checking if the given path to the body ends with .html.
-
-        :param path_to_body: The path to the body of the email.
-        :return: True if the body is valid, False otherwise.
-        """
-        if not path_to_body.endswith(".html"):
-            return False
         return True
