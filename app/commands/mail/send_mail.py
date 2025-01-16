@@ -1,5 +1,7 @@
 import click
 
+from flask import current_app
+
 from app.init.logger_setup import LoggerSetup
 
 from app.helpers.mail_sender import MailSender
@@ -21,16 +23,10 @@ def command(to: tuple, subject: str, body: str) -> None:
     logger = LoggerSetup.get_logger("cli")
 
     try:
-        with open(body, "r", encoding="utf-8") as file:
-            body = file.read()
-    except Exception as e:
-        logger.info("There was an error while reading email body.")
-        logger.info(e)
-        return
-
-    try:
         logger.info("Trying to send email...")
-        MailSender().send_email(recipients=to, subject=subject, path_to_body=body)
+        MailSender(current_app).send_email(
+            recipients=to, subject=subject, path_to_body=body
+        )
         logger.info("Email sent successfully!")
     except Exception as e:
         logger.info("There was an error while sending email.")
