@@ -3,10 +3,7 @@ import re
 from flask import Flask
 from flask_mail import Mail, Message
 
-from app.init.logger_setup import LoggerSetup
 from config.app_config import AppConfig
-
-EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
 
 class MailSender:
@@ -45,8 +42,6 @@ class MailSender:
         if isinstance(recipients, str):
             recipients = [recipients]
 
-        logger = LoggerSetup.get_logger("general")
-
         if not self._validate_email(recipients) and self._validate_body(path_to_body):
             return
 
@@ -54,21 +49,24 @@ class MailSender:
             subject=subject, recipients=recipients, sender="radovic.nenad158@gmail.com"
         )
 
-        try:
-            with open(path_to_body, "r", encoding="utf-8") as file:
-                message.body = file.read()
-        except Exception as e:
-            logger.info("There was an error while reading email body.")
-            logger.info(e)
-            return
+        with open(path_to_body, "r", encoding="utf-8") as file:
+            message.body = file.read()
 
-        try:
-            logger.info("Trying to send email...")
-            self.mail.send(message)
-            logger.info("Email sent successfully!")
-        except Exception as e:
-            logger.info("There was an error while sending email.")
-            logger.info(e)
+        self.mail.send(message)
+
+    def get_email_regex(self) -> str:
+        """
+        Retrieves a regex pattern that matches valid email addresses.
+
+        This regex pattern checks for emails that start with alphanumeric characters
+        (including dots, underscores, percent signs, plus signs, and hyphens),
+        followed by an '@' symbol, then more alphanumeric characters (including dots and hyphens),
+        and finally ends with a dot followed by two or more alphabetic characters.
+
+        Returns:
+            str: A regex pattern for validating email addresses.
+        """
+        return r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
     def _validate_email(self, recipients: list[str]) -> bool:
         """
@@ -77,10 +75,8 @@ class MailSender:
         :param recipients: A list of email addresses to validate.
         :return: True if all addresses are valid, False otherwise.
         """
-        logger = LoggerSetup.get_logger("general")
         for receiptient in recipients:
-            if not re.match(EMAIL_REGEX, receiptient):
-                logger.info(f"Invalid email address format: {receiptient}.")
+            if not re.match(self.get_email_regex(), receiptient):
                 return False
         return True
 
@@ -91,8 +87,6 @@ class MailSender:
         :param path_to_body: The path to the body of the email.
         :return: True if the body is valid, False otherwise.
         """
-        logger = LoggerSetup.get_logger("general")
         if not path_to_body.endswith(".html"):
-            logger.info("Provided body must be of type .html.")
             return False
         return True
