@@ -4,8 +4,8 @@ from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_reque
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
-from app.helpers.date_formatter import DateFormatter
-from app.helpers.password_validator import PasswordValidator
+from app.helpers.validators.date_validator import DateValidator
+from app.helpers.validators.password_validator import PasswordValidator
 from config.app_config import AppConfig
 
 from app.helpers.image_processor import ImageProcessor
@@ -50,7 +50,7 @@ class UserAuthService:
         surname = args.get("surname")
         email = args.get("email")
         password = PasswordValidator.validate_password(args.get("password"))
-        birthday = DateFormatter.date_from_string(args.get("birthday", None))
+        birthday = DateValidator.date_from_string(args.get("birthday", None))
         sex = args.get("sex", None)
         profession = args.get("profession", None)
         profile_picture = args.get("profile_picture", None)

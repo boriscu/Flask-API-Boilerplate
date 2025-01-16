@@ -1,9 +1,6 @@
 from flask_restx import reqparse
 from werkzeug.datastructures import FileStorage
 
-from app.helpers.date_formatter import DateFormatter
-from app.helpers.password_validator import PasswordValidator
-
 
 def get_user_registration_schema():
     user_registration_schema = reqparse.RequestParser(bundle_errors=True)

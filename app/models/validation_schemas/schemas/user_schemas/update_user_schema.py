@@ -1,5 +1,4 @@
 from flask_restx import reqparse
-from app.helpers.date_formatter import DateFormatter
 from werkzeug.datastructures import FileStorage
 
 
@@ -21,7 +20,7 @@ def get_update_user_schema(namespace):
     )
     update_user_schema.add_argument(
         "birthday",
-        type=DateFormatter.date_from_string,
+        type=str,
         required=False,
         location="form",
         help="User's date of birth. Example: 2001-11-27",

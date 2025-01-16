@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class DateFormatter:
+class DateValidator:
     @staticmethod
     def date_from_string(date_str: str):
         """Convert a date string into a datetime.date object."""

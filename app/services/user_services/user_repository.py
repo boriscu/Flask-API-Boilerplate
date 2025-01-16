@@ -1,11 +1,12 @@
 from typing import Any, Dict, List, Tuple, Union
 from flask import Response, abort, json
 
-
-from app.helpers.image_processor import ImageProcessor
 from app.models.enums.http_status import HttpStatus
+
 from app.models.pg.user_profile import UserProfile
 
+from app.helpers.image_processor import ImageProcessor
+from app.helpers.validators.date_validator import DateValidator
 from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
@@ -148,7 +149,9 @@ class UserRepository:
             args["surname"] if args.get("surname") is not None else user.surname
         )
         user.birthday = (
-            args["birthday"] if args.get("birthday") is not None else user.birthday
+            DateValidator.date_from_string(args["birthday"])
+            if args.get("birthday") is not None
+            else user.birthday
         )
         user.profession = (
             args["profession"]

@@ -2,7 +2,7 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource, marshal_with
 
-from app.helpers.password_validator import PasswordValidator
+from app.helpers.validators.password_validator import PasswordValidator
 from app.models.enums.http_status import HttpStatus
 
 from app.helpers.http_response_generator import HttpResponseGenerator
