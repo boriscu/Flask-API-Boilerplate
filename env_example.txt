@@ -28,3 +28,9 @@ ADMIN_PASSWORD=admin
 
 # Sentry configurations
 SENTRY_DSN=https://12r...
+
+# Email server
+MAIL_SERVER=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME=some-email-username-given-by-brevo
+MAIL_PASSWORD=some-email-password-given-by-brevo

@@ -23,6 +23,8 @@ load_dotenv(dotenv_path)
 def create_app():
     app = Flask(__name__)
 
+    app.app_context().push()
+
     AppConfig.load_config()
 
     SentryInitializer.initialize()

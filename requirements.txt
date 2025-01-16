@@ -1,5 +1,6 @@
 Flask==2.0.1
 Flask-Cors==4.0.0
+Flask-Mail==0.10.0
 peewee==3.17.1
 Peewee-Migrate==1.12.1
 psycopg2==2.9.9 
