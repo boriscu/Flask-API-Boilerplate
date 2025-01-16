@@ -2,12 +2,16 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
-from app.helpers.validators.password_validator import PasswordValidator
 from app.models.enums.http_status import HttpStatus
 
+from app.models.pg.user_profile import UserProfile
+
+from app.helpers.validators.password_validator import PasswordValidator
 from app.helpers.http_response_generator import HttpResponseGenerator
 
-from app.models.pg.user_profile import UserProfile
+from app.services.user_services.user_verification_service import (
+    UserVerificationService,
+)
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_repository import UserRepository
 
@@ -29,15 +33,9 @@ class RegisterEndpoint(Resource):
     )
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
-        try:
-            return UserAuthService.register(
-                user_schema_retriever.retrieve("registration").parse_args()
-            )
-        except Exception as e:
-            print(e)
-            return HttpResponseGenerator.generate_response(
-                HttpStatus.INTERNAL_SERVER_ERROR
-            )
+        return UserAuthService.register(
+            user_schema_retriever.retrieve("registration").parse_args()
+        )
 
 
 @user_namespace.route("/login/", methods=["POST"])
@@ -107,5 +105,21 @@ class UserPasswordEndpoint(Resource):
         UserRepository.update_user_password(
             user, data.get("old_password"), new_password
         )
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
+
+
+@user_namespace.route("/verify", methods=["POST"])
+class UserVerificationEndpoint(Resource):
+    @user_namespace.expect(
+        user_schema_retriever.retrieve("user_verification"), validate=True
+    )
+    @user_namespace.doc(description="Verifies the user account.")
+    @user_namespace.response(HttpStatus.OK.value, "Users account verified.")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Token not valid.")
+    def post(self):
+        data = request.json
+
+        UserVerificationService.submit(data.get("token"))
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)

@@ -25,6 +25,9 @@ from app.models.validation_schemas.schemas.user_schemas.toggle_user_status_respo
 from app.models.validation_schemas.schemas.user_schemas.update_user_schema import (
     get_update_user_schema,
 )
+from app.models.validation_schemas.schemas.user_schemas.user_verification_schema import (
+    get_user_verification_schema,
+)
 
 
 def create_user_schemas(namespace):
@@ -39,4 +42,5 @@ def create_user_schemas(namespace):
         "admin_change_password": get_admin_change_password_schema(namespace),
         "users_response": get_all_users_schema(namespace),
         "update_user": get_update_user_schema(namespace),
+        "user_verification": get_user_verification_schema(namespace),
     }

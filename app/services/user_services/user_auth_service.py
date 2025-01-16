@@ -4,19 +4,19 @@ from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_reque
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
-from app.helpers.validators.date_validator import DateValidator
-from app.helpers.validators.password_validator import PasswordValidator
-from app.services.user_services.account_verification_service import (
-    AccountVerificationService,
-)
 from config.app_config import AppConfig
-
-from app.helpers.image_processor import ImageProcessor
 
 from app.models.enums.http_status import HttpStatus
 
 from app.models.pg.user_profile import UserProfile
 
+from app.helpers.validators.date_validator import DateValidator
+from app.helpers.validators.password_validator import PasswordValidator
+from app.helpers.image_processor import ImageProcessor
+
+from app.services.user_services.user_verification_service import (
+    UserVerificationService,
+)
 from app.services.workspace_user_services.workspace_user_repository import (
     WorkspaceUserRepository,
 )
@@ -91,7 +91,7 @@ class UserAuthService:
                 expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
             )
 
-        AccountVerificationService.request(email)
+        UserVerificationService.request(email)
 
         return make_response(
             {

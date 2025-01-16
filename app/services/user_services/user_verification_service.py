@@ -6,12 +6,12 @@ from app.models.pg.user_profile import UserProfile
 
 from app.models.enums.http_status import HttpStatus
 
-from app.helpers.email.strategies.account_verification_sender import (
-    AccountVerificationSender,
+from app.helpers.email.strategies.user_verification_sender import (
+    UserVerificationSender,
 )
 
 
-class AccountVerificationService:
+class UserVerificationService:
 
     @staticmethod
     def request(email: str):
@@ -25,7 +25,7 @@ class AccountVerificationService:
             abort(HttpStatus.FORBIDDEN.value)
 
         token = secrets.token_urlsafe(32)
-        hashed_token = AccountVerificationService._hash_token(token)
+        hashed_token = UserVerificationService._hash_token(token)
 
         current_app.redis.setex(
             f"account-verification:{hashed_token}",
@@ -33,15 +33,15 @@ class AccountVerificationService:
             user.id,
         )
 
-        AccountVerificationSender().send_template(email, token)
+        UserVerificationSender().send_template(email, token)
 
     @staticmethod
-    def submit(token: str, password: str):
+    def submit(token: str):
 
-        if not password or not token:
+        if not token:
             abort(HttpStatus.BAD_REQUEST.value)
 
-        hashed_token = AccountVerificationService._hash_token(token)
+        hashed_token = UserVerificationService._hash_token(token)
 
         user_id = current_app.redis.get(f"account-verification:{hashed_token}")
 
