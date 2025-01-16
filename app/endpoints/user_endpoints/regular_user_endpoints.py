@@ -96,7 +96,7 @@ class UserPasswordEndpoint(Resource):
         data = request.json
 
         user = UserProfile.get_by_id(int(get_jwt_identity()))
-        new_password = PasswordValidator.validate(data.get("new_password"))
+        new_password = PasswordValidator().validate(data.get("new_password"))
 
         UserRepository.update_user_password(
             user, data.get("old_password"), new_password

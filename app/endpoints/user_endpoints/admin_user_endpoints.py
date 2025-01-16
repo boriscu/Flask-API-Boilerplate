@@ -115,7 +115,7 @@ class AdminPasswordEndpoint(Resource):
     def put(self, user_id):
         data = request.json
         user = UserRepository.get_single_user(user_id, check_admin=True)
-        password = PasswordValidator.validate(data.get("new_password"))
+        password = PasswordValidator().validate(data.get("new_password"))
 
         UserAuthService.change_password(user, password)
 
