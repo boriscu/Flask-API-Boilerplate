@@ -1,6 +1,8 @@
 from flask_restx import reqparse
-from app.helpers.date_formater import DateFormatter
 from werkzeug.datastructures import FileStorage
+
+from app.helpers.date_formatter import DateFormatter
+from app.helpers.password_validator import PasswordValidator
 
 
 def get_user_registration_schema():
@@ -28,10 +30,10 @@ def get_user_registration_schema():
     )
     user_registration_schema.add_argument(
         "password",
-        type=str,
+        type=PasswordValidator.validate_password,
         required=True,
         location="form",
-        help="Password for account creation. Example: Strong password",
+        help="Password for account creation. Example: 'Strong password'.",
     )
     user_registration_schema.add_argument(
         "birthday",

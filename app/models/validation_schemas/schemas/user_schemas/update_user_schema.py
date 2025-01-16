@@ -1,5 +1,5 @@
 from flask_restx import reqparse
-from app.helpers.date_formater import DateFormatter
+from app.helpers.date_formatter import DateFormatter
 from werkzeug.datastructures import FileStorage
 
 

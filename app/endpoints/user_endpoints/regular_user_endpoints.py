@@ -2,6 +2,7 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
+from app.helpers.password_validator import PasswordValidator
 from app.models.enums.http_status import HttpStatus
 
 from app.helpers.http_response_generator import HttpResponseGenerator
@@ -89,17 +90,16 @@ class UserPasswordEndpoint(Resource):
     )
     @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
     @user_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
+    @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Old password is incorrect.")
     @jwt_required()
     def put(self):
         data = request.json
 
         user = UserProfile.get_by_id(int(get_jwt_identity()))
+        new_password = PasswordValidator.validate_password(data.get("new_password"))
 
-        result = UserRepository.update_user_password(
-            user, data.get("old_password"), data.get("new_password")
+        UserRepository.update_user_password(
+            user, data.get("old_password"), new_password
         )
-
-        if result:
-            return result, HttpStatus.BAD_REQUEST.value
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)

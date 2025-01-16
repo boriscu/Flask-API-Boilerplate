@@ -109,10 +109,9 @@ class UserRepository:
             Union[Dict[str, str], None]: A message dictionary in case of an error, None if the password was updated.
         """
         if not UserAuthService.check_password(user, old_password):
-            return {"msg": "Old password is incorrect"}
+            raise ValueError("Old password is incorrect")
 
         UserAuthService.change_password(user, new_password)
-        return None
 
     @staticmethod
     def delete_user(user_id: int):
