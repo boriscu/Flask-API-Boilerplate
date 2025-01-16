@@ -2,7 +2,7 @@ from flask_restx import reqparse
 from werkzeug.datastructures import FileStorage
 
 from app.helpers.date_formatter import DateFormatter
-from app.helpers.password_validator import PasswordValidator
+from app.helpers.validator.password_validator import PasswordValidator
 
 
 def get_user_registration_schema():
@@ -30,7 +30,7 @@ def get_user_registration_schema():
     )
     user_registration_schema.add_argument(
         "password",
-        type=PasswordValidator.validate_password,
+        type=PasswordValidator.validate,
         required=True,
         location="form",
         help="Password for account creation. Example: 'Strong password'.",
