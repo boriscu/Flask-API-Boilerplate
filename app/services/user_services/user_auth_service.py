@@ -6,6 +6,9 @@ from datetime import timedelta
 
 from app.helpers.validators.date_validator import DateValidator
 from app.helpers.validators.password_validator import PasswordValidator
+from app.services.user_services.account_verification_service import (
+    AccountVerificationService,
+)
 from config.app_config import AppConfig
 
 from app.helpers.image_processor import ImageProcessor
@@ -87,6 +90,8 @@ class UserAuthService:
                 identity=str(user.id),
                 expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
             )
+
+        AccountVerificationService.request(email)
 
         return make_response(
             {

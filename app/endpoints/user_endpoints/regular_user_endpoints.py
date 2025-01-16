@@ -29,9 +29,15 @@ class RegisterEndpoint(Resource):
     )
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def post(self):
-        return UserAuthService.register(
-            user_schema_retriever.retrieve("registration").parse_args()
-        )
+        try:
+            return UserAuthService.register(
+                user_schema_retriever.retrieve("registration").parse_args()
+            )
+        except Exception as e:
+            print(e)
+            return HttpResponseGenerator.generate_response(
+                HttpStatus.INTERNAL_SERVER_ERROR
+            )
 
 
 @user_namespace.route("/login/", methods=["POST"])

@@ -68,6 +68,9 @@ class AppConfig(BaseConfig):
     MAIL_USERNAME = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
+    # Client
+    CLIENT_DOMAIN = None
+
     @classmethod
     def load_config(cls):
         """
@@ -107,6 +110,8 @@ class AppConfig(BaseConfig):
             cls.MAIL_PORT = os.getenv("MAIL_PORT")
             cls.MAIL_USERNAME = os.getenv("MAIL_USERNAME")
             cls.MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
+            cls.CLIENT_DOMAIN = os.getenv("CLIENT_DOMAIN", "http://localhost:3000")
 
         super().check_none_values()
 

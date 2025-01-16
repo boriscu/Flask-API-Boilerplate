@@ -34,3 +34,6 @@ MAIL_SERVER=smtp-relay.brevo.com
 MAIL_PORT=587
 MAIL_USERNAME=some-email-username-given-by-brevo
 MAIL_PASSWORD=some-email-password-given-by-brevo
+
+# Client
+CLIENT_DOMAIN=http://localhost:3000

@@ -54,7 +54,7 @@ class MailSender:
 
         return self.mail.send(message)
 
-    def get_email_regex(self) -> str:
+    def _get_email_regex(self) -> str:
         """
         Retrieves a regex pattern that matches valid email addresses.
 
@@ -76,6 +76,6 @@ class MailSender:
         :return: True if all addresses are valid, False otherwise.
         """
         for receiptient in recipients:
-            if not re.match(self.get_email_regex(), receiptient):
+            if not re.match(self._get_email_regex(), receiptient):
                 return False
         return True
