@@ -30,14 +30,14 @@ def get_user_registration_schema():
     )
     user_registration_schema.add_argument(
         "password",
-        type=PasswordValidator.validate_password,
+        type=str,
         required=True,
         location="form",
         help="Password for account creation. Example: 'Strong password'.",
     )
     user_registration_schema.add_argument(
         "birthday",
-        type=DateFormatter.date_from_string,
+        type=str,
         required=False,
         location="form",
         help="User's date of birth. Example: 2001-11-27",
