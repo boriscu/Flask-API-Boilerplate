@@ -35,6 +35,7 @@ class AccountVerificationService:
 
         AccountVerificationSender().send_template(email, token)
 
+    @staticmethod
     def submit(token: str, password: str):
 
         if not password or not token:
