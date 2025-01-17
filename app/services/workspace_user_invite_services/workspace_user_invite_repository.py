@@ -9,6 +9,9 @@ from app.models.enums.http_status import HttpStatus
 from app.models.pg.user_profile import UserProfile
 from app.models.pg.workspace_user import WorkspaceUser
 from app.models.pg.workspace_user_invite import WorkspaceUserInvite
+from app.services.workspace_user_invite_services.workspace_non_registred_user_invite import (
+    WorkspaceNonRegistredUserInviteService,
+)
 from app.services.workspace_user_invite_services.workspace_user_invite_pagination_service import (
     WorkspaceUserInvitePaginationService,
 )
@@ -45,23 +48,7 @@ class WorkspaceUserInviteRepository:
                     workspace_user_role=workspace_user_role.value,
                 )
         except UserProfile.DoesNotExist:
-            invite = current_app.redis.get(data["user_email"])
-
-            if invite:
-                invite = json.loads(invite)
-                if not invite["workspace_id"] == workspace_id:
-                    new_invite = data
-                    new_invite["workspace_id"] = workspace_id
-
-                    current_app.redis.setex(
-                        data["user_email"], 60 * 60 * 24, json.dumps(new_invite)
-                    )
-            else:
-                invite = data
-                invite["workspace_id"] = workspace_id
-                current_app.redis.setex(
-                    data["user_email"], 60 * 60 * 24, json.dumps(invite)
-                )
+            WorkspaceNonRegistredUserInviteService.reserve_invite(workspace_id, data)
 
         return HttpResponseGenerator.generate_response(HttpStatus.CREATED)
 
