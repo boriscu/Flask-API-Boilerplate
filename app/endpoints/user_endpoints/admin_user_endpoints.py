@@ -1,13 +1,8 @@
-from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource, marshal_with
 
-from app.helpers.validators.password_validator import PasswordValidator
 from app.models.enums.http_status import HttpStatus
 
-from app.helpers.http_response_generator import HttpResponseGenerator
-
-from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_repository import UserRepository
 
 from . import user_namespace, user_schema_retriever
@@ -99,24 +94,3 @@ class UserStatusEndpoint(Resource):
         new_status, message = UserRepository.toggle_active_status(user_profile)
 
         return {"msg": message, "is_active": new_status}, HttpStatus.OK.value
-
-
-@user_namespace.route("/change-password/<int:user_id>", methods=["PUT"])
-class AdminPasswordEndpoint(Resource):
-    @user_namespace.doc(
-        description="Allows admin to change the password for a specified user by user ID. Requires admin privileges."
-    )
-    @user_namespace.expect(
-        user_schema_retriever.retrieve("admin_change_password"), validate=True
-    )
-    @user_namespace.response(HttpStatus.OK.value, "Password changed successfully.")
-    @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized.")
-    @jwt_required()
-    def put(self, user_id):
-        data = request.json
-        user = UserRepository.get_single_user(user_id, check_admin=True)
-        password = PasswordValidator.validate_password(data.get("new_password"))
-
-        UserAuthService.change_password(user, password)
-
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)
