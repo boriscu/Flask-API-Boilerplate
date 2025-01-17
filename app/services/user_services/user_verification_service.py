@@ -12,10 +12,8 @@ from app.helpers.email.strategies.user_verification_sender import (
 
 
 class UserVerificationService:
-
     @staticmethod
     def request(email: str):
-
         if not email:
             abort(HttpStatus.BAD_REQUEST.value)
 
@@ -37,7 +35,6 @@ class UserVerificationService:
 
     @staticmethod
     def submit(token: str):
-
         if not token:
             abort(HttpStatus.BAD_REQUEST.value)
 

@@ -71,6 +71,8 @@ class AppConfig(BaseConfig):
     # Client
     CLIENT_DOMAIN = None
 
+    TOKEN_EXPIRATION_TIME = 30000
+
     @classmethod
     def load_config(cls):
         """

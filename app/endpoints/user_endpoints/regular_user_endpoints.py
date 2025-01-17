@@ -9,6 +9,10 @@ from app.helpers.http_response_generator import HttpResponseGenerator
 from app.services.user_services.user_verification_service import (
     UserVerificationService,
 )
+from app.services.workspace_user_invite_services.workspace_non_registred_user_invite import (
+    WorkspaceNonRegistredUserInviteService,
+)
+
 from app.services.user_services.user_repository import UserRepository
 
 from . import user_namespace, user_schema_retriever
@@ -40,7 +44,10 @@ class UserVerificationEndpoint(Resource):
     @user_namespace.response(HttpStatus.OK.value, "Users account verified.")
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Token not valid.")
     def post(self):
-
         UserVerificationService.submit(request.json.get("token"))
+
+        WorkspaceNonRegistredUserInviteService.invite_if_exists(
+            request.json.get("email")
+        )
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)

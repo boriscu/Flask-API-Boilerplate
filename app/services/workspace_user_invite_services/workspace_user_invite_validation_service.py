@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 from flask import abort
 
 from app.models.enums.http_status import HttpStatus
@@ -16,13 +16,11 @@ from app.services.workspace_user_services.workspace_user_access_control import (
 
 
 class WorkspaceUserInviteValidationService:
-
     @staticmethod
-    def check_existing_invitation(workspace_id: int, data: Dict[str, Any]) -> bool:
-
+    def check_existing_invitation(workspace_id: int, invited_id: int) -> bool:
         if WorkspaceUserInvite.get_or_none(
             WorkspaceUserInvite.workspace == workspace_id,
-            WorkspaceUserInvite.user == data.get("user_id"),
+            WorkspaceUserInvite.user == invited_id,
         ):
             return True
 
@@ -30,8 +28,8 @@ class WorkspaceUserInviteValidationService:
 
     @staticmethod
     def validate_invitation(
-        workspace_id: int, invitor_id: int, data: Dict[str, Any]
-    ) -> Tuple[int, WorkspaceUserRole]:
+        workspace_id: int, invitor_id: int, invited_id: int, data: Dict[str, Any]
+    ) -> WorkspaceUserRole:
         """
         Validates an invitation based on workspace rules and roles.
 
@@ -41,12 +39,10 @@ class WorkspaceUserInviteValidationService:
         - data (dict): Contains details of the invitation such as 'user_id' and 'workspace_user_role'.
 
         Returns:
-        - Tuple[int, WorkspaceUserRole]: Returns the invited user's ID and role.
+        - WorkspaceUserRole: Returns the invited's user role.
 
         Raises relevant HTTP status exceptions based on various checks.
         """
-        invited_id = data.get("user_id")
-
         WorkspaceUserInviteValidationService._check_invitor(invitor_id, workspace_id)
         WorkspaceUserInviteValidationService._check_invited(invited_id, workspace_id)
         workspace_user_role = (
@@ -55,7 +51,7 @@ class WorkspaceUserInviteValidationService:
             )
         )
         WorkspaceUserInviteValidationService._check_workspace_limit(workspace_id)
-        return invited_id, workspace_user_role
+        return workspace_user_role
 
     @staticmethod
     def _validate_workspace_user_role(workspace_user_role: int) -> WorkspaceUserRole:
