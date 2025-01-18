@@ -37,13 +37,15 @@ class UserVerificationEndpoint(Resource):
         user_schema_retriever.retrieve("user_verification"), validate=True
     )
     @user_namespace.doc(description="Verifies the user account.")
-    @user_namespace.response(HttpStatus.OK.value, "Users account verified.")
+    @user_namespace.response(
+        HttpStatus.OK.value,
+        "Users account verified.",
+        user_schema_retriever.retrieve("verification_response"),
+    )
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Token not valid.")
     def post(self):
 
-        UserVerificationService.submit(request.json.get("token"))
-
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)
+        return UserVerificationService.submit(request.json.get("token"))
 
     @user_namespace.doc(
         description="Re-sends the verification email to the user. This endpoint should be called if the user did not receive or accidentally deleted their initial verification email. Requires a valid JWT."

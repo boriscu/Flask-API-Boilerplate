@@ -89,6 +89,10 @@ class UserAuthService:
             access_token = create_access_token(
                 identity=str(user.id),
                 expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+                additional_claims={
+                    "is_admin": user.is_admin,
+                    "is_active": user.is_active,
+                },
             )
 
         UserVerificationService.request(email)
@@ -121,7 +125,10 @@ class UserAuthService:
             access_token = create_access_token(
                 identity=str(user.id),
                 expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
-                additional_claims={"is_admin": user.is_admin},
+                additional_claims={
+                    "is_admin": user.is_admin,
+                    "is_active": user.is_active,
+                },
             )
 
             response = make_response(

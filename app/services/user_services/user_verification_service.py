@@ -1,6 +1,10 @@
+from datetime import timedelta
 import hashlib
 import secrets
-from flask import abort, current_app
+from flask import Response, abort, current_app, make_response
+from flask_jwt_extended import create_access_token
+
+from config.app_config import AppConfig
 
 from app.models.pg.user_profile import UserProfile
 
@@ -55,7 +59,7 @@ class UserVerificationService:
         UserVerificationSender().send_template(user.email, token)
 
     @staticmethod
-    def submit(token: str):
+    def submit(token: str) -> Response:
 
         if not token:
             abort(HttpStatus.BAD_REQUEST.value)
@@ -72,6 +76,23 @@ class UserVerificationService:
         user.save()
 
         current_app.redis.delete(f"account-verification:{hashed_token}")
+
+        access_token = create_access_token(
+            identity=str(user.id),
+            expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+            additional_claims={
+                "is_admin": user.is_admin,
+                "is_active": user.is_active,
+            },
+        )
+
+        return make_response(
+            {
+                "msg": "User verified successfully",
+                "access_token": access_token,
+            },
+            HttpStatus.OK.value,
+        )
 
     @staticmethod
     def _hash_token(token):
