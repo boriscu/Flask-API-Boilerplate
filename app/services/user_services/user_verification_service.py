@@ -1,21 +1,18 @@
 import hashlib
 import secrets
+
 from flask import abort, current_app
-
-from app.models.pg.user_profile import UserProfile
-
-from app.models.enums.http_status import HttpStatus
 
 from app.helpers.email.strategies.user_verification_sender import (
     UserVerificationSender,
 )
+from app.models.enums.http_status import HttpStatus
+from app.models.pg.user_profile import UserProfile
 
 
 class UserVerificationService:
-
     @staticmethod
     def request(email: str):
-
         if not email:
             abort(HttpStatus.BAD_REQUEST.value)
 
@@ -37,7 +34,6 @@ class UserVerificationService:
 
     @staticmethod
     def submit(token: str):
-
         if not token:
             abort(HttpStatus.BAD_REQUEST.value)
 

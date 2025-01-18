@@ -40,7 +40,7 @@ class UserVerificationEndpoint(Resource):
     @user_namespace.response(HttpStatus.OK.value, "Users account verified.")
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Token not valid.")
     def post(self):
-
-        UserVerificationService.submit(request.json.get("token"))
+        token: str = request.json.get("token")
+        UserVerificationService.submit(token)
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)

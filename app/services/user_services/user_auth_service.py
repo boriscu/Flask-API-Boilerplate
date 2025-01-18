@@ -4,6 +4,9 @@ from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_reque
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
+from app.services.workspace_user_invite_services.workspace_user_invite_redis_service import (
+    WorkspaceUserInviteRedisService,
+)
 from config.app_config import AppConfig
 
 from app.models.enums.http_status import HttpStatus
@@ -83,6 +86,7 @@ class UserAuthService:
         )
 
         WorkspaceUserRepository.create_personal_workspace(name, user.id)
+        WorkspaceUserInviteRedisService.sync_with_pg(email)
 
         access_token = ""
         if not is_admin:
