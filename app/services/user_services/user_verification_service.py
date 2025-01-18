@@ -36,6 +36,25 @@ class UserVerificationService:
         UserVerificationSender().send_template(email, token)
 
     @staticmethod
+    def re_request(user_id: int):
+
+        user = UserProfile.get_by_id(user_id)
+
+        if user.is_active or user.is_sso:
+            abort(HttpStatus.BAD_REQUEST.value)
+
+        token = secrets.token_urlsafe(32)
+        hashed_token = UserVerificationService._hash_token(token)
+
+        current_app.redis.setex(
+            f"account-verification:{hashed_token}",
+            600,
+            user.id,
+        )
+
+        UserVerificationSender().send_template(user.email, token)
+
+    @staticmethod
     def submit(token: str):
 
         if not token:
