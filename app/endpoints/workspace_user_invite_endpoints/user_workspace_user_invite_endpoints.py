@@ -96,7 +96,9 @@ class SingleInviteEndpoint(Resource):
     def delete(self, invite_id):
         return WorkspaceUserInviteRepository.decline_user_invite(invite_id)
 
-    @workspace_user_invite_namespace.doc(description="Accepts an invite.")
+    @workspace_user_invite_namespace.doc(
+        description="Accepts an invite through invite id."
+    )
     @workspace_user_invite_namespace.response(
         HttpStatus.OK.value,
         "Invite accepted successfully",
@@ -110,3 +112,23 @@ class SingleInviteEndpoint(Resource):
     @jwt_required()
     def put(self, invite_id):
         return WorkspaceUserInviteRepository.accept_user_invite(invite_id)
+
+
+@workspace_user_invite_namespace.route("/<string:invite_token>", methods=["PUT"])
+class TokenInviteEndpoint(Resource):
+    @workspace_user_invite_namespace.doc(
+        description="Accepts an invite through token sent from mail."
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.OK.value,
+        "Invite accepted successfully",
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.NOT_FOUND.value, "Invite not found or expired."
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.UNAUTHORIZED.value, "Authentication is required"
+    )
+    @jwt_required()
+    def put(self, invite_token: str):
+        return WorkspaceUserInviteRepository.accept_user_invite_by_token(invite_token)

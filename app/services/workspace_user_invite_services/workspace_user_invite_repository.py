@@ -72,8 +72,9 @@ class WorkspaceUserInviteRepository:
     ) -> Tuple[bool, str]:
         user_email = data.get("user_email")
 
-        token = secrets.token_urlsafe(32)
-        hashed_token = WorkspaceUserInviteRedisService.hash_token(token)
+        hashed_token = WorkspaceUserInviteRedisService.hash_token(
+            f"{user_email}:{workspace_id}"
+        )
 
         invite = WorkspaceUserInviteRedisService.get_invite(hashed_token)
 
@@ -116,6 +117,26 @@ class WorkspaceUserInviteRepository:
         WorkspaceUserInviteRepository._delete_user_invite(invite_id, user_id)
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
+
+    @staticmethod
+    def accept_user_invite_by_token(invite_token: str) -> Response:
+        invite = WorkspaceUserInviteRedisService.get_invite(invite_token)
+        if not invite:
+            return HttpResponseGenerator.generate_response(HttpStatus.NOT_FOUND)
+
+        invite_value = json.loads(invite)
+
+        data = invite_value["data"]
+        workspace_id = invite_value["workspace_id"]
+
+        user_id = UserProfile.get(UserProfile.email == data["user_email"]).id
+
+        invite_id = WorkspaceUserInvite.get(
+            WorkspaceUserInvite.id == workspace_id
+            and WorkspaceUserInvite.user == user_id
+        ).id
+
+        return WorkspaceUserInviteRepository.accept_user_invite(invite_id)
 
     @staticmethod
     def _delete_user_invite(invite_id, user_id):

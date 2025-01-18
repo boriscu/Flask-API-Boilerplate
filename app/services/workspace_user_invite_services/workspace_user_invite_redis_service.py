@@ -13,8 +13,8 @@ class WorkspaceUserInviteRedisService:
         return current_app.redis.get(f"workspace-invite:{token}")
 
     @staticmethod
-    def save_invite(key: str, for_how_long: int, value: any) -> None:
-        current_app.redis.setex(f"workspace-invite:{key}", for_how_long, value)
+    def save_invite(token: str, for_how_long: int, value: any) -> None:
+        current_app.redis.setex(f"workspace-invite:{token}", for_how_long, value)
 
     @staticmethod
     def hash_token(token: str) -> str:
