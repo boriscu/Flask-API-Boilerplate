@@ -14,7 +14,7 @@ from app.services.user_services.user_repository import UserRepository
 from . import user_namespace, user_schema_retriever
 
 
-@user_namespace.route("/get_myself/", methods=["GET"])
+@user_namespace.route("/get_myself", methods=["GET"])
 class GetMyselfEndpoint(Resource):
     @user_namespace.doc(
         description="Retrieve the logged-in user's profile. Requires a valid JWT token.",

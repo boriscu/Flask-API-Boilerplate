@@ -2,7 +2,7 @@ from datetime import timedelta
 import hashlib
 import secrets
 from flask import Response, abort, current_app, make_response
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
 
 from config.app_config import AppConfig
 
@@ -93,6 +93,21 @@ class UserVerificationService:
             },
             HttpStatus.OK.value,
         )
+
+    @staticmethod
+    def abort_if_not_active():
+        """Abort the request if the user is not considered active based on JWT.
+
+        This function verifies the JWT in the request and aborts the request with a 423 (Locked) status
+        if the 'is_active' claim in the JWT is False.
+        """
+
+        try:
+            verify_jwt_in_request()
+            if not get_jwt().get("is_active"):
+                abort(HttpStatus.RESOURCE_LOCKED.value)
+        except:
+            abort(HttpStatus.RESOURCE_LOCKED.value)
 
     @staticmethod
     def _hash_token(token):
