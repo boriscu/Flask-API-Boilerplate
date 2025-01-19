@@ -4,11 +4,11 @@ from config.app_config import AppConfig
 
 
 class WorkspaceInviteSender(MailSender):
-    def send_template(self, user_email: str, token: str, is_registred: bool) -> None:
+    def send_template(self, user_email: str, token: str) -> None:
         subject = "Mentoria: Workspace Invitation"
         recipients = [user_email]
 
-        url = f"{AppConfig.CLIENT_DOMAIN}/workspace-invite?token={token}"
+        url = f"{AppConfig.CLIENT_DOMAIN}/workspace-invite?email={user_email}&token={token}"
 
         data = {"url": url}
         html = render_template("emails/workspace_invite_template.html", **data)

@@ -1,10 +1,5 @@
 import hashlib
-import json
 from flask import current_app
-
-from app.services.workspace_user_invite_services.workspace_user_invite_repository import (
-    WorkspaceUserInviteRepository,
-)
 
 
 class WorkspaceUserInviteRedisService:
@@ -17,22 +12,9 @@ class WorkspaceUserInviteRedisService:
         current_app.redis.setex(f"workspace-invite:{token}", for_how_long, value)
 
     @staticmethod
-    def hash_token(token: str) -> str:
-        return hashlib.sha256(token.encode("utf-8")).hexdigest()
+    def delete_invite(token: str) -> None:
+        current_app.redis.delete(f"workspace-invite:{token}")
 
     @staticmethod
-    def sync_with_pg(email: str) -> None:
-        cursor = 0
-        while True:
-            cursor, keys = current_app.redis.scan(
-                cursor=cursor,
-                match=f"workspace-invite:{email}:*",
-            )
-            for key in keys:
-                value = json.loads(current_app.redis.get(key))
-                WorkspaceUserInviteRepository.create_workspace_user_invite(
-                    workspace_id=value["workspace_id"],
-                    data=value["data"],
-                )
-            if cursor == 0:
-                break
+    def hash_token(token: str) -> str:
+        return hashlib.sha256(token.encode("utf-8")).hexdigest()

@@ -1,5 +1,4 @@
 from flask_restx import fields
-from datetime import datetime
 
 
 def get_invitor_schema(namespace):

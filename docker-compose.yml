@@ -1,4 +1,4 @@
-version: "3.8"
+# version: "3.8"
 
 networks:
   app-network:
@@ -10,7 +10,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - '5000:5000'
     command: flask run --host=0.0.0.0 --debugger --reload
     volumes:
       - .:/app
@@ -44,7 +44,7 @@ services:
     command: bash -c "redis-server --requirepass $$REDIS_PASSWORD --port ${REDIS_PORT}"
     restart: always
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - '${REDIS_PORT}:${REDIS_PORT}'
     networks:
       - app-network
 
@@ -57,7 +57,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT}:5432"
+      - '${DB_PORT}:5432'
     networks:
       - app-network
 volumes:

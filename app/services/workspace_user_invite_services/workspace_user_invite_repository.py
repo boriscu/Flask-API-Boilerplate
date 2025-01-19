@@ -1,6 +1,5 @@
 import hashlib
 import json
-import secrets
 from typing import Any, Dict, List, Tuple
 from flask import Response
 from flask_jwt_extended import get_jwt_identity
@@ -26,20 +25,19 @@ from app.services.workspace_user_invite_services.workspace_user_invite_validatio
 class WorkspaceUserInviteRepository:
     @staticmethod
     def create_workspace_user_invite(
-        workspace_id: int, data: Dict[str, Any]
+        workspace_id: int, invitor_id: int, data: Dict[str, Any]
     ) -> Response:
-        invitor_id = int(get_jwt_identity())
         user_email = data.get("user_email")
 
         already_invited_redis, hashed_token = (
             WorkspaceUserInviteRepository.__save_invite_to_redis(
-                workspace_id=workspace_id, data=data
+                workspace_id=workspace_id, invitor_id=invitor_id, data=data
             )
         )
 
         invited_user = UserProfile.get_or_none(UserProfile.email == user_email)
 
-        if invited_user:
+        if invited_user is not None:
             invited_id, workspace_user_role = (
                 WorkspaceUserInviteValidationService.validate_invitation(
                     workspace_id=workspace_id,
@@ -68,23 +66,27 @@ class WorkspaceUserInviteRepository:
 
     @staticmethod
     def __save_invite_to_redis(
-        workspace_id: int, data: Dict[str, Any]
+        workspace_id: int, invitor_id: int, data: Dict[str, Any]
     ) -> Tuple[bool, str]:
         user_email = data.get("user_email")
+        print(user_email)
 
         hashed_token = WorkspaceUserInviteRedisService.hash_token(
             f"{user_email}:{workspace_id}"
         )
 
-        invite = WorkspaceUserInviteRedisService.get_invite(hashed_token)
+        invite = WorkspaceUserInviteRedisService.get_invite(
+            f"{user_email}:{hashed_token}"
+        )
 
-        if invite is not None:
+        if invite is None:
             WorkspaceUserInviteRedisService.save_invite(
                 f"{user_email}:{hashed_token}",
                 60 * 60 * 24,
                 json.dumps(
                     {
                         "workspace_id": workspace_id,
+                        "invitor_id": invitor_id,
                         "data": data,
                     }
                 ),
@@ -119,8 +121,12 @@ class WorkspaceUserInviteRepository:
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @staticmethod
-    def accept_user_invite_by_token(invite_token: str) -> Response:
-        invite = WorkspaceUserInviteRedisService.get_invite(invite_token)
+    def accept_user_invite_by_token(request_data: dict[str, any]) -> Response:
+        invite_email = request_data["invite_email"]
+        invite_token = request_data["invite_token"]
+        key = f"{invite_email}:{invite_token}"
+
+        invite = WorkspaceUserInviteRedisService.get_invite(key)
         if not invite:
             return HttpResponseGenerator.generate_response(HttpStatus.NOT_FOUND)
 
@@ -135,6 +141,8 @@ class WorkspaceUserInviteRepository:
             WorkspaceUserInvite.id == workspace_id
             and WorkspaceUserInvite.user == user_id
         ).id
+
+        WorkspaceUserInviteRedisService.delete_invite(key)
 
         return WorkspaceUserInviteRepository.accept_user_invite(invite_id)
 
