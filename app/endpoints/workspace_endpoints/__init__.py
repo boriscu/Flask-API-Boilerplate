@@ -8,7 +8,9 @@ from app.models.validation_schemas.retrievers.workspace_schema_retriever import 
 from app.services.user_services.user_verification_service import UserVerificationService
 
 
-workspace_namespace = Namespace("Workspaces", description="Workspace operations")
+workspace_namespace = Namespace(
+    "Workspaces", description="Workspace operations. Requires the user to be activated"
+)
 
 workspace_schema_retriever = WorkspaceSchemaRetriever(workspace_namespace)
 

@@ -6,7 +6,7 @@ from app.models.validation_schemas.retrievers.user_schema_retriever import (
 )
 
 
-user_namespace = Namespace("Users", description="User operations")
+user_namespace = Namespace("Users", description="User operations.")
 user_schema_retriever = UserSchemaRetriever(user_namespace)
 
 
