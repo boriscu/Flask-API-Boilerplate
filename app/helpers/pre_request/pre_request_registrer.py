@@ -1,4 +1,5 @@
 from app.endpoints.workspace_endpoints import workspace_pre_request
+from app.endpoints.user_endpoints import user_pre_request
 
 
 class PreRequestRegistrer:
@@ -16,8 +17,14 @@ class PreRequestRegistrer:
         """Register all pre-request handlers."""
 
         self._register_workspace_checks()
+        self._register_user_checks()
 
     def _register_workspace_checks(self):
         """Register pre-request checks specific to workspace endpoints."""
 
         self.app.before_request(workspace_pre_request)
+
+    def _register_user_checks(self):
+        """Register pre-request checks specific to workspace endpoints."""
+
+        self.app.before_request(user_pre_request)

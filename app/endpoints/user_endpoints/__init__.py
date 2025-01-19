@@ -10,7 +10,7 @@ user_namespace = Namespace("Users", description="User operations")
 user_schema_retriever = UserSchemaRetriever(user_namespace)
 
 
-def user_before_request():
+def user_pre_request():
 
     PreRequestManager.pre_request_handler(
         base_path="/api/v1/user",

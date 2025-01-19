@@ -101,7 +101,6 @@ class UserVerificationService:
         This function verifies the JWT in the request and aborts the request with a 423 (Locked) status
         if the 'is_active' claim in the JWT is False.
         """
-
         try:
             verify_jwt_in_request()
             if not get_jwt().get("is_active"):
