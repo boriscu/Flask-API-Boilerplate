@@ -44,7 +44,6 @@ class UserVerificationEndpoint(Resource):
     )
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Token not valid.")
     def post(self):
-
         return UserVerificationService.submit(request.json.get("token"))
 
     @user_namespace.doc(
@@ -63,7 +62,6 @@ class UserVerificationEndpoint(Resource):
     )
     @jwt_required()
     def get(self):
-
         UserVerificationService.re_request(int(get_jwt_identity()))
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)

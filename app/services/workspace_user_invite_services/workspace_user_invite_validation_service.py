@@ -4,6 +4,7 @@ from flask import abort
 from app.models.enums.http_status import HttpStatus
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 
+from app.models.pg.user_profile import UserProfile
 from app.models.pg.workspace import Workspace
 from app.models.pg.workspace_user_invite import WorkspaceUserInvite
 
@@ -16,13 +17,11 @@ from app.services.workspace_user_services.workspace_user_access_control import (
 
 
 class WorkspaceUserInviteValidationService:
-
     @staticmethod
-    def check_existing_invitation(workspace_id: int, data: Dict[str, Any]) -> bool:
-
+    def check_existing_invitation(workspace_id: int, invited_id: int) -> bool:
         if WorkspaceUserInvite.get_or_none(
             WorkspaceUserInvite.workspace == workspace_id,
-            WorkspaceUserInvite.user == data.get("user_id"),
+            WorkspaceUserInvite.user == invited_id,
         ):
             return True
 
@@ -30,7 +29,10 @@ class WorkspaceUserInviteValidationService:
 
     @staticmethod
     def validate_invitation(
-        workspace_id: int, invitor_id: int, data: Dict[str, Any]
+        workspace_id: int,
+        invitor_id: int,
+        invited_user: UserProfile,
+        data: Dict[str, Any],
     ) -> Tuple[int, WorkspaceUserRole]:
         """
         Validates an invitation based on workspace rules and roles.
@@ -45,7 +47,7 @@ class WorkspaceUserInviteValidationService:
 
         Raises relevant HTTP status exceptions based on various checks.
         """
-        invited_id = data.get("user_id")
+        invited_id = invited_user.id
 
         WorkspaceUserInviteValidationService._check_invitor(invitor_id, workspace_id)
         WorkspaceUserInviteValidationService._check_invited(invited_id, workspace_id)

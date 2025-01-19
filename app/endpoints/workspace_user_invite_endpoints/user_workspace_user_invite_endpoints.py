@@ -1,9 +1,8 @@
 from flask import request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
 from app.models.enums.http_status import HttpStatus
-
 from app.services.workspace_user_invite_services.workspace_user_invite_repository import (
     WorkspaceUserInviteRepository,
 )
@@ -44,12 +43,13 @@ class WorkspaceInviteEndpoint(Resource):
     )
     @jwt_required()
     def post(self, workspace_id):
+        invitor_id = int(get_jwt_identity())
         return WorkspaceUserInviteRepository.create_workspace_user_invite(
-            workspace_id, request.get_json()
+            workspace_id=workspace_id, invitor_id=invitor_id, data=request.get_json()
         )
 
 
-@workspace_user_invite_namespace.route("/", methods=["GET"])
+@workspace_user_invite_namespace.route("/", methods=["GET", "PUT"])
 class BaseUserWorkspaceEndpoint(Resource):
     @workspace_user_invite_namespace.doc(
         description="Fetches all invites with pagination, sorting, and filtering. In most cases you would use the filter to show only pending invites"
@@ -81,6 +81,29 @@ class BaseUserWorkspaceEndpoint(Resource):
             "total_pages": total_pages,
         }, HttpStatus.OK.value
 
+    @workspace_user_invite_namespace.expect(
+        workspace_user_invite_schema_retriever.retrieve("invite_accept_by_token"),
+        validate=True,
+    )
+    @workspace_user_invite_namespace.doc(
+        description="Accepts an invite through token sent from mail."
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.OK.value,
+        "Invite accepted successfully",
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.NOT_FOUND.value, "Invite not found or expired."
+    )
+    @workspace_user_invite_namespace.response(
+        HttpStatus.UNAUTHORIZED.value, "Authentication is required"
+    )
+    @jwt_required()
+    def put(self):
+        return WorkspaceUserInviteRepository.accept_user_invite_by_token(
+            request.get_json()
+        )
+
 
 @workspace_user_invite_namespace.route("/<int:invite_id>", methods=["DELETE", "PUT"])
 class SingleInviteEndpoint(Resource):
@@ -96,7 +119,9 @@ class SingleInviteEndpoint(Resource):
     def delete(self, invite_id):
         return WorkspaceUserInviteRepository.decline_user_invite(invite_id)
 
-    @workspace_user_invite_namespace.doc(description="Accepts an invite.")
+    @workspace_user_invite_namespace.doc(
+        description="Accepts an invite through invite id."
+    )
     @workspace_user_invite_namespace.response(
         HttpStatus.OK.value,
         "Invite accepted successfully",

@@ -7,8 +7,9 @@ def get_invite_creation_schema(namespace):
     invite_creation_schema = namespace.model(
         "Workspace invite",
         {
-            "user_id": fields.Integer(
-                description="A unique identifier for the invited user.", example=101
+            "user_email": fields.String(
+                description="A unique email for the invited user.",
+                example="user@mail.com",
             ),
             "workspace_user_role": fields.Integer(
                 description="A role that the user will have on the workspace.",
