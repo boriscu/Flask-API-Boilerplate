@@ -16,6 +16,9 @@ from app.models.validation_schemas.schemas.user_schemas.update_user_schema impor
 from app.models.validation_schemas.schemas.user_schemas.user_verification_schema import (
     get_user_verification_schema,
 )
+from app.models.validation_schemas.schemas.user_schemas.verification_response_schema import (
+    get_verification_response_schema,
+)
 
 
 def create_user_schemas(namespace):
@@ -26,4 +29,5 @@ def create_user_schemas(namespace):
         "users_response": get_all_users_schema(namespace),
         "update_user": get_update_user_schema(namespace),
         "user_verification": get_user_verification_schema(namespace),
+        "verification_response": get_verification_response_schema(namespace),
     }

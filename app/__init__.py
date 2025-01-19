@@ -11,10 +11,11 @@ from config.app_config import AppConfig
 from app.commands import register_commands
 
 from app.init.sentry_init import SentryInitializer
-
 from app.init.error_handler import register_error_handlers
 
 from app.services.celery_service import CeleryService
+
+from app.helpers.pre_request.pre_request_registrer import PreRequestRegistrer
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -47,6 +48,8 @@ def create_app():
         db=AppConfig.REDIS_DB,
         password=AppConfig.REDIS_PASSWORD,
     )
+
+    PreRequestRegistrer(app).register_all()
 
     register_commands(app)
     register_error_handlers(app)

@@ -76,7 +76,7 @@ class SingleUserEndpoint(Resource):
         )
 
 
-@user_namespace.route("/<int:user_id>/status/", methods=["PUT"])
+@user_namespace.route("/<int:user_id>/status", methods=["PUT"])
 class UserStatusEndpoint(Resource):
     @user_namespace.doc(
         description="Toggle user's active status by user ID. Requires admin privileges."
