@@ -135,29 +135,3 @@ class SingleInviteEndpoint(Resource):
     @jwt_required()
     def put(self, invite_id):
         return WorkspaceUserInviteRepository.accept_user_invite(invite_id)
-
-
-@workspace_user_invite_namespace.route("/accept_by_token", methods=["PUT"])
-class TokenInviteEndpoint(Resource):
-    @workspace_user_invite_namespace.expect(
-        workspace_user_invite_schema_retriever.retrieve("invite_accept_by_token"),
-        validate=True,
-    )
-    @workspace_user_invite_namespace.doc(
-        description="Accepts an invite through token sent from mail."
-    )
-    @workspace_user_invite_namespace.response(
-        HttpStatus.OK.value,
-        "Invite accepted successfully",
-    )
-    @workspace_user_invite_namespace.response(
-        HttpStatus.NOT_FOUND.value, "Invite not found or expired."
-    )
-    @workspace_user_invite_namespace.response(
-        HttpStatus.UNAUTHORIZED.value, "Authentication is required"
-    )
-    @jwt_required()
-    def put(self):
-        return WorkspaceUserInviteRepository.accept_user_invite_by_token(
-            request.get_json()
-        )
