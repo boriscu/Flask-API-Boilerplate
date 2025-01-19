@@ -23,7 +23,7 @@ def init_app_routes(app: Flask) -> None:
         app,
         version="1.0",
         title="Flask Boilerplate API Documentation",
-        description="A detailed description of the Flask API",
+        description="If you recieve HTTP Status code 423 (Resource locked) that means that the user needs to be activated in order to access the endpoint",
         authorizations=authorizations,
         security="Bearer Auth",
         prefix="/api",

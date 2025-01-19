@@ -10,6 +10,9 @@ from app.helpers.validators.password_validator import PasswordValidator
 from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
+from app.services.user_services.user_password_reset_service import (
+    UserPasswordResetService,
+)
 from app.services.user_services.user_repository import UserRepository
 
 from . import auth_namespace, auth_schema_retriever
@@ -86,3 +89,40 @@ class BaseAuthEndpoint(Resource):
         )
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
+
+    @auth_namespace.route("/password-reset-request/", methods=["POST"])
+    class PasswordResetRequest(Resource):
+        @auth_namespace.expect(
+            auth_schema_retriever.retrieve("password_reset_request"), validate=True
+        )
+        @auth_namespace.doc(
+            "Initiates a password reset process. An email with a reset link will be sent to the provided email address."
+        )
+        @auth_namespace.response(
+            HttpStatus.OK.value, "Password reset email successfully sent."
+        )
+        @auth_namespace.response(HttpStatus.NOT_FOUND.value, "User not found.")
+        def post(self):
+            UserPasswordResetService.request(request.json.get("email"))
+
+            return HttpResponseGenerator.generate_response(HttpStatus.OK)
+
+    @auth_namespace.route("/password-reset-submit/", methods=["POST"])
+    class PasswordResetRequest(Resource):
+        @auth_namespace.expect(
+            auth_schema_retriever.retrieve("password_reset_submit"), validate=True
+        )
+        @auth_namespace.doc(
+            "Processes the submission of a password reset token and new password."
+        )
+        @auth_namespace.response(
+            HttpStatus.OK.value, "Password has been successfully reset."
+        )
+        @auth_namespace.response(HttpStatus.UNAUTHORIZED.value, "Bad token.")
+        def post(self):
+            data = request.json
+            password = PasswordValidator.validate_password(data.get("password"))
+
+            UserPasswordResetService.submit(password, data.get("token"))
+
+            return HttpResponseGenerator.generate_response(HttpStatus.OK)

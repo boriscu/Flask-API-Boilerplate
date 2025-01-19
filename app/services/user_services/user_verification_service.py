@@ -1,5 +1,12 @@
+from datetime import timedelta
 import hashlib
 import secrets
+from flask import Response, abort, current_app, make_response
+from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
+
+from config.app_config import AppConfig
+
+from app.models.pg.user_profile import UserProfile
 
 from flask import abort, current_app
 
@@ -33,7 +40,26 @@ class UserVerificationService:
         UserVerificationSender().send_template(email, token)
 
     @staticmethod
-    def submit(token: str):
+    def re_request(user_id: int):
+
+        user = UserProfile.get_by_id(user_id)
+
+        if user.is_active or user.is_sso:
+            abort(HttpStatus.BAD_REQUEST.value)
+
+        token = secrets.token_urlsafe(32)
+        hashed_token = UserVerificationService._hash_token(token)
+
+        current_app.redis.setex(
+            f"account-verification:{hashed_token}",
+            600,
+            user.id,
+        )
+
+        UserVerificationSender().send_template(user.email, token)
+
+    @staticmethod
+    def submit(token: str) -> Response:
         if not token:
             abort(HttpStatus.BAD_REQUEST.value)
 
@@ -49,6 +75,37 @@ class UserVerificationService:
         user.save()
 
         current_app.redis.delete(f"account-verification:{hashed_token}")
+
+        access_token = create_access_token(
+            identity=str(user.id),
+            expires_delta=timedelta(minutes=int(AppConfig.TOKEN_EXPIRATION_TIME)),
+            additional_claims={
+                "is_admin": user.is_admin,
+                "is_active": user.is_active,
+            },
+        )
+
+        return make_response(
+            {
+                "msg": "User verified successfully",
+                "access_token": access_token,
+            },
+            HttpStatus.OK.value,
+        )
+
+    @staticmethod
+    def abort_if_not_active():
+        """Abort the request if the user is not considered active based on JWT.
+
+        This function verifies the JWT in the request and aborts the request with a 423 (Locked) status
+        if the 'is_active' claim in the JWT is False.
+        """
+        try:
+            verify_jwt_in_request()
+            if not get_jwt().get("is_active"):
+                abort(HttpStatus.RESOURCE_LOCKED.value)
+        except:
+            abort(HttpStatus.RESOURCE_LOCKED.value)
 
     @staticmethod
     def _hash_token(token):
