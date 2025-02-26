@@ -7,6 +7,7 @@ from app.endpoints.workspace_endpoints import workspace_namespace
 from app.endpoints.workspace_user_invite_endpoints import (
     workspace_user_invite_namespace,
 )
+from app.init.error_handler import register_error_handlers
 
 
 def init_app_routes(app: Flask) -> None:
@@ -33,6 +34,8 @@ def init_app_routes(app: Flask) -> None:
     api.add_namespace(auth_namespace, path="/v1/auth")
     api.add_namespace(workspace_namespace, path="/v1/workspace")
     api.add_namespace(workspace_user_invite_namespace, path="/v1/invite")
+
+    register_error_handlers(app, api)
 
     from flask_jwt_extended import JWTManager
 

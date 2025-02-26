@@ -8,10 +8,11 @@ from app import routes
 
 from config.app_config import AppConfig
 
+
 from app.commands import register_commands
 
+from app.init.before_handler import register_before_handlers
 from app.init.sentry_init import SentryInitializer
-from app.init.error_handler import register_error_handlers
 
 from app.services.celery_service import CeleryService
 
@@ -34,8 +35,7 @@ def create_app():
 
     cors = CORS(
         app,
-        resources={r"/*": {"origins": AppConfig.ALLOWED_ORIGINS}},
-        supports_credentials=True,
+        resources={r"/api/v1/*": {"origins": AppConfig.ALLOWED_ORIGINS}},
     )
 
     routes.init_app_routes(app)
@@ -52,6 +52,6 @@ def create_app():
     PreRequestRegistrer(app).register_all()
 
     register_commands(app)
-    register_error_handlers(app)
+    register_before_handlers(app)
 
     return app

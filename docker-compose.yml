@@ -10,7 +10,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '5000:5000'
+      - "5000:5000"
     command: flask run --host=0.0.0.0 --debugger --reload
     volumes:
       - .:/app
@@ -44,7 +44,7 @@ services:
     command: bash -c "redis-server --requirepass $$REDIS_PASSWORD --port ${REDIS_PORT}"
     restart: always
     ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - app-network
 
@@ -57,9 +57,31 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - '${DB_PORT}:5432'
+      - "${DB_PORT}:5432"
     networks:
       - app-network
+
+  weaviate_db:
+    command: --host 0.0.0.0 --port 8000 --scheme http
+    image: cr.weaviate.io/semitechnologies/weaviate:1.24.10
+    ports:
+      - 8000:8000
+      - 50051:50051
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: always
+    env_file: .env
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "false"
+      AUTHENTICATION_APIKEY_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+      CLUSTER_HOSTNAME: "node1"
+    networks:
+      - app-network
+
 volumes:
   postgresdata:
     external: false
+  weaviate_data:

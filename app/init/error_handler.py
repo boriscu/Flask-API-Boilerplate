@@ -1,20 +1,23 @@
 from flask import Flask
-from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
+from flask_restx import Api
 from peewee import DoesNotExist, IntegrityError, PeeweeException
 from werkzeug.exceptions import HTTPException
 import sentry_sdk
+
+from jwt.exceptions import ExpiredSignatureError
+from flask_jwt_extended.exceptions import NoAuthorizationError
 
 from app.models.enums.http_status import HttpStatus
 
 from app.helpers.http_response_generator import HttpResponseGenerator
 
 
-def register_error_handlers(app: Flask):
+def register_error_handlers(app: Flask, api: Api):
     """
     Automatically registers error handlers for all HTTP status codes in the HttpStatus enum.
 
     Args:
-        app (Flask): The Flask application instance.
+        api (flask-restx): The flask-restx API instance.
     """
 
     def generate_error_handler(status: HttpStatus):
@@ -40,7 +43,7 @@ def register_error_handlers(app: Flask):
                     f"Client error {status.value}: {str(e)}", level="warning"
                 )
 
-            return HttpResponseGenerator.generate_response(status)
+            return HttpResponseGenerator.generate_error_response(status)
 
         return handler
 
@@ -48,81 +51,88 @@ def register_error_handlers(app: Flask):
         if 400 <= status.value < 600:
             app.register_error_handler(status.value, generate_error_handler(status))
 
-    @app.errorhandler(DoesNotExist)
+    @api.errorhandler(DoesNotExist)
     def handle_does_not_exist(e):
         """Handle Peewee DoesNotExist exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.NOT_FOUND)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.NOT_FOUND)
 
-    @app.errorhandler(IntegrityError)
+    @api.errorhandler(IntegrityError)
     def handle_integrity_error(e):
         """Handle Peewee IntegrityError exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.BAD_REQUEST)
 
-    @app.errorhandler(ValueError)
+    @api.errorhandler(ValueError)
     def handle_value_error(e):
         """Handle Peewee ValueError exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.BAD_REQUEST)
 
-    @app.errorhandler(PeeweeException)
+    @api.errorhandler(PeeweeException)
     def handle_peewee_exception(e):
         """Handle general Peewee exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.BAD_REQUEST)
 
-    @app.errorhandler(PermissionError)
+    @api.errorhandler(PermissionError)
     def handle_permission_exception(e):
         """Handle PermissionError exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.FORBIDDEN)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.FORBIDDEN)
 
-    @app.errorhandler(RuntimeError)
+    @api.errorhandler(RuntimeError)
     def handle_runtime_exception(e):
         """Handle RuntimeError exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
+        return HttpResponseGenerator.generate_error_response(
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
 
-    @app.errorhandler(KeyError)
+    @api.errorhandler(KeyError)
     def handle_key_exception(e):
         """Handle KeyError exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.BAD_REQUEST)
 
-    @app.errorhandler(TypeError)
+    @api.errorhandler(TypeError)
     def handle_type_exception(e):
         """Handle TypeError exceptions."""
         sentry_sdk.capture_message(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.BAD_REQUEST)
+        return HttpResponseGenerator.generate_error_response(HttpStatus.BAD_REQUEST)
 
-    @app.errorhandler(IndexError)
+    @api.errorhandler(IndexError)
     def handle_index_exception(e):
         """Handle IndexError exceptions."""
         sentry_sdk.capture_exception(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
+        return HttpResponseGenerator.generate_error_response(
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
 
-    @app.errorhandler(HTTPException)
+    @api.errorhandler(HTTPException)
     def handle_http_exception(e):
         """Handle exceptions raised by abort."""
         status_code = e.code if hasattr(e, "code") and e.code else 500
-        return HttpResponseGenerator.generate_response(HttpStatus(status_code))
+        return HttpResponseGenerator.generate_error_response(HttpStatus(status_code))
 
-    @app.errorhandler(Exception)
+    @api.errorhandler(ExpiredSignatureError)
+    def handle_http_exception(e):
+        """ExpiredSignatureError is a subclass of Exception and thus not caught by the abort handlers"""
+        status_code = e.code if hasattr(e, "code") and e.code else 423
+        return HttpResponseGenerator.generate_error_response(HttpStatus(status_code))
+
+    @api.errorhandler(NoAuthorizationError)
+    def handle_http_exception(e):
+        """NoAuthorizationError is a subclass of Exception and thus not caught by the abort handlers"""
+        return HttpResponseGenerator.generate_error_response(HttpStatus.FORBIDDEN)
+
+    @api.errorhandler(Exception)
     def handle_general_exception(e):
         """
         Handle general exceptions not specifically mapped to an HTTP status.
         Defaults to INTERNAL_SERVER_ERROR.
         """
         sentry_sdk.capture_exception(e)
-        return HttpResponseGenerator.generate_response(HttpStatus.INTERNAL_SERVER_ERROR)
-
-    @app.before_request
-    def before_request_func():
-        try:
-            verify_jwt_in_request()
-            jwt_data = get_jwt()
-            if jwt_data:
-                sentry_sdk.set_user({"id": get_jwt_identity()})
-        except:
-            pass
+        return HttpResponseGenerator.generate_error_response(
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )

@@ -20,6 +20,9 @@ class PreRequestManager:
             exclusions (List[str]): Paths to exclude from the pre-request checks.
         """
 
+        if request.method == "OPTIONS":
+            return
+
         full_exclusions = [base_path + exc for exc in exclusions]
 
         if request.path.startswith(base_path) and not any(
