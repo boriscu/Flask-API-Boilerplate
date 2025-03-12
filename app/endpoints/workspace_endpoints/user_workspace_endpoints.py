@@ -1,5 +1,5 @@
 from flask import Response, abort
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
 from app.helpers.http_response_generator import HttpResponseGenerator
@@ -33,7 +33,10 @@ class BaseUserWorkspaceEndpoint(Resource):
     @jwt_required()
     def post(self):
         new_workspace_id = WorkspaceRepository.create_workspace(
-            workspace_schema_retriever.retrieve("create_workspace_request").parse_args()
+            args=workspace_schema_retriever.retrieve(
+                "create_workspace_request"
+            ).parse_args(),
+            user_id=int(get_jwt_identity()),
         )
         return Response(
             f'{{"msg": "Workspace created successfully.", "workspace_id": {new_workspace_id}}}',
@@ -58,7 +61,7 @@ class BaseUserWorkspaceEndpoint(Resource):
     def get(self):
         args = workspace_schema_retriever.retrieve("pagination_parser").parse_args()
         workspaces, total_entries, total_pages = WorkspaceRepository.get_all_workspaces(
-            args
+            args=args, user_id=int(get_jwt_identity())
         )
         return {
             "workspaces": workspaces,
@@ -85,7 +88,9 @@ class SingleWorkspaceEndpoint(Resource):
     @marshal_with(workspace_schema_retriever.retrieve("workspace"))
     @jwt_required()
     def get(self, workspace_id):
-        return WorkspaceRepository.get_single_workspace(workspace_id)
+        return WorkspaceRepository.get_single_workspace(
+            workspace_id=workspace_id, user_id=int(get_jwt_identity())
+        )
 
     @workspace_namespace.doc(
         description="Delete a workspace based on the workspace ID. Admin can delete any workspace."
@@ -99,7 +104,9 @@ class SingleWorkspaceEndpoint(Resource):
     @workspace_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def delete(self, workspace_id):
-        WorkspaceRepository.delete_workspace(workspace_id)
+        WorkspaceRepository.delete_workspace(
+            workspace_id=workspace_id, user_id=int(get_jwt_identity())
+        )
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @workspace_namespace.doc(
@@ -123,10 +130,11 @@ class SingleWorkspaceEndpoint(Resource):
     @jwt_required()
     def put(self, workspace_id):
         WorkspaceRepository.update_workspace(
-            workspace_id,
-            workspace_schema_retriever.retrieve(
+            workspace_id=workspace_id,
+            args=workspace_schema_retriever.retrieve(
                 "create_workspace_request"
             ).parse_args(),
+            user_id=int(get_jwt_identity()),
         )
 
         return Response(
@@ -170,7 +178,9 @@ class PublicWorkspaceEndpoint(Resource):
     def get(self):
         args = workspace_schema_retriever.retrieve("pagination_parser").parse_args()
         workspaces, total_entries, total_pages = (
-            WorkspaceRepository.get_public_workspaces(args)
+            WorkspaceRepository.get_public_workspaces(
+                args=args, user_id=int(get_jwt_identity())
+            )
         )
         return {
             "workspaces": workspaces,

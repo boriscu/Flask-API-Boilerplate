@@ -2,7 +2,6 @@ import hashlib
 import json
 from typing import Any, Dict, List, Tuple
 from flask import Response, abort
-from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.http_status import HttpStatus
 
@@ -98,15 +97,12 @@ class WorkspaceUserInviteRepository:
         return WorkspaceUserInvitePaginationService.get_serialized_invites(args)
 
     @staticmethod
-    def decline_user_invite(invite_id: int) -> Response:
-        WorkspaceUserInviteRepository._delete_user_invite(
-            invite_id, int(get_jwt_identity())
-        )
+    def decline_user_invite(invite_id: int, user_id: int):
+        WorkspaceUserInviteRepository._delete_user_invite(invite_id, user_id)
 
     @staticmethod
-    def accept_user_invite(invite_id: int) -> Response:
+    def accept_user_invite(invite_id: int, user_id: int):
         invite = WorkspaceUserInvite.get_by_id(invite_id)
-        user_id = int(get_jwt_identity())
 
         WorkspaceUser.create(
             workspace=invite.workspace,
@@ -117,7 +113,7 @@ class WorkspaceUserInviteRepository:
         WorkspaceUserInviteRepository._delete_user_invite(invite_id, user_id)
 
     @staticmethod
-    def accept_user_invite_by_token(request_data: dict[str, any]):
+    def accept_user_invite_by_token(request_data: dict[str, any], user_id: int):
         invite_email = request_data["invite_email"]
         invite_token = request_data["invite_token"]
         key = f"{invite_email}:{invite_token}"
@@ -141,7 +137,7 @@ class WorkspaceUserInviteRepository:
 
         WorkspaceUserInviteRedisService.delete_invite(key)
 
-        WorkspaceUserInviteRepository.accept_user_invite(invite_id)
+        WorkspaceUserInviteRepository.accept_user_invite(invite_id, user_id)
 
     @staticmethod
     def _delete_user_invite(invite_id, user_id):

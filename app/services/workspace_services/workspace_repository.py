@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple
 from flask import json
-from flask_jwt_extended import get_jwt_identity
 
 from app.models.enums.workspace_type import WorkspaceType
 from app.models.enums.workspace_user_role import WorkspaceUserRole
@@ -25,11 +24,12 @@ from app.services.workspace_user_services.workspace_user_repository import (
 
 class WorkspaceRepository:
     @staticmethod
-    def create_workspace(args: Dict[str, Any]) -> int:
+    def create_workspace(args: Dict[str, Any], user_id: int) -> int:
         """Create a new workspace in the database and return the id of the new workspace.
 
         Args:
             args (Dict[str, Any]): A dictionary containing workspace attributes.
+            user_id (int) : Id of the user that is creating the workspace.
 
         Returns:
             workspace_id (int): Id of the newly created workspace
@@ -37,8 +37,6 @@ class WorkspaceRepository:
         Raises:
             ValueError: If required attributes are missing or invalid.
         """
-
-        user_id = int(get_jwt_identity())
 
         WorkspaceValidationService.check_workspace_creation_quota(user_id)
 
@@ -72,18 +70,18 @@ class WorkspaceRepository:
         return new_workspace.id
 
     @staticmethod
-    def update_workspace(workspace_id: int, args: Dict[str, Any]):
+    def update_workspace(workspace_id: int, args: Dict[str, Any], user_id: int):
         """Update an existing workspace in the database and return a Flask response object.
 
         Args:
             workspace_id (int): The ID of the workspace to update.
             args (Dict[str, Any]): A dictionary containing workspace attributes.
+            user_id (int): The ID of the user that is updating the workspace
 
         Raises:
             ValueError: If required attributes are missing or invalid.
             NotFoundError: If the workspace with the given ID does not exist.
         """
-        user_id = int(get_jwt_identity())
 
         WorkspaceUserAccessControl.check_operation_access_rights(
             workspace_id=workspace_id,
@@ -117,9 +115,9 @@ class WorkspaceRepository:
         workspace.save()
 
     @staticmethod
-    def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
-
-        user_id = int(get_jwt_identity())
+    def get_all_workspaces(
+        args: dict, user_id: int
+    ) -> Tuple[List[Workspace], int, int]:
 
         if UserAuthService.check_if_admin():
             workspaces_info = WorkspacePaginationService.get_rows(
@@ -155,9 +153,9 @@ class WorkspaceRepository:
         return (workspaces, total_entries, total_pages)
 
     @staticmethod
-    def get_public_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
-
-        user_id = int(get_jwt_identity())
+    def get_public_workspaces(
+        args: dict, user_id: int
+    ) -> Tuple[List[Workspace], int, int]:
 
         workspaces, total_entries, total_pages = (
             WorkspacePaginationService.get_public_workspaces(
@@ -183,9 +181,7 @@ class WorkspaceRepository:
         return (workspaces, total_entries, total_pages)
 
     @staticmethod
-    def get_single_workspace(workspace_id: int) -> Optional[Workspace]:
-
-        user_id = int(get_jwt_identity())
+    def get_single_workspace(workspace_id: int, user_id: int) -> Optional[Workspace]:
 
         WorkspaceUserAccessControl.check_operation_access_rights(
             workspace_id=workspace_id,
@@ -206,8 +202,7 @@ class WorkspaceRepository:
         return workspace
 
     @staticmethod
-    def delete_workspace(workspace_id: int):
-        user_id = int(get_jwt_identity())
+    def delete_workspace(workspace_id: int, user_id: int):
 
         WorkspaceUserAccessControl.check_operation_access_rights(
             workspace_id=workspace_id,

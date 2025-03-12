@@ -105,7 +105,9 @@ class BaseUserWorkspaceEndpoint(Resource):
     )
     @jwt_required()
     def put(self):
-        WorkspaceUserInviteRepository.accept_user_invite_by_token(request.get_json())
+        WorkspaceUserInviteRepository.accept_user_invite_by_token(
+            request_data=request.get_json(), user_id=int(get_jwt_identity())
+        )
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
@@ -122,7 +124,9 @@ class SingleInviteEndpoint(Resource):
     )
     @jwt_required()
     def delete(self, invite_id):
-        WorkspaceUserInviteRepository.decline_user_invite(invite_id)
+        WorkspaceUserInviteRepository.decline_user_invite(
+            invite_id=invite_id, user_id=int(get_jwt_identity())
+        )
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
@@ -141,6 +145,8 @@ class SingleInviteEndpoint(Resource):
     )
     @jwt_required()
     def put(self, invite_id):
-        WorkspaceUserInviteRepository.accept_user_invite(invite_id)
+        WorkspaceUserInviteRepository.accept_user_invite(
+            invite_id=invite_id, user_id=int(get_jwt_identity())
+        )
 
         return HttpResponseGenerator.generate_response(HttpStatus.OK)
