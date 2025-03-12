@@ -1,14 +1,11 @@
 from typing import Any, Dict, List, Optional, Tuple
-from flask import Response, json
+from flask import json
 from flask_jwt_extended import get_jwt_identity
-
-from app.models.enums.http_status import HttpStatus
 
 from app.models.enums.workspace_type import WorkspaceType
 from app.models.enums.workspace_user_role import WorkspaceUserRole
 from app.models.pg.workspace import Workspace
 
-from app.helpers.http_response_generator import HttpResponseGenerator
 from app.helpers.image_processor import ImageProcessor
 
 from app.services.user_services.user_auth_service import UserAuthService
@@ -28,14 +25,14 @@ from app.services.workspace_user_services.workspace_user_repository import (
 
 class WorkspaceRepository:
     @staticmethod
-    def create_workspace(args: Dict[str, Any]) -> Response:
-        """Create a new workspace in the database and return a Flask response object.
+    def create_workspace(args: Dict[str, Any]) -> int:
+        """Create a new workspace in the database and return the id of the new workspace.
 
         Args:
             args (Dict[str, Any]): A dictionary containing workspace attributes.
 
         Returns:
-            Response: Flask response object with the creation status and workspace ID.
+            workspace_id (int): Id of the newly created workspace
 
         Raises:
             ValueError: If required attributes are missing or invalid.
@@ -72,22 +69,15 @@ class WorkspaceRepository:
             user_id, new_workspace.id
         )
 
-        return Response(
-            f'{{"msg": "Workspace created successfully.", "workspace_id": {new_workspace.id}}}',
-            status=HttpStatus.CREATED.value,
-            mimetype="application/json",
-        )
+        return new_workspace.id
 
     @staticmethod
-    def update_workspace(workspace_id: int, args: Dict[str, Any]) -> Response:
+    def update_workspace(workspace_id: int, args: Dict[str, Any]):
         """Update an existing workspace in the database and return a Flask response object.
 
         Args:
             workspace_id (int): The ID of the workspace to update.
             args (Dict[str, Any]): A dictionary containing workspace attributes.
-
-        Returns:
-            Response: Flask response object with the update status.
 
         Raises:
             ValueError: If required attributes are missing or invalid.
@@ -125,12 +115,6 @@ class WorkspaceRepository:
             workspace.icon_image = None
 
         workspace.save()
-
-        return Response(
-            f'{{"msg": "Workspace updated successfully.", "workspace_id": {workspace.id}}}',
-            status=HttpStatus.OK.value,
-            mimetype="application/json",
-        )
 
     @staticmethod
     def get_all_workspaces(args: dict) -> Tuple[List[Workspace], int, int]:
@@ -233,5 +217,3 @@ class WorkspaceRepository:
         )
 
         Workspace.delete().where(Workspace.id == workspace_id).execute()
-
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)

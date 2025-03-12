@@ -1,7 +1,8 @@
-from flask import abort
+from flask import Response, abort
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource, marshal_with
 
+from app.helpers.http_response_generator import HttpResponseGenerator
 from app.models.enums.http_status import HttpStatus
 
 from app.services.workspace_services.workspace_repository import WorkspaceRepository
@@ -31,8 +32,13 @@ class BaseUserWorkspaceEndpoint(Resource):
     )
     @jwt_required()
     def post(self):
-        return WorkspaceRepository.create_workspace(
+        new_workspace_id = WorkspaceRepository.create_workspace(
             workspace_schema_retriever.retrieve("create_workspace_request").parse_args()
+        )
+        return Response(
+            f'{{"msg": "Workspace created successfully.", "workspace_id": {new_workspace_id}}}',
+            status=HttpStatus.CREATED.value,
+            mimetype="application/json",
         )
 
     @workspace_namespace.doc(
@@ -93,7 +99,8 @@ class SingleWorkspaceEndpoint(Resource):
     @workspace_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def delete(self, workspace_id):
-        return WorkspaceRepository.delete_workspace(workspace_id)
+        WorkspaceRepository.delete_workspace(workspace_id)
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @workspace_namespace.doc(
         description="Updates a workspace. Admin can update any workspace."
@@ -115,11 +122,17 @@ class SingleWorkspaceEndpoint(Resource):
     )
     @jwt_required()
     def put(self, workspace_id):
-        return WorkspaceRepository.update_workspace(
+        WorkspaceRepository.update_workspace(
             workspace_id,
             workspace_schema_retriever.retrieve(
                 "create_workspace_request"
             ).parse_args(),
+        )
+
+        return Response(
+            f'{{"msg": "Workspace updated successfully.", "workspace_id": {workspace_id}}}',
+            status=HttpStatus.OK.value,
+            mimetype="application/json",
         )
 
 
