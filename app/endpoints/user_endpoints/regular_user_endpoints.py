@@ -1,4 +1,4 @@
-from flask import request
+from flask import make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
@@ -44,7 +44,14 @@ class UserVerificationEndpoint(Resource):
     )
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Token not valid.")
     def post(self):
-        return UserVerificationService.submit(request.json.get("token"))
+        access_token = UserVerificationService.submit(request.json.get("token"))
+        return make_response(
+            {
+                "msg": "User verified successfully",
+                "access_token": access_token,
+            },
+            HttpStatus.OK.value,
+        )
 
     @user_namespace.doc(
         description="Re-sends the verification email to the user. This endpoint should be called if the user did not receive or accidentally deleted their initial verification email. Requires a valid JWT."

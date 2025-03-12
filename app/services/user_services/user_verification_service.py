@@ -1,20 +1,18 @@
 from datetime import timedelta
 import hashlib
 import secrets
-from flask import Response, abort, current_app, make_response
+from flask import abort, current_app
 from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
 
 from config.app_config import AppConfig
 
-from app.models.pg.user_profile import UserProfile
+from app.models.enums.http_status import HttpStatus
 
-from flask import abort, current_app
+from app.models.pg.user_profile import UserProfile
 
 from app.helpers.email.strategies.user_verification_sender import (
     UserVerificationSender,
 )
-from app.models.enums.http_status import HttpStatus
-from app.models.pg.user_profile import UserProfile
 
 
 class UserVerificationService:
@@ -59,7 +57,15 @@ class UserVerificationService:
         UserVerificationSender().send_template(user.email, token)
 
     @staticmethod
-    def submit(token: str) -> Response:
+    def submit(token: str) -> str:
+        """Verifies the user and returns the access token with updated access rights
+
+        Args:
+            token (str): Received verification token to be checked against the one in Redis
+
+        Returns:
+            access_token (str): New access token
+        """
         if not token:
             abort(HttpStatus.BAD_REQUEST.value)
 
@@ -85,13 +91,7 @@ class UserVerificationService:
             },
         )
 
-        return make_response(
-            {
-                "msg": "User verified successfully",
-                "access_token": access_token,
-            },
-            HttpStatus.OK.value,
-        )
+        return access_token
 
     @staticmethod
     def abort_if_not_active():

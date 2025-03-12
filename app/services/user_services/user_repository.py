@@ -7,7 +7,6 @@ from app.models.pg.user_profile import UserProfile
 
 from app.helpers.image_processor import ImageProcessor
 from app.helpers.validators.date_validator import DateValidator
-from app.helpers.http_response_generator import HttpResponseGenerator
 
 from app.services.user_services.user_auth_service import UserAuthService
 from app.services.user_services.user_pagination_service import UserPaginationService
@@ -116,15 +115,22 @@ class UserRepository:
 
     @staticmethod
     def delete_user(user_id: int):
+        """Deletes a user
+
+        Args:
+            user_id (int): id of the user to delete
+
+        Raises:
+            HTTPException: A 403 Forbidden status if the user is an admin.
+        """
         UserAuthService.check_if_admin_and_raise()
 
         user = UserProfile.get_by_id(user_id)
+
         if not user.is_admin:
             UserProfile.delete().where(UserProfile.id == user_id).execute()
         else:
-            return HttpResponseGenerator.generate_response(HttpStatus.FORBIDDEN)
-
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)
+            abort(HttpStatus.FORBIDDEN.value)
 
     @staticmethod
     def update_user(user_id: int, args: Dict[str, Any]) -> Response:
@@ -177,5 +183,3 @@ class UserRepository:
             )
 
         user.save()
-
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)

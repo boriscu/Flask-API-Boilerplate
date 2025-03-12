@@ -1,9 +1,8 @@
-from typing import Any, Dict, Optional, Union
-from flask import Response, abort, make_response
+from typing import Any, Dict, Optional
+from flask import abort
 from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
-
 
 from config.app_config import AppConfig
 

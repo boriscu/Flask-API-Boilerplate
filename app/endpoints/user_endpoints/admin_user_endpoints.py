@@ -1,6 +1,7 @@
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource, marshal_with
 
+from app.helpers.http_response_generator import HttpResponseGenerator
 from app.models.enums.http_status import HttpStatus
 
 from app.services.user_services.user_repository import UserRepository
@@ -61,7 +62,8 @@ class SingleUserEndpoint(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @jwt_required()
     def delete(self, user_id):
-        return UserRepository.delete_user(user_id)
+        UserRepository.delete_user(user_id)
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @user_namespace.doc(
         description="Update a user. Admin can update any user. Only the admin can change the is_sso field"
@@ -71,9 +73,10 @@ class SingleUserEndpoint(Resource):
     @user_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     @user_namespace.response(HttpStatus.BAD_REQUEST.value, "Bad request")
     def put(self, user_id):
-        return UserRepository.update_user(
+        UserRepository.update_user(
             user_id, user_schema_retriever.retrieve("update_user").parse_args()
         )
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
 
 @user_namespace.route("/<int:user_id>/status", methods=["PUT"])
