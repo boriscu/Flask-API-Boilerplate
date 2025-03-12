@@ -3,6 +3,9 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource, marshal_with
 
 from app.models.enums.http_status import HttpStatus
+
+from app.helpers.http_response_generator import HttpResponseGenerator
+
 from app.services.workspace_user_invite_services.workspace_user_invite_repository import (
     WorkspaceUserInviteRepository,
 )
@@ -44,9 +47,11 @@ class WorkspaceInviteEndpoint(Resource):
     @jwt_required()
     def post(self, workspace_id):
         invitor_id = int(get_jwt_identity())
-        return WorkspaceUserInviteRepository.create_workspace_user_invite(
+        WorkspaceUserInviteRepository.create_workspace_user_invite(
             workspace_id=workspace_id, invitor_id=invitor_id, data=request.get_json()
         )
+
+        return HttpResponseGenerator.generate_response(HttpStatus.CREATED)
 
 
 @workspace_user_invite_namespace.route("/", methods=["GET", "PUT"])
@@ -100,9 +105,9 @@ class BaseUserWorkspaceEndpoint(Resource):
     )
     @jwt_required()
     def put(self):
-        return WorkspaceUserInviteRepository.accept_user_invite_by_token(
-            request.get_json()
-        )
+        WorkspaceUserInviteRepository.accept_user_invite_by_token(request.get_json())
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
 
 @workspace_user_invite_namespace.route("/<int:invite_id>", methods=["DELETE", "PUT"])
@@ -117,7 +122,9 @@ class SingleInviteEndpoint(Resource):
     )
     @jwt_required()
     def delete(self, invite_id):
-        return WorkspaceUserInviteRepository.decline_user_invite(invite_id)
+        WorkspaceUserInviteRepository.decline_user_invite(invite_id)
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @workspace_user_invite_namespace.doc(
         description="Accepts an invite through invite id."
@@ -134,4 +141,6 @@ class SingleInviteEndpoint(Resource):
     )
     @jwt_required()
     def put(self, invite_id):
-        return WorkspaceUserInviteRepository.accept_user_invite(invite_id)
+        WorkspaceUserInviteRepository.accept_user_invite(invite_id)
+
+        return HttpResponseGenerator.generate_response(HttpStatus.OK)

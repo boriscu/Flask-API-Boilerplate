@@ -1,16 +1,17 @@
 import hashlib
 import json
 from typing import Any, Dict, List, Tuple
-from flask import Response
+from flask import Response, abort
 from flask_jwt_extended import get_jwt_identity
 
-
-from app.helpers.email.strategies.workspace_invite_sender import WorkspaceInviteSender
-from app.helpers.http_response_generator import HttpResponseGenerator
 from app.models.enums.http_status import HttpStatus
+
 from app.models.pg.workspace_user import WorkspaceUser
 from app.models.pg.workspace_user_invite import WorkspaceUserInvite
 from app.models.pg.user_profile import UserProfile
+
+from app.helpers.email.strategies.workspace_invite_sender import WorkspaceInviteSender
+
 from app.services.workspace_user_invite_services.workspace_user_invite_pagination_service import (
     WorkspaceUserInvitePaginationService,
 )
@@ -62,8 +63,6 @@ class WorkspaceUserInviteRepository:
                 token=hashed_token,
             )
 
-        return HttpResponseGenerator.generate_response(HttpStatus.CREATED)
-
     @staticmethod
     def __save_invite_to_redis(
         workspace_id: int, invitor_id: int, data: Dict[str, Any]
@@ -103,7 +102,6 @@ class WorkspaceUserInviteRepository:
         WorkspaceUserInviteRepository._delete_user_invite(
             invite_id, int(get_jwt_identity())
         )
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)
 
     @staticmethod
     def accept_user_invite(invite_id: int) -> Response:
@@ -118,17 +116,16 @@ class WorkspaceUserInviteRepository:
 
         WorkspaceUserInviteRepository._delete_user_invite(invite_id, user_id)
 
-        return HttpResponseGenerator.generate_response(HttpStatus.OK)
-
     @staticmethod
-    def accept_user_invite_by_token(request_data: dict[str, any]) -> Response:
+    def accept_user_invite_by_token(request_data: dict[str, any]):
         invite_email = request_data["invite_email"]
         invite_token = request_data["invite_token"]
         key = f"{invite_email}:{invite_token}"
 
         invite = WorkspaceUserInviteRedisService.get_invite(key)
+
         if not invite:
-            return HttpResponseGenerator.generate_response(HttpStatus.NOT_FOUND)
+            abort(HttpStatus.NOT_FOUND.value)
 
         invite_value = json.loads(invite)
 
@@ -144,7 +141,7 @@ class WorkspaceUserInviteRepository:
 
         WorkspaceUserInviteRedisService.delete_invite(key)
 
-        return WorkspaceUserInviteRepository.accept_user_invite(invite_id)
+        WorkspaceUserInviteRepository.accept_user_invite(invite_id)
 
     @staticmethod
     def _delete_user_invite(invite_id, user_id):
