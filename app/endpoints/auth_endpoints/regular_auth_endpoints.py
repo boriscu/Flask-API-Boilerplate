@@ -1,4 +1,4 @@
-from flask import request
+from flask import make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
@@ -38,8 +38,16 @@ class RegisterEndpoint(Resource):
         HttpStatus.FORBIDDEN.value, "User with that email already exists"
     )
     def post(self):
-        return UserAuthService.register(
+        access_token = UserAuthService.register(
             auth_schema_retriever.retrieve("registration").parse_args()
+        )
+
+        return make_response(
+            {
+                "msg": "User registered successfully",
+                "access_token": access_token,
+            },
+            HttpStatus.CREATED.value,
         )
 
 
@@ -56,7 +64,17 @@ class BaseAuthEndpoint(Resource):
     )
     @auth_namespace.response(HttpStatus.UNAUTHORIZED.value, "Unauthorized")
     def post(self):
-        return UserAuthService.login(request.get_json())
+        access_token = UserAuthService.login(request.get_json())
+        if access_token:
+            return make_response(
+                {
+                    "msg": "Login successful",
+                    "access_token": access_token,
+                },
+                HttpStatus.OK.value,
+            )
+        else:
+            return {"msg": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
 
     @auth_namespace.doc(
         description="Check the validity of the current user's JWT token."

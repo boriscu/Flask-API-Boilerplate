@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 from flask import Response, abort, make_response
 from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,7 +29,7 @@ class UserAuthService:
     login, util methods.
     """
 
-    def register(args: Dict[str, Any]) -> Response:
+    def register(args: Dict[str, Any]) -> str:
         """
         Registers a new user with the required and optional fields, handles SSO based on admin rights,
         and returns a consistent response format with an access token, which is empty if registered by an admin.
@@ -47,7 +47,7 @@ class UserAuthService:
                 - is_sso (bool, optional): Flag indicating if the user is using SSO (only modifiable by admins).
 
         Returns:
-            Response: A Flask Response object with a message and an access token (empty if registered by an admin).
+            access_token (str)
         """
 
         name = args.get("name")
@@ -104,16 +104,10 @@ class UserAuthService:
 
         UserVerificationService.request(email)
 
-        return make_response(
-            {
-                "msg": "User registered successfully",
-                "access_token": access_token,
-            },
-            HttpStatus.CREATED.value,
-        )
+        return access_token
 
     @staticmethod
-    def login(data: Dict[str, str]) -> Union[Dict[str, str], make_response]:
+    def login(data: Dict[str, str]) -> Optional[str]:
         """
         Logs in a user by validating the email and password.
 
@@ -121,7 +115,7 @@ class UserAuthService:
             data (dict): A dictionary containing the user's email and password.
 
         Returns:
-            Union[Dict[str, str], make_response]: A success or error message with the status code.
+            access_token (Optional[str]): Access token if password is correct, else None
         """
         email = data.get("email")
         password = data.get("password")
@@ -138,16 +132,9 @@ class UserAuthService:
                 },
             )
 
-            response = make_response(
-                {
-                    "msg": "Login successful",
-                    "access_token": access_token,
-                },
-                HttpStatus.OK.value,
-            )
-            return response
+            return access_token
         else:
-            return {"msg": "Password is incorrect"}, HttpStatus.UNAUTHORIZED.value
+            return None
 
     @staticmethod
     def check_if_admin() -> bool:
